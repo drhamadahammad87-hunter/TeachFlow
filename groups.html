@@ -414,7 +414,7 @@
     <div class="logo">📚 TeachFlow <span>نظام إدارة المعلمين</span></div>
 
     <button class="sidebar-item" onclick="window.location.href='home.html'">🏠 <span>الرئيسية</span></button>
-    <button class="sidebar-item" onclick="window.location.href='groups.html'">👥 <span>المجموعات</span></button>
+    <button class="sidebar-item active" onclick="window.location.href='groups.html'">👥 <span>المجموعات</span></button>
     <button class="sidebar-item" onclick="window.location.href='students.html'">👨‍🎓 <span>الطلاب</span></button>
     <button class="sidebar-item" onclick="window.location.href='schedule.html'">📅 <span>الجدول</span></button>
     <button class="sidebar-item" onclick="window.location.href='attendance.html'">✅ <span>الحضور</span></button>
@@ -425,6 +425,7 @@
     <button class="sidebar-item" onclick="window.location.href='settings.html'">⚙️ <span>الإعدادات</span></button>
     <button class="sidebar-item" onclick="logout()">🚪 <span>تسجيل الخروج</span></button>
 </nav>
+
     <main class="main-content">
 
         <div class="page-header">
@@ -461,51 +462,8 @@
             if (saved) {
                 groups = JSON.parse(saved);
             } else {
-                // بيانات وهمية للتجربة
-                groups = [
-                    {
-                        id: 1,
-                        number: 'G-001',
-                        name: 'الرياضيات المتقدمة',
-                        icon: '📐',
-                        description: 'طلاب الرياضيات المتقدمين - المنهج الدولي',
-                        locationType: '🏠 بيت',
-                        locationAddress: 'شارع النيل، مدينة نصر، القاهرة',
-                        day: 'السبت',
-                        time: '10:00 ص',
-                        level: 'متقدم',
-                        maxStudents: 15,
-                        active: true
-                    },
-                    {
-                        id: 2,
-                        number: 'G-002',
-                        name: 'العلوم الأساسية',
-                        icon: '🔬',
-                        description: 'طلاب العلوم - المنهج المصري',
-                        locationType: '🏢 سنتر',
-                        locationAddress: 'سنتر العلم - الدور الثالث، شارع مصر',
-                        day: 'الأحد',
-                        time: '12:00 م',
-                        level: 'مبتدئ',
-                        maxStudents: 20,
-                        active: true
-                    },
-                    {
-                        id: 3,
-                        number: 'G-003',
-                        name: 'اللغة العربية',
-                        icon: '📖',
-                        description: 'تقوية اللغة العربية - القراءة والإملاء',
-                        locationType: '💻 أونلاين',
-                        locationAddress: 'Zoom - الرابط: https://zoom.us/...',
-                        day: 'الثلاثاء',
-                        time: '2:00 م',
-                        level: 'متوسط',
-                        maxStudents: 12,
-                        active: true
-                    }
-                ];
+                // ❌ لا توجد بيانات وهمية
+                groups = [];
                 saveGroups();
             }
             filteredGroups = [...groups];
