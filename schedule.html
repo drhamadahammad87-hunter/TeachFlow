@@ -4,8 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>الجدول الأسبوعي - TeachFlow</title>
+    <!-- ===== jsPDF لتحويل الجدول إلى PDF ===== -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js">
+    </script>
     <style>
-        /* نفس الاستايلات السابقة */
         * {
             margin: 0;
             padding: 0;
@@ -166,6 +170,46 @@
             transform: scale(1.02);
         }
 
+        .btn-print {
+            padding: 10px 20px;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-print:hover {
+            background: #219653;
+            transform: scale(1.02);
+        }
+
+        .btn-pdf {
+            padding: 10px 20px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-pdf:hover {
+            background: #c0392b;
+            transform: scale(1.02);
+        }
+
         .schedule-container {
             background: white;
             border-radius: 16px;
@@ -273,6 +317,38 @@
             font-weight: 600;
         }
 
+        /* ===== تحسينات الطباعة ===== */
+        @media print {
+            .sidebar,
+            .btn-back,
+            .btn-add,
+            .btn-refresh,
+            .btn-print,
+            .btn-pdf,
+            .footer,
+            .page-header .actions {
+                display: none !important;
+            }
+            .main-content {
+                margin-right: 0 !important;
+                padding: 10px !important;
+            }
+            .schedule-container {
+                box-shadow: none !important;
+                border: 1px solid #ddd !important;
+            }
+            .schedule-table th {
+                background: #667eea !important;
+                color: white !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .schedule-table .lesson-cell {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+        }
+
         @media (max-width: 768px) {
             .sidebar {
                 width: 60px;
@@ -310,6 +386,13 @@
                 width: 60px;
                 font-size: 11px;
             }
+            .page-header .actions {
+                gap: 6px;
+            }
+            .page-header .actions button {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -326,11 +409,13 @@
                 font-size: 10px;
             }
             .page-header .actions {
-                flex-direction: column;
+                flex-direction: row;
+                flex-wrap: wrap;
                 width: 100%;
             }
             .page-header .actions button {
-                width: 100%;
+                flex: 1;
+                min-width: 60px;
                 justify-content: center;
             }
         }
@@ -363,11 +448,13 @@
                 <button class="btn-back" onclick="window.location.href='home.html'">🔙 رجوع</button>
                 <button class="btn-refresh" onclick="refreshSchedule()">🔄 تحديث</button>
                 <button class="btn-add" onclick="showAddLesson()">➕ إضافة حصة</button>
+                <button class="btn-print" onclick="window.print()">🖨️ طباعة</button>
+                <button class="btn-pdf" onclick="exportPDF()">📄 PDF</button>
             </div>
         </div>
 
-        <div class="schedule-container">
-            <table class="schedule-table">
+        <div class="schedule-container" id="scheduleContainer">
+            <table class="schedule-table" id="scheduleTable">
                 <thead>
                     <tr>
                         <th>⏰ الوقت</th>
@@ -411,7 +498,6 @@
             if (saved) {
                 schedule = JSON.parse(saved);
             } else {
-                // بيانات وهمية للتجربة
                 schedule = [
                     { id: 1, day: 'السبت', time: '10:00 ص', group: 'الرياضيات المتقدمة', subject: 'الرياضيات' },
                     { id: 2, day: 'السبت', time: '12:00 م', group: 'العلوم الأساسية', subject: 'العلوم' },
@@ -439,10 +525,8 @@
                 let row = `<tr><td class="time-col">${time}</td>`;
 
                 days.forEach(day => {
-                    // 1. الحصص المسجلة يدوياً
                     const scheduledLessons = schedule.filter(s => s.day === day && s.time === time);
 
-                    // 2. المجموعات اللي ليها يوم ووقت محدد (من بيانات المجموعة)
                     const groupLessons = groups
                         .filter(g => g.day === day && g.time === time && g.active !== false)
                         .map(g => ({
@@ -454,7 +538,6 @@
                             fromGroup: true
                         }));
 
-                    // دمج الحصص (المجموعات أولاً ثم الحصص اليدوية)
                     const allLessons = [...groupLessons, ...scheduledLessons];
 
                     if (allLessons.length > 0) {
@@ -575,6 +658,42 @@
                 renderSchedule();
                 alert('✅ تم حذف الحصة!');
             }
+        }
+
+        // ===== تصدير PDF =====
+        function exportPDF() {
+            const element = document.getElementById('scheduleContainer');
+            const originalOverflow = document.body.style.overflow;
+            document.body.style.overflow = 'hidden';
+
+            // إضافة border مؤقت للطباعة
+            element.style.border = '1px solid #ddd';
+            element.style.padding = '10px';
+
+            html2canvas(element, {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: '#ffffff',
+                allowTaint: true,
+                logging: false
+            }).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('l', 'mm', 'a4');
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+                pdf.save(`الجدول_الأسبوعي_${new Date().toISOString().split('T')[0]}.pdf`);
+
+                element.style.border = 'none';
+                element.style.padding = '0';
+                document.body.style.overflow = originalOverflow;
+            }).catch(err => {
+                alert('⚠️ حدث خطأ أثناء إنشاء PDF: ' + err.message);
+                element.style.border = 'none';
+                element.style.padding = '0';
+                document.body.style.overflow = originalOverflow;
+            });
         }
 
         // ===== تسجيل الخروج =====
