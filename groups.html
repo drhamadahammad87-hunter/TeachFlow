@@ -409,14 +409,12 @@
         <button class="sidebar-item" onclick="window.location.href='home.html'">🏠 <span>الرئيسية</span></button>
         <button class="sidebar-item" onclick="window.location.href='students.html'">👨‍🎓 <span>الطلاب</span></button>
         <button class="sidebar-item active" onclick="window.location.href='groups.html'">👥 <span>المجموعات</span></button>
-        <button class="sidebar-item" onclick="window.location.href='home.html'">📚 <span>الدروس</span></button>
-        <button class="sidebar-item" onclick="window.location.href='home.html'">📅 <span>الجدول</span></button>
-        <button class="sidebar-item" onclick="window.location.href='home.html'">✅ <span>الحضور</span></button>
-        <button class="sidebar-item" onclick="window.location.href='home.html'">📊 <span>التقييمات</span></button>
-        <button class="sidebar-item" onclick="window.location.href='home.html'">💰 <span>الحسابات</span></button>
-        <button class="sidebar-item" onclick="window.location.href='home.html'">📈 <span>التقارير</span></button>
-        <button class="sidebar-item" onclick="window.location.href='home.html'">🔔 <span>التنبيهات</span></button>
-        <button class="sidebar-item" onclick="window.location.href='home.html'">⚙️ <span>الإعدادات</span></button>
+        <button class="sidebar-item" onclick="window.location.href='attendance.html'">✅ <span>الحضور</span></button>
+        <button class="sidebar-item" onclick="window.location.href='assessments.html'">📊 <span>التقييمات</span></button>
+        <button class="sidebar-item" onclick="window.location.href='finances.html'">💰 <span>الحسابات</span></button>
+        <button class="sidebar-item" onclick="window.location.href='student-report.html'">📈 <span>التقارير</span></button>
+        <button class="sidebar-item" onclick="window.location.href='notifications.html'">🔔 <span>التنبيهات</span></button>
+        <button class="sidebar-item" onclick="window.location.href='settings.html'">⚙️ <span>الإعدادات</span></button>
         <button class="sidebar-item" onclick="logout()">🚪 <span>تسجيل الخروج</span></button>
     </nav>
 
@@ -445,17 +443,18 @@
     </main>
 
     <script>
+        // ===== بيانات المجموعات =====
         let groups = [];
         let filteredGroups = [];
-
-        // ===== أنواع الأماكن =====
         const locationTypes = ['🏠 بيت', '🏢 سنتر', '💻 أونلاين', '📚 مدرسة', '🏛️ معهد', '📍 مكان آخر'];
 
+        // ===== تحميل المجموعات =====
         function loadGroups() {
             const saved = localStorage.getItem('teachflow_groups');
             if (saved) {
                 groups = JSON.parse(saved);
             } else {
+                // بيانات وهمية للتجربة
                 groups = [
                     {
                         id: 1,
@@ -503,10 +502,12 @@
             renderGroups();
         }
 
+        // ===== حفظ المجموعات =====
         function saveGroups() {
             localStorage.setItem('teachflow_groups', JSON.stringify(groups));
         }
 
+        // ===== عرض المجموعات =====
         function renderGroups() {
             const grid = document.getElementById('groupsGrid');
             const students = JSON.parse(localStorage.getItem('teachflow_students')) || [];
@@ -521,6 +522,7 @@
                 `;
             } else {
                 grid.innerHTML = filteredGroups.map(group => {
+                    // حساب عدد الطلاب في هذه المجموعة
                     const studentCount = students.filter(s => s.group === group.name).length;
                     const statusClass = group.active ? 'badge-active' : 'badge-inactive';
                     const statusText = group.active ? '✅ نشطة' : '❌ غير نشطة';
@@ -560,6 +562,7 @@
             document.getElementById('groupsCountLabel').textContent = `(${filteredGroups.length})`;
         }
 
+        // ===== البحث =====
         function searchGroups() {
             const filter = document.getElementById('searchInput').value.trim().toLowerCase();
             filteredGroups = groups.filter(g =>
@@ -573,6 +576,7 @@
             renderGroups();
         }
 
+        // ===== إضافة مجموعة =====
         function showAddGroup() {
             const name = prompt('👥 اسم المجموعة:');
             if (!name) return;
@@ -618,6 +622,7 @@
             alert('✅ تم إضافة المجموعة بنجاح!');
         }
 
+        // ===== تعديل مجموعة =====
         function editGroup(id) {
             const group = groups.find(g => g.id === id);
             if (!group) return;
@@ -665,6 +670,7 @@
             alert('✅ تم تعديل المجموعة!');
         }
 
+        // ===== حذف مجموعة =====
         function deleteGroup(id) {
             const group = groups.find(g => g.id === id);
             if (!group) return;
@@ -676,6 +682,7 @@
                 if (!confirm(`⚠️ يوجد ${students.filter(s => s.group === group.name).length} طالب في هذه المجموعة. هل أنت متأكد من حذفها؟ سيتم إزالة المجموعة من الطلاب.`)) {
                     return;
                 }
+                // إزالة المجموعة من الطلاب
                 students.forEach(s => {
                     if (s.group === group.name) s.group = '';
                 });
@@ -691,6 +698,7 @@
             }
         }
 
+        // ===== تسجيل الخروج =====
         function logout() {
             if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
                 localStorage.removeItem('teachflow_teacher');
@@ -699,6 +707,7 @@
             }
         }
 
+        // ===== تحميل الصفحة =====
         document.addEventListener('DOMContentLoaded', function() {
             const teacher = localStorage.getItem('teachflow_teacher');
             if (!teacher) {
