@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>الرئيسية - TeachFlow</title>
     <style>
-        /* نفس الاستايلات السابقة */
         * {
             margin: 0;
             padding: 0;
@@ -276,6 +275,68 @@
             font-weight: 600;
         }
 
+        /* ===== رسالة انتهاء الفترة ===== */
+        .trial-banner {
+            background: #f39c12;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 500;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .trial-banner .btn-upgrade {
+            background: #2ecc71;
+            color: white;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .trial-banner .btn-upgrade:hover {
+            background: #27ae60;
+        }
+
+        .limit-banner {
+            background: #e74c3c;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            font-size: 14px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 999;
+        }
+
+        .limit-banner .btn-upgrade {
+            background: white;
+            color: #e74c3c;
+            border: none;
+            padding: 4px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-right: 10px;
+        }
+
+        .limit-banner .btn-upgrade:hover {
+            background: #f5f5f5;
+        }
+
         @media (max-width: 768px) {
             .sidebar {
                 width: 60px;
@@ -323,6 +384,14 @@
             .subjects-tags .tag {
                 font-size: 12px;
                 padding: 4px 12px;
+            }
+            .trial-banner {
+                font-size: 12px;
+                padding: 8px 12px;
+            }
+            .limit-banner {
+                font-size: 12px;
+                padding: 8px 12px;
             }
         }
     </style>
@@ -442,18 +511,30 @@
     </main>
 
     <script>
-        // ===== تحميل بيانات المعلم =====
+        // ===== تحميل بيانات المعلم والتحقق من الصلاحية =====
         function loadTeacherData() {
             const data = localStorage.getItem('teachflow_teacher');
             if (!data) {
                 window.location.href = 'index.html';
                 return;
             }
+
             const teacher = JSON.parse(data);
+
+            // ===== 1. التحقق من انتهاء الفترة التجريبية =====
+            if (!checkTrialStatus(teacher)) {
+                return;
+            }
+
+            // ===== 2. التحقق من عدد الطلاب =====
+            checkStudentLimit(teacher);
+
+            // ===== 3. عرض بيانات المعلم =====
             document.getElementById('teacherName').textContent = teacher.name;
             document.getElementById('userEmail').textContent = '📧 ' + teacher.email;
             document.getElementById('userAvatar').textContent = teacher.name.charAt(0);
 
+            // ===== 4. عرض المواد =====
             const tagsContainer = document.getElementById('subjectsTags');
             tagsContainer.innerHTML = '';
             if (teacher.subjects && teacher.subjects.length > 0) {
@@ -467,10 +548,71 @@
                 tagsContainer.innerHTML = '<span style="color:#999;font-size:13px;">⚠️ لم تقم بتحديد مواد بعد</span>';
             }
 
+            // ===== 5. تحديث الأرقام =====
             updateCounts();
 
-            // ===== تطبيق اللغة =====
+            // ===== 6. تطبيق اللغة =====
             applyLanguage();
+        }
+
+        // ===== التحقق من الفترة التجريبية =====
+        function checkTrialStatus(teacher) {
+            // لو الحساب مدفوع، يشتغل عادي
+            if (teacher.isPaid) return true;
+
+            // حساب الأيام المتبقية
+            const trialEnd = new Date(teacher.trialEndDate);
+            const now = new Date();
+
+            if (now > trialEnd) {
+                // انتهت الفترة التجريبية
+                localStorage.setItem('teachflow_account_expired', 'true');
+                window.location.href = 'expired.html';
+                return false;
+            }
+
+            // عرض عدد الأيام المتبقية
+            const daysLeft = Math.ceil((trialEnd - now) / (1000 * 60 * 60 * 24));
+            showTrialBanner(daysLeft);
+            return true;
+        }
+
+        // ===== عرض عدد الأيام المتبقية =====
+        function showTrialBanner(daysLeft) {
+            // إزالة أي بانر قديم
+            const oldBanner = document.getElementById('trialBanner');
+            if (oldBanner) oldBanner.remove();
+
+            const banner = document.createElement('div');
+            banner.id = 'trialBanner';
+            banner.className = 'trial-banner';
+            banner.innerHTML = `
+                ⏳ الفترة التجريبية: ${daysLeft} يوم متبقي
+                <button class="btn-upgrade" onclick="window.location.href='pricing.html'">🚀 الترقية الآن</button>
+            `;
+            document.body.appendChild(banner);
+        }
+
+        // ===== التحقق من عدد الطلاب =====
+        function checkStudentLimit(teacher) {
+            if (teacher.isPaid) return;
+
+            const students = JSON.parse(localStorage.getItem('teachflow_students')) || [];
+            const maxStudents = teacher.maxStudents || 10;
+
+            if (students.length >= maxStudents) {
+                const oldBanner = document.getElementById('limitBanner');
+                if (oldBanner) oldBanner.remove();
+
+                const banner = document.createElement('div');
+                banner.id = 'limitBanner';
+                banner.className = 'limit-banner';
+                banner.innerHTML = `
+                    ⚠️ لقد وصلت للحد الأقصى من الطلاب (${maxStudents} طالب)
+                    <button class="btn-upgrade" onclick="window.location.href='pricing.html'">🚀 الترقية الآن</button>
+                `;
+                document.body.prepend(banner);
+            }
         }
 
         // ===== تحديث الأرقام =====
