@@ -202,6 +202,9 @@
         .card.red .card-number {
             color: #e74c3c;
         }
+        .card.purple .card-number {
+            color: #9b59b6;
+        }
 
         .section-title {
             font-size: 18px;
@@ -325,21 +328,45 @@
 </head>
 <body>
 
+    <!-- ===== القائمة الجانبية (الترتيب الجديد) ===== -->
     <nav class="sidebar">
         <div class="logo">📚 TeachFlow <span>نظام إدارة المعلمين</span></div>
 
+        <!-- 1. الرئيسية -->
         <button class="sidebar-item active" onclick="window.location.href='home.html'">🏠 <span>الرئيسية</span></button>
+
+        <!-- 2. المجموعات -->
         <button class="sidebar-item" onclick="window.location.href='groups.html'">👥 <span>المجموعات</span></button>
+
+        <!-- 3. الطلاب -->
         <button class="sidebar-item" onclick="window.location.href='students.html'">👨‍🎓 <span>الطلاب</span></button>
+
+        <!-- 4. الجدول (جديد) -->
+        <button class="sidebar-item" onclick="window.location.href='schedule.html'">📅 <span>الجدول</span></button>
+
+        <!-- 5. الحضور -->
         <button class="sidebar-item" onclick="window.location.href='attendance.html'">✅ <span>الحضور</span></button>
+
+        <!-- 6. التقييمات -->
         <button class="sidebar-item" onclick="window.location.href='assessments.html'">📊 <span>التقييمات</span></button>
+
+        <!-- 7. الحسابات -->
         <button class="sidebar-item" onclick="window.location.href='finances.html'">💰 <span>الحسابات</span></button>
+
+        <!-- 8. التقارير -->
         <button class="sidebar-item" onclick="window.location.href='student-report.html'">📈 <span>التقارير</span></button>
+
+        <!-- 9. التنبيهات -->
         <button class="sidebar-item" onclick="window.location.href='notifications.html'">🔔 <span>التنبيهات</span></button>
+
+        <!-- 10. الإعدادات -->
         <button class="sidebar-item" onclick="window.location.href='settings.html'">⚙️ <span>الإعدادات</span></button>
+
+        <!-- 11. تسجيل الخروج -->
         <button class="sidebar-item" onclick="logout()">🚪 <span>تسجيل الخروج</span></button>
     </nav>
 
+    <!-- ===== المحتوى ===== -->
     <main class="main-content">
 
         <div class="page-header">
@@ -350,27 +377,43 @@
             </div>
         </div>
 
+        <!-- ===== المواد ===== -->
         <div class="subjects-card">
             <h3>📚 المواد التي تدرسها</h3>
             <div class="subjects-tags" id="subjectsTags"></div>
         </div>
 
+        <!-- ===== البطاقات (الترتيب الجديد مع الجدول) ===== -->
         <div class="cards-grid">
+            <!-- 1. المجموعات (أزرق) -->
             <div class="card blue" onclick="window.location.href='groups.html'">
                 <div class="card-icon">👥</div>
                 <div class="card-number" id="groupsCount">0</div>
                 <div class="card-label">المجموعات</div>
             </div>
+
+            <!-- 2. الطلاب (أخضر) -->
             <div class="card green" onclick="window.location.href='students.html'">
                 <div class="card-icon">👨‍🎓</div>
                 <div class="card-number" id="studentCount">0</div>
                 <div class="card-label">الطلاب</div>
             </div>
+
+            <!-- 3. الجدول (بنفسجي - جديد) -->
+            <div class="card purple" onclick="window.location.href='schedule.html'">
+                <div class="card-icon">📅</div>
+                <div class="card-number" id="scheduleCount">0</div>
+                <div class="card-label">الجـدول</div>
+            </div>
+
+            <!-- 4. الحضور (برتقالي) -->
             <div class="card orange" onclick="window.location.href='attendance.html'">
                 <div class="card-icon">✅</div>
                 <div class="card-number" id="attendanceCount">0</div>
                 <div class="card-label">حضور اليوم</div>
             </div>
+
+            <!-- 5. المدفوعات (أحمر) -->
             <div class="card red" onclick="window.location.href='finances.html'">
                 <div class="card-icon">💰</div>
                 <div class="card-number" id="paymentCount">EGP 0</div>
@@ -378,6 +421,7 @@
             </div>
         </div>
 
+        <!-- ===== الأنشطة ===== -->
         <div class="section-title">📋 آخر الأنشطة</div>
         <div class="activity-list">
             <div class="activity-item" onclick="window.location.href='groups.html'">
@@ -456,17 +500,25 @@
         }
 
         function updateCounts() {
+            // المجموعات
             const groups = JSON.parse(localStorage.getItem('teachflow_groups')) || [];
             document.getElementById('groupsCount').textContent = groups.length;
 
+            // الطلاب
             const students = JSON.parse(localStorage.getItem('teachflow_students')) || [];
             document.getElementById('studentCount').textContent = students.length;
 
+            // الجدول (عدد الحصص)
+            const schedule = JSON.parse(localStorage.getItem('teachflow_schedule')) || [];
+            document.getElementById('scheduleCount').textContent = schedule.length;
+
+            // الحضور
             const attendance = JSON.parse(localStorage.getItem('teachflow_attendance')) || [];
             const today = new Date().toISOString().split('T')[0];
             const todayAttendance = attendance.filter(a => a.date === today);
             document.getElementById('attendanceCount').textContent = todayAttendance.length || 0;
 
+            // المدفوعات
             const payments = JSON.parse(localStorage.getItem('teachflow_payments')) || [];
             const totalPaid = payments.reduce((sum, p) => sum + (p.status === 'paid' ? p.amount : 0), 0);
             document.getElementById('paymentCount').textContent = 'EGP ' + totalPaid;
