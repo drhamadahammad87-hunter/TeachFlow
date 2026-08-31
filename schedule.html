@@ -240,6 +240,16 @@
             color: #888;
         }
 
+        .schedule-table .lesson-cell .from-group {
+            font-size: 10px;
+            color: #2e7d32;
+            background: #e8f5e9;
+            padding: 2px 8px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-top: 2px;
+        }
+
         .schedule-table .empty-cell {
             color: #ccc;
             font-size: 13px;
@@ -321,22 +331,24 @@
 </head>
 <body>
 
-     <!-- ===== الشريط الجانبي الموحد ===== -->
-   <nav class="sidebar">
-    <div class="logo">📚 TeachFlow <span>نظام إدارة المعلمين</span></div>
+    <!-- ===== الشريط الجانبي الموحد ===== -->
+    <nav class="sidebar">
+        <div class="logo">📚 TeachFlow <span>نظام إدارة المعلمين</span></div>
 
-    <button class="sidebar-item" onclick="window.location.href='home.html'">🏠 <span>الرئيسية</span></button>
-    <button class="sidebar-item" onclick="window.location.href='groups.html'">👥 <span>المجموعات</span></button>
-    <button class="sidebar-item" onclick="window.location.href='students.html'">👨‍🎓 <span>الطلاب</span></button>
-    <button class="sidebar-item" onclick="window.location.href='schedule.html'">📅 <span>الجدول</span></button>
-    <button class="sidebar-item" onclick="window.location.href='attendance.html'">✅ <span>الحضور</span></button>
-    <button class="sidebar-item" onclick="window.location.href='assessments.html'">📊 <span>التقييمات</span></button>
-    <button class="sidebar-item" onclick="window.location.href='finances.html'">💰 <span>الحسابات</span></button>
-    <button class="sidebar-item" onclick="window.location.href='student-report.html'">📈 <span>التقارير</span></button>
-    <button class="sidebar-item" onclick="window.location.href='notifications.html'">🔔 <span>التنبيهات</span></button>
-    <button class="sidebar-item" onclick="window.location.href='settings.html'">⚙️ <span>الإعدادات</span></button>
-    <button class="sidebar-item" onclick="logout()">🚪 <span>تسجيل الخروج</span></button>
-</nav>
+        <button class="sidebar-item" onclick="window.location.href='home.html'">🏠 <span>الرئيسية</span></button>
+        <button class="sidebar-item" onclick="window.location.href='groups.html'">👥 <span>المجموعات</span></button>
+        <button class="sidebar-item" onclick="window.location.href='students.html'">👨‍🎓 <span>الطلاب</span></button>
+        <button class="sidebar-item active" onclick="window.location.href='schedule.html'">📅 <span>الجدول</span></button>
+        <button class="sidebar-item" onclick="window.location.href='attendance.html'">✅ <span>الحضور</span></button>
+        <button class="sidebar-item" onclick="window.location.href='assessments.html'">📊 <span>التقييمات</span></button>
+        <button class="sidebar-item" onclick="window.location.href='finances.html'">💰 <span>الحسابات</span></button>
+        <button class="sidebar-item" onclick="window.location.href='student-report.html'">📈 <span>التقارير</span></button>
+        <button class="sidebar-item" onclick="window.location.href='notifications.html'">🔔 <span>التنبيهات</span></button>
+        <button class="sidebar-item" onclick="window.location.href='settings.html'">⚙️ <span>الإعدادات</span></button>
+        <button class="sidebar-item" onclick="logout()">🚪 <span>تسجيل الخروج</span></button>
+    </nav>
+
+    <main class="main-content">
 
         <div class="page-header">
             <h1>📅 الجدول الأسبوعي</h1>
@@ -373,11 +385,14 @@
     </main>
 
     <script>
+        // ===== أيام الأسبوع =====
         const days = ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'];
         const times = ['8:00 ص', '9:00 ص', '10:00 ص', '11:00 ص', '12:00 م', '1:00 م', '2:00 م', '3:00 م', '4:00 م', '5:00 م', '6:00 م', '7:00 م'];
 
+        // ===== بيانات الجدول =====
         let schedule = [];
 
+        // ===== تحميل الجدول =====
         function loadSchedule() {
             const saved = localStorage.getItem('teachflow_schedule');
             if (saved) {
@@ -397,22 +412,25 @@
             renderSchedule();
         }
 
+        // ===== حفظ الجدول =====
         function saveSchedule() {
             localStorage.setItem('teachflow_schedule', JSON.stringify(schedule));
         }
 
+        // ===== عرض الجدول =====
         function renderSchedule() {
             const tbody = document.getElementById('scheduleBody');
+            // جلب المجموعات من localStorage
             const groups = JSON.parse(localStorage.getItem('teachflow_groups')) || [];
 
             tbody.innerHTML = times.map(time => {
                 let row = `<tr><td class="time-col">${time}</td>`;
 
                 days.forEach(day => {
-                    // الحصص المسجلة في هذا اليوم والوقت
+                    // 1. الحصص المسجلة يدوياً
                     const scheduledLessons = schedule.filter(s => s.day === day && s.time === time);
 
-                    // المجموعات اللي ليها يوم ووقت محدد (من بيانات المجموعة)
+                    // 2. المجموعات اللي ليها يوم ووقت محدد (من بيانات المجموعة)
                     const groupLessons = groups
                         .filter(g => g.day === day && g.time === time && g.active !== false)
                         .map(g => ({
@@ -420,24 +438,35 @@
                             group: g.name,
                             subject: g.level || 'مجموعة',
                             location: g.locationType || '',
-                            isGroup: true
+                            isGroup: true,
+                            fromGroup: true
                         }));
 
-                    // دمج الحصص
-                    const allLessons = [...scheduledLessons, ...groupLessons];
+                    // دمج الحصص (المجموعات أولاً ثم الحصص اليدوية)
+                    const allLessons = [...groupLessons, ...scheduledLessons];
 
                     if (allLessons.length > 0) {
                         row += `<td>`;
                         allLessons.forEach(lesson => {
                             const isGroup = lesson.isGroup || false;
                             const locationText = lesson.location ? `📍 ${lesson.location}` : '';
+
+                            // تحديد لون الخلفية
+                            let bgColor = '#f0f4ff';
+                            let borderColor = '';
+                            if (isGroup) {
+                                bgColor = '#e8f5e9';
+                                borderColor = 'border-right: 3px solid #2e7d32;';
+                            }
+
                             row += `
-                                <div class="lesson-cell" ${isGroup ? 'style="background:#e8f5e9;"' : ''} 
-                                     onclick="${isGroup ? `alert('📚 ${lesson.group}\\n📍 ${lesson.location || 'لا يوجد عنوان'}')` : `deleteLesson(${lesson.id})`}">
+                                <div class="lesson-cell" 
+                                     style="background:${bgColor}; ${borderColor} padding:6px 10px; margin:2px 0; border-radius:8px; cursor:pointer; transition:0.3s;"
+                                     onclick="${isGroup ? `showGroupDetails('${lesson.group}')` : `deleteLesson(${lesson.id})`}">
                                     <div class="group-name">${lesson.group}</div>
                                     <div class="subject">${lesson.subject}</div>
                                     ${locationText ? `<div class="location">${locationText}</div>` : ''}
-                                    ${isGroup ? '<div style="font-size:10px;color:#2e7d32;">🔄 من المجموعات</div>' : ''}
+                                    ${isGroup ? '<div class="from-group">🔄 من المجموعات</div>' : ''}
                                 </div>
                             `;
                         });
@@ -452,7 +481,18 @@
             }).join('');
         }
 
-        // ===== تحديث الجدول (إعادة تحميل) =====
+        // ===== عرض تفاصيل المجموعة =====
+        function showGroupDetails(groupName) {
+            const groups = JSON.parse(localStorage.getItem('teachflow_groups')) || [];
+            const group = groups.find(g => g.name === groupName);
+            if (group) {
+                alert(`📚 ${group.name}\n📅 ${group.day || 'غير محدد'}\n⏰ ${group.time || 'غير محدد'}\n📍 ${group.locationAddress || 'لا يوجد عنوان'}\n📊 المستوى: ${group.level || 'عام'}\n👥 الحد الأقصى: ${group.maxStudents || 'غير محدد'}`);
+            } else {
+                alert(`📚 ${groupName}`);
+            }
+        }
+
+        // ===== تحديث الجدول =====
         function refreshSchedule() {
             renderSchedule();
             alert('🔄 تم تحديث الجدول!');
@@ -515,7 +555,7 @@
             alert(`✅ تم إضافة الحصة: ${day} - ${time} - ${group}`);
         }
 
-        // ===== حذف حصة =====
+        // ===== حذف حصة يدوية =====
         function deleteLesson(id) {
             const lesson = schedule.find(s => s.id === id);
             if (!lesson) return;
