@@ -665,3 +665,21 @@
     </script>
 </body>
 </html>
+// ===== حساب الفترة التجريبية =====
+const trialDays = 14; // 14 يوم مجاني
+const trialEndDate = new Date();
+trialEndDate.setDate(trialEndDate.getDate() + trialDays);
+
+// حفظ بيانات الخطة مع بيانات المعلم
+const teacherData = {
+    name: name,
+    email: email,
+    password: password,
+    language: currentLang,
+    subjects: selectedSubjects,
+    registeredAt: new Date().toISOString(),
+    plan: 'trial', // 'trial' = مجاني, 'paid' = مدفوع
+    trialEndDate: trialEndDate.toISOString(),
+    isPaid: false,
+    maxStudents: 10 // عدد الطلاب المسموح به في الفترة المجانية
+};
