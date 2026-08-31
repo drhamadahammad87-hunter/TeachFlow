@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>خطط الأسعار - TeachFlow</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+
+        body {
+            background: #f0f2f5;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 36px;
+            color: #333;
+        }
+
+        .header p {
+            color: #888;
+            font-size: 16px;
+        }
+
+        .plans-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+        }
+
+        .plan-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transition: 0.3s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .plan-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .plan-card.popular {
+            border: 2px solid #667eea;
+            position: relative;
+        }
+
+        .plan-card.popular::before {
+            content: '⭐ الأكثر شهرة';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #667eea;
+            color: white;
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .plan-card .plan-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        .plan-card .plan-name {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .plan-card .plan-price {
+            font-size: 32px;
+            font-weight: 700;
+            color: #667eea;
+            margin: 10px 0;
+        }
+
+        .plan-card .plan-price .currency {
+            font-size: 18px;
+            font-weight: 400;
+        }
+
+        .plan-card .plan-period {
+            color: #999;
+            font-size: 14px;
+        }
+
+        .plan-card .plan-save {
+            background: #eafaf1;
+            color: #27ae60;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+            margin: 6px 0;
+        }
+
+        .plan-card .plan-features {
+            list-style: none;
+            margin: 20px 0;
+            text-align: right;
+            flex: 1;
+        }
+
+        .plan-card .plan-features li {
+            padding: 8px 0;
+            color: #555;
+            font-size: 14px;
+            border-bottom: 1px solid #f0f2f5;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .plan-card .plan-features li:last-child {
+            border-bottom: none;
+        }
+
+        .plan-card .plan-features li .check {
+            color: #2ecc71;
+            font-weight: 700;
+        }
+
+        .btn-plan {
+            padding: 14px 30px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn-plan:hover {
+            transform: scale(1.02);
+        }
+
+        .btn-plan.free {
+            background: #e8edf2;
+            color: #555;
+        }
+
+        .btn-plan.free:hover {
+            background: #d5dbe3;
+        }
+
+        .btn-plan.pro {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-plan.premium {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+        }
+
+        .btn-plan.premium:hover {
+            background: linear-gradient(135deg, #e67e22, #d35400);
+        }
+
+        @media (max-width: 768px) {
+            .plans-grid {
+                grid-template-columns: 1fr;
+                max-width: 400px;
+                margin: auto;
+            }
+
+            .plan-card.popular::before {
+                top: -10px;
+                font-size: 10px;
+                padding: 2px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 خطط TeachFlow</h1>
+            <p>اختر الخطة المناسبة لك وابدأ في إدارة طلابك باحترافية</p>
+        </div>
+
+        <div class="plans-grid">
+            <!-- مجاني (تجريبي) -->
+            <div class="plan-card">
+                <div class="plan-icon">🎁</div>
+                <div class="plan-name">تجريبي</div>
+                <div class="plan-price"><span class="currency">EGP</span> 0</div>
+                <div class="plan-period">14 يوم مجاناً</div>
+                <ul class="plan-features">
+                    <li><span class="check">✅</span> عدد محدود من الطلاب</li>
+                    <li><span class="check">✅</span> المجموعات الأساسية</li>
+                    <li><span class="check">✅</span> تسجيل الحضور</li>
+                    <li><span class="check">✅</span> التقييمات والملاحظات</li>
+                    <li><span class="check">✅</span> الجدول الأسبوعي</li>
+                </ul>
+                <button class="btn-plan free" onclick="alert('✅ بدأت الفترة التجريبية المجانية لمدة 14 يوم!')">ابدأ التجربة</button>
+            </div>
+
+            <!-- شهري -->
+            <div class="plan-card popular">
+                <div class="plan-icon">⭐</div>
+                <div class="plan-name">شهري</div>
+                <div class="plan-price"><span class="currency">EGP</span> 100</div>
+                <div class="plan-period">/شهر</div>
+                <ul class="plan-features">
+                    <li><span class="check">✅</span> عدد غير محدود من الطلاب</li>
+                    <li><span class="check">✅</span> جميع الميزات المتقدمة</li>
+                    <li><span class="check">✅</span> تقارير شاملة PDF/Excel</li>
+                    <li><span class="check">✅</span> إشعارات فورية</li>
+                    <li><span class="check">✅</span> دعم فني 24/7</li>
+                </ul>
+                <button class="btn-plan pro" onclick="alert('🚀 سيتم توجيهك لصفحة الدفع')">اشترك شهرياً</button>
+            </div>
+
+            <!-- سنوي -->
+            <div class="plan-card">
+                <div class="plan-icon">💎</div>
+                <div class="plan-name">سنوي</div>
+                <div class="plan-price"><span class="currency">EGP</span> 500</div>
+                <div class="plan-period">/سنة</div>
+                <div class="plan-save">💰 وفر 700 جنيه عن الاشتراك الشهري</div>
+                <ul class="plan-features">
+                    <li><span class="check">✅</span> جميع ميزات الخطة الشهرية</li>
+                    <li><span class="check">✅</span> خصم 58% عن الشهري</li>
+                    <li><span class="check">✅</span> أولوية الدعم الفني</li>
+                    <li><span class="check">✅</span> تحديثات مجانية مدى الحياة</li>
+                    <li><span class="check">✅</span> استشارة مجانية شهرية</li>
+                </ul>
+                <button class="btn-plan premium" onclick="alert('🚀 سيتم توجيهك لصفحة الدفع')">اشترك سنوياً</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
