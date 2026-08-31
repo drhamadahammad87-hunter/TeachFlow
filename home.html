@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>الرئيسية - TeachFlow</title>
     <style>
+        /* نفس الاستايلات السابقة */
         * {
             margin: 0;
             padding: 0;
@@ -441,6 +442,7 @@
     </main>
 
     <script>
+        // ===== تحميل بيانات المعلم =====
         function loadTeacherData() {
             const data = localStorage.getItem('teachflow_teacher');
             if (!data) {
@@ -467,15 +469,11 @@
 
             updateCounts();
 
-            if (teacher.language === 'en' || teacher.language === 'fr' || teacher.language === 'de') {
-                document.dir = 'ltr';
-                document.documentElement.lang = teacher.language;
-            } else {
-                document.dir = 'rtl';
-                document.documentElement.lang = 'ar';
-            }
+            // ===== تطبيق اللغة =====
+            applyLanguage();
         }
 
+        // ===== تحديث الأرقام =====
         function updateCounts() {
             const groups = JSON.parse(localStorage.getItem('teachflow_groups')) || [];
             document.getElementById('groupsCount').textContent = groups.length;
@@ -496,6 +494,22 @@
             document.getElementById('paymentCount').textContent = 'EGP ' + totalPaid;
         }
 
+        // ===== تطبيق اللغة =====
+        function applyLanguage() {
+            const teacher = JSON.parse(localStorage.getItem('teachflow_teacher'));
+            if (teacher && teacher.language) {
+                const lang = teacher.language;
+                if (lang === 'ar' || lang === 'ur') {
+                    document.dir = 'rtl';
+                    document.documentElement.lang = lang;
+                } else {
+                    document.dir = 'ltr';
+                    document.documentElement.lang = lang;
+                }
+            }
+        }
+
+        // ===== تسجيل الخروج =====
         function logout() {
             if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
                 localStorage.removeItem('teachflow_teacher');
