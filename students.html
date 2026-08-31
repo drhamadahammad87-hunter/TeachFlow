@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>الطلاب - TeachFlow</title>
     <style>
+        /* نفس الاستايلات السابقة */
         * {
             margin: 0;
             padding: 0;
@@ -17,7 +18,6 @@
             min-height: 100vh;
         }
 
-        /* ===== القائمة الجانبية ===== */
         .sidebar {
             position: fixed;
             right: 0;
@@ -74,7 +74,6 @@
             color: white;
         }
 
-        /* ===== المحتوى ===== */
         .main-content {
             margin-right: 220px;
             padding: 25px;
@@ -147,7 +146,6 @@
             transform: scale(1.02);
         }
 
-        /* ===== البحث ===== */
         .search-box {
             display: flex;
             gap: 10px;
@@ -171,7 +169,6 @@
             border-color: #667eea;
         }
 
-        /* ===== جدول الطلاب ===== */
         .table-container {
             background: white;
             border-radius: 16px;
@@ -273,7 +270,6 @@
             margin-bottom: 10px;
         }
 
-        /* ===== تذييل ===== */
         .footer {
             text-align: center;
             margin-top: 30px;
@@ -289,7 +285,6 @@
             font-weight: 600;
         }
 
-        /* ===== للشاشات الصغيرة ===== */
         @media (max-width: 768px) {
             .sidebar {
                 width: 60px;
@@ -349,22 +344,19 @@
         <div class="logo">📚 TeachFlow <span>نظام إدارة المعلمين</span></div>
         <button class="sidebar-item" onclick="window.location.href='home.html'">🏠 <span>الرئيسية</span></button>
         <button class="sidebar-item active" onclick="window.location.href='students.html'">👨‍🎓 <span>الطلاب</span></button>
-        <button class="sidebar-item" onclick="window.location.href='home.html'">👥 <span>المجموعات</span></button>
-        <button class="sidebar-item" onclick="window.location.href='home.html'">📚 <span>الدروس</span></button>
-        <button class="sidebar-item" onclick="window.location.href='home.html'">📅 <span>الجدول</span></button>
-        <button class="sidebar-item" onclick="window.location.href='home.html'">✅ <span>الحضور</span></button>
-        <button class="sidebar-item" onclick="window.location.href='home.html'">📊 <span>التقييمات</span></button>
-        <button class="sidebar-item" onclick="window.location.href='home.html'">💰 <span>الحسابات</span></button>
-        <button class="sidebar-item" onclick="window.location.href='home.html'">📈 <span>التقارير</span></button>
-        <button class="sidebar-item" onclick="window.location.href='home.html'">🔔 <span>التنبيهات</span></button>
-        <button class="sidebar-item" onclick="window.location.href='home.html'">⚙️ <span>الإعدادات</span></button>
+        <button class="sidebar-item" onclick="window.location.href='groups.html'">👥 <span>المجموعات</span></button>
+        <button class="sidebar-item" onclick="window.location.href='attendance.html'">✅ <span>الحضور</span></button>
+        <button class="sidebar-item" onclick="window.location.href='assessments.html'">📊 <span>التقييمات</span></button>
+        <button class="sidebar-item" onclick="window.location.href='finances.html'">💰 <span>الحسابات</span></button>
+        <button class="sidebar-item" onclick="window.location.href='student-report.html'">📈 <span>التقارير</span></button>
+        <button class="sidebar-item" onclick="window.location.href='notifications.html'">🔔 <span>التنبيهات</span></button>
+        <button class="sidebar-item" onclick="window.location.href='settings.html'">⚙️ <span>الإعدادات</span></button>
         <button class="sidebar-item" onclick="logout()">🚪 <span>تسجيل الخروج</span></button>
     </nav>
 
     <!-- ===== المحتوى ===== -->
     <main class="main-content">
 
-        <!-- ===== الهيدر ===== -->
         <div class="page-header">
             <h1>
                 👨‍🎓 الطلاب
@@ -376,12 +368,10 @@
             </div>
         </div>
 
-        <!-- ===== البحث ===== -->
         <div class="search-box">
             <input type="text" id="searchInput" placeholder="🔍 ابحث عن طالب..." oninput="searchStudents()">
         </div>
 
-        <!-- ===== جدول الطلاب ===== -->
         <div class="table-container">
             <table class="students-table">
                 <thead>
@@ -392,7 +382,7 @@
                         <th>📱 تليفون الطالب</th>
                         <th>📱 تليفون ولي الأمر</th>
                         <th>الحالة</th>
-                        <th>⚡ الاجراءات</th>
+                        <th>⚡ المهارات</th>
                     </tr>
                 </thead>
                 <tbody id="studentsTableBody">
@@ -401,35 +391,40 @@
             </table>
         </div>
 
-        <!-- ===== تذييل ===== -->
         <div class="footer">
             Designed with ❤️ by <span class="name">Dr. Hamada Fathy Hammad</span>
         </div>
     </main>
 
     <script>
-        // ===== بيانات الطلاب =====
+        // ===== بيانات الطلاب والمجموعات =====
         let students = [];
+        let groups = [];
 
-        // ===== تحميل الطلاب من LocalStorage =====
-        function loadStudents() {
-            const saved = localStorage.getItem('teachflow_students');
-            if (saved) {
-                students = JSON.parse(saved);
+        // ===== تحميل الطلاب والمجموعات من LocalStorage =====
+        function loadData() {
+            // تحميل المجموعات
+            const savedGroups = localStorage.getItem('teachflow_groups');
+            groups = savedGroups ? JSON.parse(savedGroups) : [];
+
+            // تحميل الطلاب
+            const savedStudents = localStorage.getItem('teachflow_students');
+            if (savedStudents) {
+                students = JSON.parse(savedStudents);
             } else {
                 // بيانات وهمية للتجربة
                 students = [
-                    { id: 1, name: 'أحمد محمد', group: 'الرياضيات', phone: '01001234567', parentPhone: '01009876543', active: true },
-                    { id: 2, name: 'سارة علي', group: 'العلوم', phone: '01007654321', parentPhone: '01005432187', active: true },
-                    { id: 3, name: 'محمد خالد', group: 'اللغة العربية', phone: '01009876543', parentPhone: '01003216548', active: false },
-                    { id: 4, name: 'فاطمة أحمد', group: 'الرياضيات', phone: '01005432187', parentPhone: '01001122334', active: true }
+                    { id: 1, name: 'أحمد محمد', group: groups.length > 0 ? groups[0].name : 'الرياضيات', phone: '01001234567', parentPhone: '01009876543', active: true },
+                    { id: 2, name: 'سارة علي', group: groups.length > 1 ? groups[1].name : 'العلوم', phone: '01007654321', parentPhone: '01005432187', active: true },
+                    { id: 3, name: 'محمد خالد', group: groups.length > 0 ? groups[0].name : 'الرياضيات', phone: '01009876543', parentPhone: '01003216548', active: false },
+                    { id: 4, name: 'فاطمة أحمد', group: groups.length > 1 ? groups[1].name : 'العلوم', phone: '01005432187', parentPhone: '01001122334', active: true }
                 ];
                 saveStudents();
             }
             renderStudents();
         }
 
-        // ===== حفظ الطلاب في LocalStorage =====
+        // ===== حفظ الطلاب =====
         function saveStudents() {
             localStorage.setItem('teachflow_students', JSON.stringify(students));
         }
@@ -437,12 +432,16 @@
         // ===== عرض الطلاب =====
         function renderStudents(filter = '') {
             const tbody = document.getElementById('studentsTableBody');
-            const filtered = students.filter(s =>
-                s.name.includes(filter) ||
-                s.group.includes(filter) ||
-                s.phone.includes(filter) ||
-                s.parentPhone.includes(filter)
-            );
+
+            let filtered = students;
+            if (filter) {
+                filtered = students.filter(s =>
+                    s.name.includes(filter) ||
+                    s.group.includes(filter) ||
+                    s.phone.includes(filter) ||
+                    s.parentPhone.includes(filter)
+                );
+            }
 
             if (filtered.length === 0) {
                 tbody.innerHTML = `
@@ -486,13 +485,36 @@
             renderStudents(filter);
         }
 
+        // ===== عرض قائمة المجموعات في رسالة =====
+        function getGroupsList() {
+            return groups.map((g, i) => `${i + 1}. ${g.name}`).join('\n');
+        }
+
         // ===== إضافة طالب =====
         function showAddStudent() {
+            // جلب المجموعات من localStorage
+            const savedGroups = localStorage.getItem('teachflow_groups');
+            const groups = savedGroups ? JSON.parse(savedGroups) : [];
+
+            if (groups.length === 0) {
+                alert('⚠️ لا توجد مجموعات! الرجاء إضافة مجموعة أولاً من صفحة المجموعات.');
+                return;
+            }
+
             const name = prompt('👤 أدخل اسم الطالب:');
             if (!name) return;
 
-            const group = prompt('📚 أدخل المجموعة:');
-            if (!group) return;
+            // عرض قائمة المجموعات للاختيار
+            const groupOptions = groups.map((g, i) => `${i + 1}. ${g.name}`).join('\n');
+            const groupChoice = prompt(`📚 اختر المجموعة:\n${groupOptions}\n\nأدخل رقم المجموعة:`);
+            const groupIndex = parseInt(groupChoice) - 1;
+
+            if (isNaN(groupIndex) || groupIndex < 0 || groupIndex >= groups.length) {
+                alert('⚠️ اختيار غير صحيح! الرجاء إدخال رقم صحيح.');
+                return;
+            }
+
+            const selectedGroup = groups[groupIndex].name;
 
             const phone = prompt('📱 أدخل رقم تليفون الطالب:');
             if (!phone) return;
@@ -503,7 +525,7 @@
             const newStudent = {
                 id: Date.now(),
                 name: name,
-                group: group,
+                group: selectedGroup,
                 phone: phone,
                 parentPhone: parentPhone,
                 active: true
@@ -512,7 +534,7 @@
             students.push(newStudent);
             saveStudents();
             renderStudents();
-            alert('✅ تم إضافة الطالب بنجاح!');
+            alert(`✅ تم إضافة الطالب ${name} إلى مجموعة ${selectedGroup}`);
         }
 
         // ===== تعديل طالب =====
@@ -523,8 +545,21 @@
             const name = prompt('👤 اسم الطالب:', student.name);
             if (name) student.name = name;
 
-            const group = prompt('📚 المجموعة:', student.group);
-            if (group) student.group = group;
+            // جلب المجموعات من localStorage
+            const savedGroups = localStorage.getItem('teachflow_groups');
+            const groups = savedGroups ? JSON.parse(savedGroups) : [];
+
+            if (groups.length > 0) {
+                const groupOptions = groups.map((g, i) => `${i + 1}. ${g.name}`).join('\n');
+                const currentGroupIndex = groups.findIndex(g => g.name === student.group) + 1;
+                const groupChoice = prompt(`📚 اختر المجموعة (الحالية: ${student.group}):\n${groupOptions}\n\nأدخل رقم المجموعة:`, currentGroupIndex);
+                if (groupChoice) {
+                    const groupIndex = parseInt(groupChoice) - 1;
+                    if (!isNaN(groupIndex) && groupIndex >= 0 && groupIndex < groups.length) {
+                        student.group = groups[groupIndex].name;
+                    }
+                }
+            }
 
             const phone = prompt('📱 تليفون الطالب:', student.phone);
             if (phone) student.phone = phone;
@@ -568,7 +603,7 @@
                 window.location.href = 'index.html';
                 return;
             }
-            loadStudents();
+            loadData();
         });
     </script>
 </body>
