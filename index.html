@@ -512,7 +512,6 @@
                 select.appendChild(option);
             });
 
-            // استرجاع القيمة المحددة
             if ([...select.options].some(o => o.value === currentValue)) {
                 select.value = currentValue;
             }
@@ -600,7 +599,7 @@
             }
         });
 
-        // ===== معالجة التسجيل =====
+        // ===== معالجة التسجيل (مع الفترة التجريبية) =====
         document.getElementById('registerForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
@@ -636,13 +635,23 @@
                 return;
             }
 
+            // ===== حساب الفترة التجريبية =====
+            const trialDays = 14;
+            const trialEndDate = new Date();
+            trialEndDate.setDate(trialEndDate.getDate() + trialDays);
+
+            // حفظ بيانات المعلم مع الفترة التجريبية
             const teacherData = {
                 name: name,
                 email: email,
                 password: password,
                 language: currentLang,
                 subjects: selectedSubjects,
-                registeredAt: new Date().toISOString()
+                registeredAt: new Date().toISOString(),
+                plan: 'trial',
+                trialEndDate: trialEndDate.toISOString(),
+                isPaid: false,
+                maxStudents: 10
             };
 
             localStorage.setItem('teachflow_teacher', JSON.stringify(teacherData));
@@ -665,21 +674,3 @@
     </script>
 </body>
 </html>
-// ===== حساب الفترة التجريبية =====
-const trialDays = 14; // 14 يوم مجاني
-const trialEndDate = new Date();
-trialEndDate.setDate(trialEndDate.getDate() + trialDays);
-
-// حفظ بيانات الخطة مع بيانات المعلم
-const teacherData = {
-    name: name,
-    email: email,
-    password: password,
-    language: currentLang,
-    subjects: selectedSubjects,
-    registeredAt: new Date().toISOString(),
-    plan: 'trial', // 'trial' = مجاني, 'paid' = مدفوع
-    trialEndDate: trialEndDate.toISOString(),
-    isPaid: false,
-    maxStudents: 10 // عدد الطلاب المسموح به في الفترة المجانية
-};
