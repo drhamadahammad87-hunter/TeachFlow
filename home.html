@@ -325,13 +325,19 @@
 </head>
 <body>
 
-    <!-- ===== القائمة الجانبية ===== -->
+    <!-- ===== القائمة الجانبية (الترتيب الجديد) ===== -->
     <nav class="sidebar">
         <div class="logo">📚 TeachFlow <span>نظام إدارة المعلمين</span></div>
 
+        <!-- الرئيسية -->
         <button class="sidebar-item active" onclick="window.location.href='home.html'">🏠 <span>الرئيسية</span></button>
-        <button class="sidebar-item" onclick="window.location.href='students.html'">👨‍🎓 <span>الطلاب</span></button>
+
+        <!-- المجموعات (قبل الطلاب) -->
         <button class="sidebar-item" onclick="window.location.href='groups.html'">👥 <span>المجموعات</span></button>
+
+        <!-- الطلاب (بعد المجموعات) -->
+        <button class="sidebar-item" onclick="window.location.href='students.html'">👨‍🎓 <span>الطلاب</span></button>
+
         <button class="sidebar-item" onclick="window.location.href='attendance.html'">✅ <span>الحضور</span></button>
         <button class="sidebar-item" onclick="window.location.href='assessments.html'">📊 <span>التقييمات</span></button>
         <button class="sidebar-item" onclick="window.location.href='finances.html'">💰 <span>الحسابات</span></button>
@@ -352,46 +358,61 @@
             </div>
         </div>
 
-        <!-- المواد -->
+        <!-- ===== المواد ===== -->
         <div class="subjects-card">
             <h3>📚 المواد التي تدرسها</h3>
             <div class="subjects-tags" id="subjectsTags"></div>
         </div>
 
-        <!-- البطاقات -->
+        <!-- ===== البطاقات (الترتيب الجديد: المجموعات قبل الطلاب) ===== -->
         <div class="cards-grid">
-            <div class="card blue" onclick="window.location.href='students.html'">
+            <!-- 1. المجموعات (أزرق) -->
+            <div class="card blue" onclick="window.location.href='groups.html'">
+                <div class="card-icon">👥</div>
+                <div class="card-number" id="groupsCount">0</div>
+                <div class="card-label">المجموعات</div>
+            </div>
+
+            <!-- 2. الطلاب (أخضر) -->
+            <div class="card green" onclick="window.location.href='students.html'">
                 <div class="card-icon">👨‍🎓</div>
-                <div class="card-number" id="studentCount">24</div>
+                <div class="card-number" id="studentCount">0</div>
                 <div class="card-label">الطلاب</div>
             </div>
-            <div class="card green" onclick="window.location.href='attendance.html'">
+
+            <!-- 3. الحضور (برتقالي) -->
+            <div class="card orange" onclick="window.location.href='attendance.html'">
                 <div class="card-icon">✅</div>
-                <div class="card-number" id="attendanceCount">18</div>
+                <div class="card-number" id="attendanceCount">0</div>
                 <div class="card-label">حضور اليوم</div>
             </div>
-            <div class="card orange" onclick="window.location.href='finances.html'">
+
+            <!-- 4. المدفوعات (أحمر) -->
+            <div class="card red" onclick="window.location.href='finances.html'">
                 <div class="card-icon">💰</div>
-                <div class="card-number" id="paymentCount">EGP 1,200</div>
+                <div class="card-number" id="paymentCount">EGP 0</div>
                 <div class="card-label">المدفوعات</div>
-            </div>
-            <div class="card red" onclick="window.location.href='assessments.html'">
-                <div class="card-icon">📚</div>
-                <div class="card-number" id="lessonCount">8</div>
-                <div class="card-label">دروس اليوم</div>
             </div>
         </div>
 
-        <!-- الأنشطة -->
+        <!-- ===== الأنشطة ===== -->
         <div class="section-title">📋 آخر الأنشطة</div>
         <div class="activity-list">
+            <div class="activity-item" onclick="window.location.href='groups.html'">
+                <div class="activity-icon">👥</div>
+                <div class="activity-text">
+                    <h4>تم إضافة مجموعة جديدة</h4>
+                    <p>مجموعة الرياضيات المتقدمة</p>
+                </div>
+                <span class="activity-time">منذ 5 دقائق</span>
+            </div>
             <div class="activity-item" onclick="window.location.href='students.html'">
                 <div class="activity-icon">👤</div>
                 <div class="activity-text">
                     <h4>تم إضافة طالب جديد</h4>
                     <p>أحمد محمد - مجموعة الرياضيات</p>
                 </div>
-                <span class="activity-time">منذ 5 دقائق</span>
+                <span class="activity-time">منذ ساعة</span>
             </div>
             <div class="activity-item" onclick="window.location.href='attendance.html'">
                 <div class="activity-icon">✅</div>
@@ -399,21 +420,13 @@
                     <h4>تم تسجيل الحضور</h4>
                     <p>5 طلاب حضروا اليوم</p>
                 </div>
-                <span class="activity-time">منذ ساعة</span>
+                <span class="activity-time">منذ ساعتين</span>
             </div>
             <div class="activity-item" onclick="window.location.href='finances.html'">
                 <div class="activity-icon">💰</div>
                 <div class="activity-text">
                     <h4>تم استلام دفعة</h4>
                     <p>من سارة علي - EGP 50</p>
-                </div>
-                <span class="activity-time">منذ ساعتين</span>
-            </div>
-            <div class="activity-item" onclick="window.location.href='assessments.html'">
-                <div class="activity-icon">📊</div>
-                <div class="activity-text">
-                    <h4>تقييم جديد</h4>
-                    <p>تم تقييم أداء الطلاب في الرياضيات</p>
                 </div>
                 <span class="activity-time">منذ 3 ساعات</span>
             </div>
@@ -426,6 +439,7 @@
     </main>
 
     <script>
+        // ===== تحميل بيانات المعلم =====
         function loadTeacherData() {
             const data = localStorage.getItem('teachflow_teacher');
             if (!data) {
@@ -437,6 +451,7 @@
             document.getElementById('userEmail').textContent = '📧 ' + teacher.email;
             document.getElementById('userAvatar').textContent = teacher.name.charAt(0);
 
+            // عرض المواد
             const tagsContainer = document.getElementById('subjectsTags');
             tagsContainer.innerHTML = '';
             if (teacher.subjects && teacher.subjects.length > 0) {
@@ -450,6 +465,10 @@
                 tagsContainer.innerHTML = '<span style="color:#999;font-size:13px;">⚠️ لم تقم بتحديد مواد بعد</span>';
             }
 
+            // تحديث الأرقام في البطاقات
+            updateCounts();
+
+            // تغيير اتجاه الصفحة حسب اللغة
             if (teacher.language === 'en' || teacher.language === 'fr' || teacher.language === 'de') {
                 document.dir = 'ltr';
                 document.documentElement.lang = teacher.language;
@@ -459,6 +478,29 @@
             }
         }
 
+        // ===== تحديث الأرقام في البطاقات =====
+        function updateCounts() {
+            // عدد المجموعات
+            const groups = JSON.parse(localStorage.getItem('teachflow_groups')) || [];
+            document.getElementById('groupsCount').textContent = groups.length;
+
+            // عدد الطلاب
+            const students = JSON.parse(localStorage.getItem('teachflow_students')) || [];
+            document.getElementById('studentCount').textContent = students.length;
+
+            // عدد الحضور اليوم (بيانات وهمية)
+            const attendance = JSON.parse(localStorage.getItem('teachflow_attendance')) || [];
+            const today = new Date().toISOString().split('T')[0];
+            const todayAttendance = attendance.filter(a => a.date === today);
+            document.getElementById('attendanceCount').textContent = todayAttendance.length || 0;
+
+            // المدفوعات (بيانات وهمية)
+            const payments = JSON.parse(localStorage.getItem('teachflow_payments')) || [];
+            const totalPaid = payments.reduce((sum, p) => sum + (p.status === 'paid' ? p.amount : 0), 0);
+            document.getElementById('paymentCount').textContent = 'EGP ' + totalPaid;
+        }
+
+        // ===== تسجيل الخروج =====
         function logout() {
             if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
                 localStorage.removeItem('teachflow_teacher');
@@ -467,6 +509,7 @@
             }
         }
 
+        // ===== تحميل الصفحة =====
         document.addEventListener('DOMContentLoaded', loadTeacherData);
     </script>
 </body>
