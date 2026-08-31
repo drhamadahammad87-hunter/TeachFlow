@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الإعدادات - TeachFlow</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+
+        body {
+            background: #f0f2f5;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            position: fixed;
+            right: 0;
+            top: 0;
+            width: 220px;
+            height: 100vh;
+            background: white;
+            padding: 20px 15px;
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.05);
+            overflow-y: auto;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: 700;
+            color: #667eea;
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 15px;
+        }
+
+        .logo span {
+            display: block;
+            font-size: 12px;
+            color: #999;
+            font-weight: 400;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            color: #555;
+            cursor: pointer;
+            transition: 0.3s;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: right;
+            font-size: 14px;
+        }
+
+        .sidebar-item:hover {
+            background: #f0f4ff;
+            color: #667eea;
+        }
+
+        .sidebar-item.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .main-content {
+            margin-right: 220px;
+            padding: 25px;
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .page-header h1 {
+            font-size: 26px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .page-header .actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-back {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-back:hover {
+            background: #5a6fd6;
+            transform: scale(1.02);
+        }
+
+        .btn-save {
+            padding: 10px 20px;
+            background: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-save:hover {
+            background: #27ae60;
+            transform: scale(1.02);
+        }
+
+        /* ===== إعدادات ===== */
+        .settings-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            flex: 1;
+        }
+
+        .settings-section {
+            margin-bottom: 30px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid #f0f2f5;
+        }
+
+        .settings-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .settings-section h3 {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .settings-section .form-group {
+            margin-bottom: 16px;
+        }
+
+        .settings-section .form-group label {
+            display: block;
+            font-weight: 500;
+            color: #444;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+
+        .settings-section .form-group input,
+        .settings-section .form-group select {
+            width: 100%;
+            max-width: 400px;
+            padding: 10px 14px;
+            border: 2px solid #e8edf2;
+            border-radius: 12px;
+            font-size: 14px;
+            background: #f8fafc;
+            transition: 0.3s;
+        }
+
+        .settings-section .form-group input:focus,
+        .settings-section .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+        }
+
+        .settings-section .form-group .hint {
+            font-size: 12px;
+            color: #999;
+            margin-top: 4px;
+        }
+
+        .settings-section .form-group .current-value {
+            font-size: 13px;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        /* ===== تبديل ===== */
+        .toggle-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .toggle-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #444;
+        }
+
+        .toggle-label input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #667eea;
+            cursor: pointer;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 15px;
+            color: #aaa;
+            font-size: 13px;
+            border-top: 1px solid #e8edf2;
+            direction: ltr;
+        }
+
+        .footer .name {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        /* ===== رسالة نجاح ===== */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #2ecc71;
+            color: white;
+            padding: 14px 24px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: 0.5s;
+            z-index: 999;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 60px;
+                padding: 15px 8px;
+            }
+            .sidebar-item span:not(.icon) {
+                display: none;
+            }
+            .sidebar-item {
+                justify-content: center;
+                padding: 12px;
+            }
+            .logo {
+                font-size: 16px;
+            }
+            .logo span {
+                display: none;
+            }
+            .main-content {
+                margin-right: 60px;
+                padding: 15px;
+            }
+            .page-header h1 {
+                font-size: 20px;
+            }
+            .settings-section .form-group input,
+            .settings-section .form-group select {
+                max-width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .page-header .actions {
+                flex-direction: column;
+                width: 100%;
+            }
+            .page-header .actions button {
+                width: 100%;
+                justify-content: center;
+            }
+            .toggle-group {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="sidebar">
+        <div class="logo">📚 TeachFlow <span>نظام إدارة المعلمين</span></div>
+        <button class="sidebar-item" onclick="window.location.href='home.html'">🏠 <span>الرئيسية</span></button>
+        <button class="sidebar-item" onclick="window.location.href='students.html'">👨‍🎓 <span>الطلاب</span></button>
+        <button class="sidebar-item" onclick="window.location.href='groups.html'">👥 <span>المجموعات</span></button>
+        <button class="sidebar-item" onclick="window.location.href='home.html'">📚 <span>الدروس</span></button>
+        <button class="sidebar-item" onclick="window.location.href='home.html'">📅 <span>الجدول</span></button>
+        <button class="sidebar-item" onclick="window.location.href='attendance.html'">✅ <span>الحضور</span></button>
+        <button class="sidebar-item" onclick="window.location.href='assessments.html'">📊 <span>التقييمات</span></button>
+        <button class="sidebar-item" onclick="window.location.href='finances.html'">💰 <span>الحسابات</span></button>
+        <button class="sidebar-item" onclick="window.location.href='student-report.html'">📈 <span>التقارير</span></button>
+        <button class="sidebar-item" onclick="window.location.href='notifications.html'">🔔 <span>التنبيهات</span></button>
+        <button class="sidebar-item active" onclick="window.location.href='settings.html'">⚙️ <span>الإعدادات</span></button>
+        <button class="sidebar-item" onclick="logout()">🚪 <span>تسجيل الخروج</span></button>
+    </nav>
+
+    <main class="main-content">
+
+        <div class="page-header">
+            <h1>⚙️ الإعدادات</h1>
+            <div class="actions">
+                <button class="btn-back" onclick="window.location.href='home.html'">🔙 رجوع</button>
+                <button class="btn-save" onclick="saveSettings()">💾 حفظ الإعدادات</button>
+            </div>
+        </div>
+
+        <!-- ===== الإعدادات ===== -->
+        <div class="settings-card">
+
+            <!-- ===== الملف الشخصي ===== -->
+            <div class="settings-section">
+                <h3>👤 الملف الشخصي</h3>
+
+                <div class="form-group">
+                    <label>👨‍🏫 اسم المعلم</label>
+                    <input type="text" id="teacherName" placeholder="اسم المعلم">
+                    <div class="current-value" id="currentName"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>📧 البريد الإلكتروني</label>
+                    <input type="email" id="teacherEmail" placeholder="teacher@example.com">
+                    <div class="current-value" id="currentEmail"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>🔒 كلمة المرور الجديدة</label>
+                    <input type="password" id="newPassword" placeholder="•••••••• (اتركها فارغة للإبقاء على نفس كلمة المرور)">
+                    <div class="hint">يجب أن تكون 6 أحرف على الأقل</div>
+                </div>
+
+                <div class="form-group">
+                    <label>🔒 تأكيد كلمة المرور الجديدة</label>
+                    <input type="password" id="confirmPassword" placeholder="••••••••">
+                </div>
+            </div>
+
+            <!-- ===== اللغة ===== -->
+            <div class="settings-section">
+                <h3>🌍 اللغة</h3>
+
+                <div class="form-group">
+                    <label>اختر اللغة</label>
+                    <select id="languageSelect">
+                        <option value="ar">🇸🇦 العربية</option>
+                        <option value="en">🇬🇧 English</option>
+                        <option value="fr">🇫🇷 Français</option>
+                        <option value="tr">🇹🇷 Türkçe</option>
+                        <option value="es">🇪🇸 Español</option>
+                        <option value="de">🇩🇪 Deutsch</option>
+                        <option value="it">🇮🇹 Italiano</option>
+                        <option value="pt">🇵🇹 Português</option>
+                        <option value="ru">🇷🇺 Русский</option>
+                        <option value="zh">🇨🇳 中文</option>
+                        <option value="ja">🇯🇵 日本語</option>
+                        <option value="ko">🇰🇷 한국어</option>
+                        <option value="hi">🇮🇳 हिन्दी</option>
+                        <option value="ur">🇵🇰 اردو</option>
+                    </select>
+                    <div class="current-value" id="currentLanguage"></div>
+                </div>
+            </div>
+
+            <!-- ===== العملة ===== -->
+            <div class="settings-section">
+                <h3>💵 العملة</h3>
+
+                <div class="form-group">
+                    <label>اختر العملة</label>
+                    <select id="currencySelect">
+                        <option value="EGP">🇪🇬 جنيه مصري (EGP)</option>
+                        <option value="USD">🇺🇸 دولار أمريكي (USD)</option>
+                        <option value="EUR">🇪🇺 يورو (EUR)</option>
+                        <option value="GBP">🇬🇧 جنيه إسترليني (GBP)</option>
+                        <option value="SAR">🇸🇦 ريال سعودي (SAR)</option>
+                        <option value="AED">🇦🇪 درهم إماراتي (AED)</option>
+                        <option value="KWD">🇰🇼 دينار كويتي (KWD)</option>
+                        <option value="QAR">🇶🇦 ريال قطري (QAR)</option>
+                        <option value="BHD">🇧🇭 دينار بحريني (BHD)</option>
+                        <option value="OMR">🇴🇲 ريال عماني (OMR)</option>
+                        <option value="JOD">🇯🇴 دينار أردني (JOD)</option>
+                    </select>
+                    <div class="current-value" id="currentCurrency"></div>
+                </div>
+            </div>
+
+            <!-- ===== الإشعارات ===== -->
+            <div class="settings-section">
+                <h3>🔔 الإشعارات</h3>
+
+                <div class="toggle-group">
+                    <label class="toggle-label">
+                        <input type="checkbox" id="notifAttendance">
+                        ✅ إشعارات الحضور
+                    </label>
+                    <label class="toggle-label">
+                        <input type="checkbox" id="notifPayment">
+                        💰 إشعارات المدفوعات
+                    </label>
+                    <label class="toggle-label">
+                        <input type="checkbox" id="notifAssessment">
+                        📊 إشعارات التقييمات
+                    </label>
+                    <label class="toggle-label">
+                        <input type="checkbox" id="notifReminder">
+                        ⏰ تذكير بالدروس
+                    </label>
+                </div>
+            </div>
+
+            <!-- ===== البيانات ===== -->
+            <div class="settings-section" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">
+                <h3>💾 البيانات</h3>
+
+                <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                    <button onclick="exportData()" style="padding:10px 20px;background:#3498db;color:white;border:none;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;transition:0.3s;display:flex;align-items:center;gap:8px;">
+                        📤 تصدير البيانات (JSON)
+                    </button>
+                    <button onclick="document.getElementById('importFile').click()" style="padding:10px 20px;background:#f39c12;color:white;border:none;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;transition:0.3s;display:flex;align-items:center;gap:8px;">
+                        📥 استيراد البيانات (JSON)
+                    </button>
+                    <input type="file" id="importFile" accept=".json" style="display:none;" onchange="importData(event)">
+                    <button onclick="clearAllData()" style="padding:10px 20px;background:#e74c3c;color:white;border:none;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;transition:0.3s;display:flex;align-items:center;gap:8px;">
+                        🗑️ حذف جميع البيانات
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="footer">
+            Designed with ❤️ by <span class="name">Dr. Hamada Fathy Hammad</span>
+        </div>
+    </main>
+
+    <!-- ===== Toast ===== -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ===== تحميل الإعدادات =====
+        function loadSettings() {
+            const teacher = JSON.parse(localStorage.getItem('teachflow_teacher'));
+
+            if (teacher) {
+                document.getElementById('teacherName').value = teacher.name || '';
+                document.getElementById('teacherEmail').value = teacher.email || '';
+                document.getElementById('currentName').textContent = 'الحالي: ' + (teacher.name || 'غير محدد');
+                document.getElementById('currentEmail').textContent = 'الحالي: ' + (teacher.email || 'غير محدد');
+
+                // اللغة
+                if (teacher.language) {
+                    document.getElementById('languageSelect').value = teacher.language;
+                }
+                document.getElementById('currentLanguage').textContent = 'الحالي: ' + teacher.language;
+
+                // العملة
+                const currency = localStorage.getItem('teachflow_currency') || 'EGP';
+                document.getElementById('currencySelect').value = currency;
+                document.getElementById('currentCurrency').textContent = 'الحالي: ' + currency;
+
+                // الإشعارات
+                const notifSettings = JSON.parse(localStorage.getItem('teachflow_notif_settings')) || {
+                    attendance: true,
+                    payment: true,
+                    assessment: true,
+                    reminder: true
+                };
+                document.getElementById('notifAttendance').checked = notifSettings.attendance !== false;
+                document.getElementById('notifPayment').checked = notifSettings.payment !== false;
+                document.getElementById('notifAssessment').checked = notifSettings.assessment !== false;
+                document.getElementById('notifReminder').checked = notifSettings.reminder !== false;
+            }
+        }
+
+        // ===== حفظ الإعدادات =====
+        function saveSettings() {
+            const name = document.getElementById('teacherName').value.trim();
+            const email = document.getElementById('teacherEmail').value.trim();
+            const newPassword = document.getElementById('newPassword').value.trim();
+            const confirmPassword = document.getElementById('confirmPassword').value.trim();
+            const language = document.getElementById('languageSelect').value;
+            const currency = document.getElementById('currencySelect').value;
+
+            // التحقق
+            if (!name) {
+                showToast('⚠️ الرجاء إدخال اسم المعلم', 'error');
+                return;
+            }
+
+            if (!email || !email.includes('@')) {
+                showToast('⚠️ الرجاء إدخال بريد إلكتروني صحيح', 'error');
+                return;
+            }
+
+            if (newPassword && newPassword.length < 6) {
+                showToast('⚠️ كلمة المرور يجب أن تكون 6 أحرف على الأقل', 'error');
+                return;
+            }
+
+            if (newPassword && newPassword !== confirmPassword) {
+                showToast('⚠️ كلمة المرور غير متطابقة مع التأكيد', 'error');
+                return;
+            }
+
+            // حفظ بيانات المعلم
+            const teacher = JSON.parse(localStorage.getItem('teachflow_teacher')) || {};
+            teacher.name = name;
+            teacher.email = email;
+            if (newPassword) {
+                teacher.password = newPassword;
+            }
+            teacher.language = language;
+            localStorage.setItem('teachflow_teacher', JSON.stringify(teacher));
+
+            // حفظ العملة
+            localStorage.setItem('teachflow_currency', currency);
+
+            // حفظ إعدادات الإشعارات
+            const notifSettings = {
+                attendance: document.getElementById('notifAttendance').checked,
+                payment: document.getElementById('notifPayment').checked,
+                assessment: document.getElementById('notifAssessment').checked,
+                reminder: document.getElementById('notifReminder').checked
+            };
+            localStorage.setItem('teachflow_notif_settings', JSON.stringify(notifSettings));
+
+            // تحديث الاتجاه حسب اللغة
+            if (language === 'ar' || language === 'ur') {
+                document.dir = 'rtl';
+                document.documentElement.lang = language;
+            } else {
+                document.dir = 'ltr';
+                document.documentElement.lang = language;
+            }
+
+            showToast('✅ تم حفظ الإعدادات بنجاح!', 'success');
+
+            // إعادة تحميل البيانات المعروضة
+            loadSettings();
+        }
+
+        // ===== تصدير البيانات =====
+        function exportData() {
+            const data = {
+                teacher: JSON.parse(localStorage.getItem('teachflow_teacher')),
+                students: JSON.parse(localStorage.getItem('teachflow_students')),
+                groups: JSON.parse(localStorage.getItem('teachflow_groups')),
+                assessments: JSON.parse(localStorage.getItem('teachflow_assessments')),
+                payments: JSON.parse(localStorage.getItem('teachflow_payments')),
+                attendance: JSON.parse(localStorage.getItem('teachflow_attendance')),
+                notifications: JSON.parse(localStorage.getItem('teachflow_notifications')),
+                settings: {
+                    currency: localStorage.getItem('teachflow_currency'),
+                    notif: JSON.parse(localStorage.getItem('teachflow_notif_settings'))
+                },
+                exportedAt: new Date().toISOString()
+            };
+
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `teachflow_backup_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            showToast('📤 تم تصدير البيانات بنجاح!', 'success');
+        }
+
+        // ===== استيراد البيانات =====
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+
+                    if (data.teacher) localStorage.setItem('teachflow_teacher', JSON.stringify(data.teacher));
+                    if (data.students) localStorage.setItem('teachflow_students', JSON.stringify(data.students));
+                    if (data.groups) localStorage.setItem('teachflow_groups', JSON.stringify(data.groups));
+                    if (data.assessments) localStorage.setItem('teachflow_assessments', JSON.stringify(data.assessments));
+                    if (data.payments) localStorage.setItem('teachflow_payments', JSON.stringify(data.payments));
+                    if (data.attendance) localStorage.setItem('teachflow_attendance', JSON.stringify(data.attendance));
+                    if (data.notifications) localStorage.setItem('teachflow_notifications', JSON.stringify(data.notifications));
+
+                    if (data.settings) {
+                        if (data.settings.currency) localStorage.setItem('teachflow_currency', data.settings.currency);
+                        if (data.settings.notif) localStorage.setItem('teachflow_notif_settings', JSON.stringify(data.settings.notif));
+                    }
+
+                    showToast('📥 تم استيراد البيانات بنجاح!', 'success');
+                    loadSettings();
+                    setTimeout(() => window.location.reload(), 1500);
+
+                } catch (err) {
+                    showToast('⚠️ خطأ في ملف الاستيراد: ' + err.message, 'error');
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        // ===== حذف جميع البيانات =====
+        function clearAllData() {
+            if (confirm('🗑️ هل أنت متأكد من حذف جميع البيانات؟ لا يمكن التراجع عن هذا الإجراء!')) {
+                if (confirm('⚠️ تأكيد نهائي: حذف جميع البيانات؟')) {
+                    const keys = [
+                        'teachflow_teacher',
+                        'teachflow_students',
+                        'teachflow_groups',
+                        'teachflow_assessments',
+                        'teachflow_payments',
+                        'teachflow_attendance',
+                        'teachflow_notifications',
+                        'teachflow_currency',
+                        'teachflow_notif_settings'
+                    ];
+                    keys.forEach(key => localStorage.removeItem(key));
+
+                    showToast('🗑️ تم حذف جميع البيانات', 'success');
+                    setTimeout(() => window.location.href = 'index.html', 1500);
+                }
+            }
+        }
+
+        // ===== Toast =====
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.style.background = type === 'success' ? '#2ecc71' : '#e74c3c';
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // ===== تسجيل الخروج =====
+        function logout() {
+            if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
+                localStorage.removeItem('teachflow_user');
+                window.location.href = 'index.html';
+            }
+        }
+
+        // ===== تحميل الصفحة =====
+        document.addEventListener('DOMContentLoaded', function() {
+            const teacher = localStorage.getItem('teachflow_teacher');
+            if (!teacher) {
+                window.location.href = 'index.html';
+                return;
+            }
+            loadSettings();
+        });
+    </script>
+</body>
+</html>

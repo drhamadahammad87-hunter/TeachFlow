@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تقرير الطالب - TeachFlow</title>
+    <!-- ===== jsPDF لتحويل التقرير إلى PDF ===== -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js">
+    </script>
+    <style>
+        /* ===== نفس الاستايلات السابقة مع إضافات ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+
+        body {
+            background: #f0f2f5;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            position: fixed;
+            right: 0;
+            top: 0;
+            width: 220px;
+            height: 100vh;
+            background: white;
+            padding: 20px 15px;
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.05);
+            overflow-y: auto;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: 700;
+            color: #667eea;
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 15px;
+        }
+
+        .logo span {
+            display: block;
+            font-size: 12px;
+            color: #999;
+            font-weight: 400;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            color: #555;
+            cursor: pointer;
+            transition: 0.3s;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: right;
+            font-size: 14px;
+        }
+
+        .sidebar-item:hover {
+            background: #f0f4ff;
+            color: #667eea;
+        }
+
+        .sidebar-item.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .main-content {
+            margin-right: 220px;
+            padding: 25px;
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .page-header h1 {
+            font-size: 26px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .page-header .actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-back {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-back:hover {
+            background: #5a6fd6;
+            transform: scale(1.02);
+        }
+
+        .btn-print {
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-print:hover {
+            background: #2980b9;
+            transform: scale(1.02);
+        }
+
+        .btn-pdf {
+            padding: 10px 20px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-pdf:hover {
+            background: #c0392b;
+            transform: scale(1.02);
+        }
+
+        .btn-email {
+            padding: 10px 20px;
+            background: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-email:hover {
+            background: #27ae60;
+            transform: scale(1.02);
+        }
+
+        .filter-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            align-items: center;
+            background: white;
+            padding: 16px 20px;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .filter-bar label {
+            font-weight: 500;
+            color: #444;
+            font-size: 14px;
+        }
+
+        .filter-bar select {
+            padding: 8px 14px;
+            border: 2px solid #e8edf2;
+            border-radius: 10px;
+            font-size: 14px;
+            background: #f8fafc;
+            transition: 0.3s;
+            min-width: 200px;
+        }
+
+        .filter-bar select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+        }
+
+        .report-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            flex: 1;
+        }
+
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #f0f2f5;
+            padding-bottom: 20px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .report-header .student-info h2 {
+            font-size: 24px;
+            color: #333;
+        }
+
+        .report-header .student-info p {
+            color: #888;
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        .report-header .student-avatar {
+            width: 80px;
+            height: 80px;
+            background: #667eea;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: white;
+            font-weight: 700;
+        }
+
+        .report-section {
+            margin-bottom: 30px;
+        }
+
+        .report-section h3 {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #f0f2f5;
+        }
+
+        .report-section .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .report-section .info-item {
+            background: #f8fafc;
+            padding: 12px 16px;
+            border-radius: 10px;
+        }
+
+        .report-section .info-item .label {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .report-section .info-item .value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-top: 2px;
+        }
+
+        .mini-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .mini-table th {
+            background: #f8fafc;
+            padding: 10px 14px;
+            text-align: right;
+            font-weight: 600;
+            color: #555;
+            border-bottom: 2px solid #e8edf2;
+        }
+
+        .mini-table td {
+            padding: 10px 14px;
+            border-bottom: 1px solid #f0f2f5;
+            color: #333;
+        }
+
+        .mini-table tr:hover td {
+            background: #f8fafc;
+        }
+
+        .grade-badge {
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .grade-excellent {
+            background: #eafaf1;
+            color: #27ae60;
+        }
+        .grade-good {
+            background: #ebf5fb;
+            color: #3498db;
+        }
+        .grade-average {
+            background: #fef9e7;
+            color: #f39c12;
+        }
+        .grade-poor {
+            background: #fdedec;
+            color: #e74c3c;
+        }
+
+        .payment-status-badge {
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .payment-status-badge.paid {
+            background: #eafaf1;
+            color: #27ae60;
+        }
+        .payment-status-badge.pending {
+            background: #fef9e7;
+            color: #f39c12;
+        }
+        .payment-status-badge.overdue {
+            background: #fdedec;
+            color: #e74c3c;
+        }
+
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .summary-stat {
+            background: #f8fafc;
+            padding: 12px 16px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .summary-stat .number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .summary-stat .label {
+            font-size: 12px;
+            color: #999;
+            margin-top: 2px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .empty-state .big-icon {
+            font-size: 48px;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 15px;
+            color: #aaa;
+            font-size: 13px;
+            border-top: 1px solid #e8edf2;
+            direction: ltr;
+        }
+
+        .footer .name {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 60px;
+                padding: 15px 8px;
+            }
+            .sidebar-item span:not(.icon) {
+                display: none;
+            }
+            .sidebar-item {
+                justify-content: center;
+                padding: 12px;
+            }
+            .logo {
+                font-size: 16px;
+            }
+            .logo span {
+                display: none;
+            }
+            .main-content {
+                margin-right: 60px;
+                padding: 15px;
+            }
+            .page-header h1 {
+                font-size: 20px;
+            }
+            .report-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .info-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .page-header .actions {
+                gap: 6px;
+            }
+            .page-header .actions button {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+            .summary-stats {
+                grid-template-columns: 1fr 1fr;
+            }
+            .page-header .actions {
+                flex-direction: column;
+                width: 100%;
+            }
+            .page-header .actions button {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="sidebar">
+        <div class="logo">📚 TeachFlow <span>نظام إدارة المعلمين</span></div>
+        <button class="sidebar-item" onclick="window.location.href='home.html'">🏠 <span>الرئيسية</span></button>
+        <button class="sidebar-item" onclick="window.location.href='students.html'">👨‍🎓 <span>الطلاب</span></button>
+        <button class="sidebar-item" onclick="window.location.href='groups.html'">👥 <span>المجموعات</span></button>
+        <button class="sidebar-item" onclick="window.location.href='home.html'">📚 <span>الدروس</span></button>
+        <button class="sidebar-item" onclick="window.location.href='home.html'">📅 <span>الجدول</span></button>
+        <button class="sidebar-item" onclick="window.location.href='attendance.html'">✅ <span>الحضور</span></button>
+        <button class="sidebar-item" onclick="window.location.href='assessments.html'">📊 <span>التقييمات</span></button>
+        <button class="sidebar-item" onclick="window.location.href='finances.html'">💰 <span>الحسابات</span></button>
+        <button class="sidebar-item active" onclick="window.location.href='student-report.html'">📈 <span>التقارير</span></button>
+        <button class="sidebar-item" onclick="window.location.href='notifications.html'">🔔 <span>التنبيهات</span></button>
+        <button class="sidebar-item" onclick="window.location.href='home.html'">⚙️ <span>الإعدادات</span></button>
+        <button class="sidebar-item" onclick="logout()">🚪 <span>تسجيل الخروج</span></button>
+    </nav>
+
+    <main class="main-content">
+
+        <div class="page-header">
+            <h1>📈 تقارير الطلاب</h1>
+            <div class="actions">
+                <button class="btn-back" onclick="window.location.href='home.html'">🔙 رجوع</button>
+                <button class="btn-print" onclick="window.print()">🖨️ طباعة</button>
+                <button class="btn-pdf" onclick="exportPDF()">📄 PDF</button>
+                <button class="btn-email" onclick="sendEmail()">📧 إرسال</button>
+            </div>
+        </div>
+
+        <!-- ===== اختيار الطالب ===== -->
+        <div class="filter-bar">
+            <label>👤 اختر الطالب:</label>
+            <select id="studentSelect" onchange="loadReport()">
+                <option value="">-- اختر طالب --</option>
+            </select>
+        </div>
+
+        <!-- ===== التقرير ===== -->
+        <div class="report-card" id="reportCard">
+            <div id="reportContent">
+                <div class="empty-state">
+                    <span class="big-icon">📈</span>
+                    <p>اختر طالباً لعرض التقرير الشامل</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            Designed with ❤️ by <span class="name">Dr. Hamada Fathy Hammad</span>
+        </div>
+    </main>
+
+    <script>
+        // ===== بيانات الطالب =====
+        let students = [];
+        let payments = [];
+        let assessments = [];
+        let attendance = [];
+        let currentStudent = null;
+        let teacherEmail = '';
+
+        // ===== تحميل البيانات =====
+        function loadData() {
+            students = JSON.parse(localStorage.getItem('teachflow_students')) || [];
+            payments = JSON.parse(localStorage.getItem('teachflow_payments')) || [];
+            assessments = JSON.parse(localStorage.getItem('teachflow_assessments')) || [];
+            attendance = JSON.parse(localStorage.getItem('teachflow_attendance')) || [];
+
+            const teacher = JSON.parse(localStorage.getItem('teachflow_teacher'));
+            if (teacher) {
+                teacherEmail = teacher.email || '';
+            }
+
+            const select = document.getElementById('studentSelect');
+            select.innerHTML = '<option value="">-- اختر طالب --</option>';
+            students.forEach(s => {
+                const option = document.createElement('option');
+                option.value = s.id;
+                option.textContent = s.name + ' (' + s.group + ')';
+                select.appendChild(option);
+            });
+        }
+
+        // ===== تحميل التقرير =====
+        function loadReport() {
+            const studentId = document.getElementById('studentSelect').value;
+            const container = document.getElementById('reportContent');
+
+            if (!studentId) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <span class="big-icon">📈</span>
+                        <p>اختر طالباً لعرض التقرير الشامل</p>
+                    </div>
+                `;
+                currentStudent = null;
+                return;
+            }
+
+            currentStudent = students.find(s => s.id == studentId);
+            if (!currentStudent) {
+                container.innerHTML = `<p style="color:#e74c3c;">⚠️ الطالب غير موجود</p>`;
+                return;
+            }
+
+            const studentPayments = payments.filter(p => p.studentId == studentId);
+            const studentAssessments = assessments.filter(a => a.studentId == studentId);
+            const studentAttendance = attendance.filter(a => a.studentId == studentId);
+
+            const totalDays = studentAttendance.length || 1;
+            const presentDays = studentAttendance.filter(a => a.status === 'present' || a.status === 'late').length;
+            const attendancePercent = Math.round((presentDays / totalDays) * 100);
+
+            let totalPaid = 0,
+                totalPending = 0,
+                totalOverdue = 0;
+            studentPayments.forEach(p => {
+                if (p.status === 'paid') totalPaid += p.amount;
+                else if (p.status === 'pending') totalPending += p.amount;
+                else if (p.status === 'overdue') totalOverdue += p.amount;
+            });
+            const totalAmount = totalPaid + totalPending + totalOverdue;
+
+            let avgGrade = 0;
+            if (studentAssessments.length > 0) {
+                const sum = studentAssessments.reduce((acc, a) => acc + a.grade, 0);
+                avgGrade = Math.round(sum / studentAssessments.length);
+            }
+
+            container.innerHTML = `
+                <div class="report-header" id="reportHeader">
+                    <div class="student-info">
+                        <h2>${currentStudent.name}</h2>
+                        <p>📚 ${currentStudent.group} | 📱 ${currentStudent.phone} | 👨‍👦 ${currentStudent.parentPhone}</p>
+                        <p style="margin-top:6px;color:#888;font-size:13px;">
+                            ${currentStudent.active ? '✅ نشط' : '❌ غير نشط'}
+                        </p>
+                    </div>
+                    <div class="student-avatar">${currentStudent.name.charAt(0)}</div>
+                </div>
+
+                <div class="summary-stats">
+                    <div class="summary-stat">
+                        <div class="number">${studentAssessments.length}</div>
+                        <div class="label">📊 عدد التقييمات</div>
+                    </div>
+                    <div class="summary-stat">
+                        <div class="number">${avgGrade}%</div>
+                        <div class="label">📈 متوسط الدرجات</div>
+                    </div>
+                    <div class="summary-stat">
+                        <div class="number">${attendancePercent}%</div>
+                        <div class="label">✅ نسبة الحضور</div>
+                    </div>
+                    <div class="summary-stat">
+                        <div class="number">${studentPayments.length}</div>
+                        <div class="label">💰 عدد المدفوعات</div>
+                    </div>
+                </div>
+
+                <div class="report-section">
+                    <h3>✅ الحضور</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="label">إجمالي الأيام</div>
+                            <div class="value">${totalDays}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="label">✅ حاضر</div>
+                            <div class="value" style="color:#27ae60;">${presentDays}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="label">❌ غائب</div>
+                            <div class="value" style="color:#e74c3c;">${studentAttendance.filter(a => a.status === 'absent').length}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="label">⏰ متأخر</div>
+                            <div class="value" style="color:#f39c12;">${studentAttendance.filter(a => a.status === 'late').length}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="label">📝 معذور</div>
+                            <div class="value" style="color:#3498db;">${studentAttendance.filter(a => a.status === 'excused').length}</div>
+                        </div>
+                    </div>
+                    ${studentAttendance.length === 0 ? '<p style="color:#999;font-size:13px;">لا توجد سجلات حضور</p>' : ''}
+                </div>
+
+                <div class="report-section">
+                    <h3>📊 التقييمات</h3>
+                    ${studentAssessments.length === 0 ? '<p style="color:#999;font-size:13px;">لا توجد تقييمات</p>' : `
+                    <table class="mini-table">
+                        <thead>
+                            <tr>
+                                <th>📝 النوع</th>
+                                <th>📊 الدرجة</th>
+                                <th>📅 التاريخ</th>
+                                <th>📌 الملاحظات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${studentAssessments.map(a => {
+                                const gradeClass = a.grade >= 85 ? 'grade-excellent' :
+                                    a.grade >= 70 ? 'grade-good' :
+                                    a.grade >= 50 ? 'grade-average' : 'grade-poor';
+                                return `
+                                    <tr>
+                                        <td>${a.type}</td>
+                                        <td><span class="grade-badge ${gradeClass}">${a.grade}</span></td>
+                                        <td>${a.date}</td>
+                                        <td>${a.notes || '-'}</td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                    `}
+                </div>
+
+                <div class="report-section">
+                    <h3>💰 المدفوعات</h3>
+                    <div class="info-grid">
+                        <div class="info-item" style="background:#eafaf1;">
+                            <div class="label">✅ إجمالي المدفوع</div>
+                            <div class="value" style="color:#27ae60;">${totalPaid} EGP</div>
+                        </div>
+                        <div class="info-item" style="background:#fef9e7;">
+                            <div class="label">⏳ المتبقي</div>
+                            <div class="value" style="color:#f39c12;">${totalPending} EGP</div>
+                        </div>
+                        <div class="info-item" style="background:#fdedec;">
+                            <div class="label">⚠️ المتأخر</div>
+                            <div class="value" style="color:#e74c3c;">${totalOverdue} EGP</div>
+                        </div>
+                        <div class="info-item" style="background:#f0f4ff;">
+                            <div class="label">💰 الإجمالي الكلي</div>
+                            <div class="value" style="color:#667eea;">${totalAmount} EGP</div>
+                        </div>
+                    </div>
+                    ${studentPayments.length === 0 ? '<p style="color:#999;font-size:13px;">لا توجد مدفوعات</p>' : `
+                    <table class="mini-table" style="margin-top:12px;">
+                        <thead>
+                            <tr>
+                                <th>📋 النوع</th>
+                                <th>💵 المبلغ</th>
+                                <th>✅ الحالة</th>
+                                <th>📅 التاريخ</th>
+                                <th>📌 ملاحظات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${studentPayments.map(p => {
+                                const statusClass = p.status === 'paid' ? 'paid' :
+                                    p.status === 'pending' ? 'pending' : 'overdue';
+                                const statusText = p.status === 'paid' ? '✅ مدفوع' :
+                                    p.status === 'pending' ? '⏳ متبقي' : '⚠️ متأخر';
+                                const typeText = p.type === 'lesson' ? '📚 بالحصة' : '📅 بالشهر';
+                                return `
+                                    <tr>
+                                        <td>${typeText}</td>
+                                        <td><strong>${p.amount} EGP</strong></td>
+                                        <td><span class="payment-status-badge ${statusClass}">${statusText}</span></td>
+                                        <td>${p.date}</td>
+                                        <td>${p.notes || '-'}</td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                    `}
+                </div>
+
+                <div class="report-section" style="margin-bottom:0;">
+                    <h3>📋 الملخص النهائي</h3>
+                    <div class="info-grid">
+                        <div class="info-item" style="background:#eafaf1;">
+                            <div class="label">📊 متوسط التقييمات</div>
+                            <div class="value" style="color:#27ae60;">${avgGrade}%</div>
+                        </div>
+                        <div class="info-item" style="background:#ebf5fb;">
+                            <div class="label">✅ نسبة الحضور</div>
+                            <div class="value" style="color:#3498db;">${attendancePercent}%</div>
+                        </div>
+                        <div class="info-item" style="background:#fef9e7;">
+                            <div class="label">💰 إجمالي المدفوعات</div>
+                            <div class="value" style="color:#f39c12;">${totalAmount} EGP</div>
+                        </div>
+                        <div class="info-item" style="background:#f0f4ff;">
+                            <div class="label">📝 عدد التقييمات</div>
+                            <div class="value" style="color:#667eea;">${studentAssessments.length}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ===== تصدير PDF =====
+        function exportPDF() {
+            if (!currentStudent) {
+                alert('⚠️ الرجاء اختيار طالب أولاً');
+                return;
+            }
+
+            const element = document.getElementById('reportContent');
+            const reportCard = document.getElementById('reportCard');
+
+            // إضافة border مؤقت للطباعة
+            reportCard.style.border = '1px solid #ddd';
+            reportCard.style.padding = '20px';
+
+            html2canvas(element, {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: '#ffffff'
+            }).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+                pdf.save(`تقرير_${currentStudent.name}.pdf`);
+
+                // إزالة border مؤقت
+                reportCard.style.border = 'none';
+                reportCard.style.padding = '30px';
+            }).catch(err => {
+                alert('⚠️ حدث خطأ أثناء إنشاء PDF: ' + err.message);
+                reportCard.style.border = 'none';
+                reportCard.style.padding = '30px';
+            });
+        }
+
+        // ===== إرسال إيميل =====
+        function sendEmail() {
+            if (!currentStudent) {
+                alert('⚠️ الرجاء اختيار طالب أولاً');
+                return;
+            }
+
+            const parentEmail = prompt('📧 أدخل البريد الإلكتروني لولي الأمر:', currentStudent.parentEmail || '');
+            if (!parentEmail) return;
+
+            if (!parentEmail.includes('@')) {
+                alert('⚠️ البريد الإلكتروني غير صحيح');
+                return;
+            }
+
+            // بناء التقرير كنص
+            const student = currentStudent;
+            const studentPayments = payments.filter(p => p.studentId === student.id);
+            const studentAssessments = assessments.filter(a => a.studentId === student.id);
+            const studentAttendance = attendance.filter(a => a.studentId === student.id);
+
+            const totalDays = studentAttendance.length || 1;
+            const presentDays = studentAttendance.filter(a => a.status === 'present' || a.status === 'late').length;
+            const attendancePercent = Math.round((presentDays / totalDays) * 100);
+
+            let totalPaid = 0,
+                totalPending = 0,
+                totalOverdue = 0;
+            studentPayments.forEach(p => {
+                if (p.status === 'paid') totalPaid += p.amount;
+                else if (p.status === 'pending') totalPending += p.amount;
+                else if (p.status === 'overdue') totalOverdue += p.amount;
+            });
+
+            let avgGrade = 0;
+            if (studentAssessments.length > 0) {
+                const sum = studentAssessments.reduce((acc, a) => acc + a.grade, 0);
+                avgGrade = Math.round(sum / studentAssessments.length);
+            }
+
+            const subject = `📚 TeachFlow - تقرير الطالب ${student.name}`;
+            const message = `
+📚 TeachFlow - تقرير الطالب
+━━━━━━━━━━━━━━━━━━━━━━━━━
+👤 الطالب: ${student.name}
+📚 المجموعة: ${student.group}
+📱 تليفون الطالب: ${student.phone}
+👨‍👦 تليفون ولي الأمر: ${student.parentPhone}
+📅 تاريخ التقرير: ${new Date().toISOString().split('T')[0]}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━
+📊 التقييمات
+📝 عدد التقييمات: ${studentAssessments.length}
+📈 متوسط الدرجات: ${avgGrade}%
+
+${studentAssessments.map(a => `  • ${a.type}: ${a.grade}% (${a.date})${a.notes ? ' - ' + a.notes : ''}`).join('\n') || '  لا توجد تقييمات'}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ الحضور
+📅 إجمالي الأيام: ${totalDays}
+✅ حاضر: ${presentDays}
+❌ غائب: ${studentAttendance.filter(a => a.status === 'absent').length}
+⏰ متأخر: ${studentAttendance.filter(a => a.status === 'late').length}
+📝 معذور: ${studentAttendance.filter(a => a.status === 'excused').length}
+📊 نسبة الحضور: ${attendancePercent}%
+
+━━━━━━━━━━━━━━━━━━━━━━━━━
+💰 المدفوعات
+✅ إجمالي المدفوع: ${totalPaid} EGP
+⏳ المتبقي: ${totalPending} EGP
+⚠️ المتأخر: ${totalOverdue} EGP
+💰 الإجمالي الكلي: ${totalPaid + totalPending + totalOverdue} EGP
+
+${studentPayments.map(p => `  • ${p.type === 'lesson' ? 'بالحصة' : 'بالشهر'}: ${p.amount} EGP - ${p.status === 'paid' ? '✅ مدفوع' : p.status === 'pending' ? '⏳ متبقي' : '⚠️ متأخر'} (${p.date})${p.notes ? ' - ' + p.notes : ''}`).join('\n') || '  لا توجد مدفوعات'}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 الملخص النهائي
+• متوسط التقييمات: ${avgGrade}%
+• نسبة الحضور: ${attendancePercent}%
+• إجمالي المدفوعات: ${totalPaid + totalPending + totalOverdue} EGP
+• عدد التقييمات: ${studentAssessments.length}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━
+تم إنشاء هذا التقرير بواسطة TeachFlow
+Designed by Dr. Hamada Fathy Hammad
+            `;
+
+            // محاكاة إرسال إيميل (في الواقع هنستخدم EmailJS)
+            if (confirm(`📧 سيتم إرسال التقرير إلى:\n${parentEmail}\n\nهل أنت متأكد؟`)) {
+                // هنا هتضيف كود EmailJS
+                alert(`✅ تم إرسال التقرير إلى ${parentEmail}`);
+            }
+        }
+
+        // ===== تسجيل الخروج =====
+        function logout() {
+            if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
+                localStorage.removeItem('teachflow_teacher');
+                localStorage.removeItem('teachflow_user');
+                window.location.href = 'index.html';
+            }
+        }
+
+        // ===== تحميل الصفحة =====
+        document.addEventListener('DOMContentLoaded', function() {
+            const teacher = localStorage.getItem('teachflow_teacher');
+            if (!teacher) {
+                window.location.href = 'index.html';
+                return;
+            }
+            loadData();
+        });
+    </script>
+</body>
+</html>

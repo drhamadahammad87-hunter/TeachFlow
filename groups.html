@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المجموعات - TeachFlow</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+
+        body {
+            background: #f0f2f5;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            position: fixed;
+            right: 0;
+            top: 0;
+            width: 220px;
+            height: 100vh;
+            background: white;
+            padding: 20px 15px;
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.05);
+            overflow-y: auto;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: 700;
+            color: #667eea;
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 15px;
+        }
+
+        .logo span {
+            display: block;
+            font-size: 12px;
+            color: #999;
+            font-weight: 400;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            color: #555;
+            cursor: pointer;
+            transition: 0.3s;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: right;
+            font-size: 14px;
+        }
+
+        .sidebar-item:hover {
+            background: #f0f4ff;
+            color: #667eea;
+        }
+
+        .sidebar-item.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .main-content {
+            margin-right: 220px;
+            padding: 25px;
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .page-header h1 {
+            font-size: 26px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .page-header .actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-add {
+            padding: 10px 20px;
+            background: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-add:hover {
+            background: #27ae60;
+            transform: scale(1.02);
+        }
+
+        .btn-back {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-back:hover {
+            background: #5a6fd6;
+            transform: scale(1.02);
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 2px solid #e8edf2;
+            border-radius: 12px;
+            font-size: 15px;
+            background: white;
+            transition: 0.3s;
+            min-width: 200px;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .groups-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 20px;
+            flex: 1;
+        }
+
+        .group-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transition: 0.3s;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .group-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .group-card .group-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .group-card .group-icon {
+            font-size: 36px;
+        }
+
+        .group-card .group-name {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .group-card .group-meta {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px 12px;
+            margin: 10px 0;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .group-card .group-meta span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .group-card .group-description {
+            color: #888;
+            font-size: 14px;
+            margin: 8px 0 12px 0;
+            flex: 1;
+        }
+
+        .group-card .group-location {
+            background: #f0f4ff;
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin: 6px 0 10px 0;
+            font-size: 13px;
+            color: #444;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .group-card .group-location .location-type {
+            background: #667eea;
+            color: white;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .group-card .group-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px solid #f0f2f5;
+        }
+
+        .group-card .student-count {
+            background: #667eea;
+            color: white;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .group-card .group-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .group-card .group-actions button {
+            padding: 6px 14px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: 0.3s;
+        }
+
+        .group-card .group-actions .btn-edit {
+            background: #f39c12;
+            color: white;
+        }
+
+        .group-card .group-actions .btn-edit:hover {
+            background: #e67e22;
+        }
+
+        .group-card .group-actions .btn-delete {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .group-card .group-actions .btn-delete:hover {
+            background: #c0392b;
+        }
+
+        .group-card .badge-status {
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .badge-active {
+            background: #eafaf1;
+            color: #27ae60;
+        }
+
+        .badge-inactive {
+            background: #fdedec;
+            color: #e74c3c;
+        }
+
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state .big-icon {
+            font-size: 56px;
+            display: block;
+            margin-bottom: 12px;
+        }
+
+        .empty-state p {
+            font-size: 16px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 15px;
+            color: #aaa;
+            font-size: 13px;
+            border-top: 1px solid #e8edf2;
+            direction: ltr;
+        }
+
+        .footer .name {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 60px;
+                padding: 15px 8px;
+            }
+            .sidebar-item span:not(.icon) {
+                display: none;
+            }
+            .sidebar-item {
+                justify-content: center;
+                padding: 12px;
+            }
+            .logo {
+                font-size: 16px;
+            }
+            .logo span {
+                display: none;
+            }
+            .main-content {
+                margin-right: 60px;
+                padding: 15px;
+            }
+            .page-header h1 {
+                font-size: 20px;
+            }
+            .groups-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .group-card .group-meta {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .groups-grid {
+                grid-template-columns: 1fr;
+            }
+            .group-card .group-meta {
+                grid-template-columns: 1fr;
+            }
+            .group-card .group-footer {
+                flex-direction: column;
+                gap: 10px;
+                align-items: stretch;
+            }
+            .group-card .group-actions {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="sidebar">
+        <div class="logo">📚 TeachFlow <span>نظام إدارة المعلمين</span></div>
+        <button class="sidebar-item" onclick="window.location.href='home.html'">🏠 <span>الرئيسية</span></button>
+        <button class="sidebar-item" onclick="window.location.href='students.html'">👨‍🎓 <span>الطلاب</span></button>
+        <button class="sidebar-item active" onclick="window.location.href='groups.html'">👥 <span>المجموعات</span></button>
+        <button class="sidebar-item" onclick="window.location.href='home.html'">📚 <span>الدروس</span></button>
+        <button class="sidebar-item" onclick="window.location.href='home.html'">📅 <span>الجدول</span></button>
+        <button class="sidebar-item" onclick="window.location.href='home.html'">✅ <span>الحضور</span></button>
+        <button class="sidebar-item" onclick="window.location.href='home.html'">📊 <span>التقييمات</span></button>
+        <button class="sidebar-item" onclick="window.location.href='home.html'">💰 <span>الحسابات</span></button>
+        <button class="sidebar-item" onclick="window.location.href='home.html'">📈 <span>التقارير</span></button>
+        <button class="sidebar-item" onclick="window.location.href='home.html'">🔔 <span>التنبيهات</span></button>
+        <button class="sidebar-item" onclick="window.location.href='home.html'">⚙️ <span>الإعدادات</span></button>
+        <button class="sidebar-item" onclick="logout()">🚪 <span>تسجيل الخروج</span></button>
+    </nav>
+
+    <main class="main-content">
+
+        <div class="page-header">
+            <h1>
+                👥 المجموعات
+                <span style="font-size:16px;color:#999;font-weight:400;" id="groupsCountLabel">(0)</span>
+            </h1>
+            <div class="actions">
+                <button class="btn-back" onclick="window.location.href='home.html'">🔙 رجوع</button>
+                <button class="btn-add" onclick="showAddGroup()">➕ إضافة مجموعة</button>
+            </div>
+        </div>
+
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="🔍 ابحث عن مجموعة..." oninput="searchGroups()">
+        </div>
+
+        <div class="groups-grid" id="groupsGrid"></div>
+
+        <div class="footer">
+            Designed with ❤️ by <span class="name">Dr. Hamada Fathy Hammad</span>
+        </div>
+    </main>
+
+    <script>
+        let groups = [];
+        let filteredGroups = [];
+
+        // ===== أنواع الأماكن =====
+        const locationTypes = ['🏠 بيت', '🏢 سنتر', '💻 أونلاين', '📚 مدرسة', '🏛️ معهد', '📍 مكان آخر'];
+
+        function loadGroups() {
+            const saved = localStorage.getItem('teachflow_groups');
+            if (saved) {
+                groups = JSON.parse(saved);
+            } else {
+                groups = [
+                    {
+                        id: 1,
+                        name: 'مجموعة الرياضيات المتقدمة',
+                        icon: '📐',
+                        description: 'طلاب الرياضيات المتقدمين - المنهج الدولي',
+                        locationType: '🏠 بيت',
+                        locationAddress: 'شارع النيل، مدينة نصر، القاهرة',
+                        day: 'السبت',
+                        time: '10:00 ص',
+                        level: 'متقدم',
+                        maxStudents: 15,
+                        active: true
+                    },
+                    {
+                        id: 2,
+                        name: 'مجموعة العلوم الأساسية',
+                        icon: '🔬',
+                        description: 'طلاب العلوم - المنهج المصري',
+                        locationType: '🏢 سنتر',
+                        locationAddress: 'سنتر العلم - الدور الثالث، شارع مصر',
+                        day: 'الأحد',
+                        time: '12:00 م',
+                        level: 'مبتدئ',
+                        maxStudents: 20,
+                        active: true
+                    },
+                    {
+                        id: 3,
+                        name: 'مجموعة اللغة العربية',
+                        icon: '📖',
+                        description: 'تقوية اللغة العربية - القراءة والإملاء',
+                        locationType: '💻 أونلاين',
+                        locationAddress: 'Zoom - الرابط: https://zoom.us/...',
+                        day: 'الثلاثاء',
+                        time: '2:00 م',
+                        level: 'متوسط',
+                        maxStudents: 12,
+                        active: true
+                    }
+                ];
+                saveGroups();
+            }
+            filteredGroups = [...groups];
+            renderGroups();
+        }
+
+        function saveGroups() {
+            localStorage.setItem('teachflow_groups', JSON.stringify(groups));
+        }
+
+        function renderGroups() {
+            const grid = document.getElementById('groupsGrid');
+            const students = JSON.parse(localStorage.getItem('teachflow_students')) || [];
+
+            if (filteredGroups.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <span class="big-icon">👥</span>
+                        <p>لا توجد مجموعات</p>
+                        <p style="font-size:12px;color:#ccc;">اضغط على "إضافة مجموعة" لإضافة أول مجموعة</p>
+                    </div>
+                `;
+            } else {
+                grid.innerHTML = filteredGroups.map(group => {
+                    const studentCount = students.filter(s => s.group === group.name).length;
+                    const statusClass = group.active ? 'badge-active' : 'badge-inactive';
+                    const statusText = group.active ? '✅ نشطة' : '❌ غير نشطة';
+
+                    return `
+                        <div class="group-card">
+                            <div class="group-header">
+                                <span class="group-icon">${group.icon || '👥'}</span>
+                                <span class="group-name">${group.name}</span>
+                            </div>
+                            <div class="group-description">${group.description || 'لا يوجد وصف'}</div>
+                            <div class="group-location">
+                                <span class="location-type">${group.locationType || '📍 مكان'}</span>
+                                <span>${group.locationAddress || 'لا يوجد عنوان'}</span>
+                            </div>
+                            <div class="group-meta">
+                                <span>📅 ${group.day || 'غير محدد'}</span>
+                                <span>⏰ ${group.time || 'غير محدد'}</span>
+                                <span>📊 المستوى: ${group.level || 'عام'}</span>
+                                <span>👥 الحد الأقصى: ${group.maxStudents || 'غير محدد'}</span>
+                            </div>
+                            <div class="group-footer">
+                                <div>
+                                    <span class="student-count">${studentCount} طالب</span>
+                                    <span class="badge-status ${statusClass}" style="margin-right:8px;">${statusText}</span>
+                                </div>
+                                <div class="group-actions">
+                                    <button class="btn-edit" onclick="editGroup(${group.id})">✏️ تعديل</button>
+                                    <button class="btn-delete" onclick="deleteGroup(${group.id})">🗑️ حذف</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            document.getElementById('groupsCountLabel').textContent = `(${filteredGroups.length})`;
+        }
+
+        function searchGroups() {
+            const filter = document.getElementById('searchInput').value.trim().toLowerCase();
+            filteredGroups = groups.filter(g =>
+                g.name.toLowerCase().includes(filter) ||
+                (g.description && g.description.toLowerCase().includes(filter)) ||
+                (g.locationAddress && g.locationAddress.toLowerCase().includes(filter)) ||
+                (g.locationType && g.locationType.includes(filter)) ||
+                (g.day && g.day.includes(filter)) ||
+                (g.level && g.level.toLowerCase().includes(filter))
+            );
+            renderGroups();
+        }
+
+        function showAddGroup() {
+            const name = prompt('👥 اسم المجموعة:');
+            if (!name) return;
+
+            const icon = prompt('🎨 أيقونة المجموعة (اختياري):', '👥') || '👥';
+
+            // اختيار نوع المكان
+            let locationOptions = locationTypes.map((t, i) => `${i + 1}. ${t}`).join('\n');
+            const locationChoice = prompt(`📍 اختر مكان الانعقاد:\n${locationOptions}\n\nأدخل رقم المكان (1-6):`);
+            const locationIndex = parseInt(locationChoice) - 1;
+            let locationType = '📍 مكان آخر';
+            if (!isNaN(locationIndex) && locationIndex >= 0 && locationIndex < locationTypes.length) {
+                locationType = locationTypes[locationIndex];
+            }
+
+            const locationAddress = prompt('📍 العنوان التفصيلي (شارع، منطقة، محافظة):') || '';
+
+            const description = prompt('📝 وصف المجموعة (اختياري):') || '';
+            const day = prompt('📅 اليوم (السبت، الأحد، إلخ):') || '';
+            const time = prompt('⏰ الوقت (10:00 ص، إلخ):') || '';
+            const level = prompt('📊 المستوى (مبتدئ، متوسط، متقدم):', 'متوسط') || 'متوسط';
+            const maxStudents = prompt('👥 الحد الأقصى للطلاب:', '20') || '20';
+            const active = confirm('✅ هل المجموعة نشطة؟ (OK = نشطة، Cancel = غير نشطة)');
+
+            const newGroup = {
+                id: Date.now(),
+                name: name,
+                icon: icon,
+                description: description,
+                locationType: locationType,
+                locationAddress: locationAddress,
+                day: day,
+                time: time,
+                level: level,
+                maxStudents: parseInt(maxStudents) || 20,
+                active: active
+            };
+
+            groups.push(newGroup);
+            filteredGroups = [...groups];
+            saveGroups();
+            renderGroups();
+            alert('✅ تم إضافة المجموعة بنجاح!');
+        }
+
+        function editGroup(id) {
+            const group = groups.find(g => g.id === id);
+            if (!group) return;
+
+            const name = prompt('👥 اسم المجموعة:', group.name);
+            if (name) group.name = name;
+
+            const icon = prompt('🎨 أيقونة المجموعة:', group.icon) || '👥';
+            if (icon) group.icon = icon;
+
+            // اختيار نوع المكان
+            let locationOptions = locationTypes.map((t, i) => `${i + 1}. ${t}`).join('\n');
+            const currentIndex = locationTypes.indexOf(group.locationType) + 1;
+            const locationChoice = prompt(`📍 اختر مكان الانعقاد:\n${locationOptions}\n\nأدخل رقم المكان (1-6) [الحالي: ${group.locationType}]:`, currentIndex);
+            if (locationChoice) {
+                const locationIndex = parseInt(locationChoice) - 1;
+                if (!isNaN(locationIndex) && locationIndex >= 0 && locationIndex < locationTypes.length) {
+                    group.locationType = locationTypes[locationIndex];
+                }
+            }
+
+            const locationAddress = prompt('📍 العنوان التفصيلي:', group.locationAddress) || '';
+            if (locationAddress !== null) group.locationAddress = locationAddress;
+
+            const description = prompt('📝 وصف المجموعة:', group.description) || '';
+            if (description !== null) group.description = description;
+
+            const day = prompt('📅 اليوم:', group.day) || '';
+            if (day !== null) group.day = day;
+
+            const time = prompt('⏰ الوقت:', group.time) || '';
+            if (time !== null) group.time = time;
+
+            const level = prompt('📊 المستوى (مبتدئ، متوسط، متقدم):', group.level) || 'متوسط';
+            if (level !== null) group.level = level;
+
+            const maxStudents = prompt('👥 الحد الأقصى للطلاب:', group.maxStudents) || '20';
+            if (maxStudents !== null) group.maxStudents = parseInt(maxStudents) || 20;
+
+            group.active = confirm('✅ هل المجموعة نشطة؟ (OK = نشطة، Cancel = غير نشطة)');
+
+            filteredGroups = [...groups];
+            saveGroups();
+            renderGroups();
+            alert('✅ تم تعديل المجموعة!');
+        }
+
+        function deleteGroup(id) {
+            const group = groups.find(g => g.id === id);
+            if (!group) return;
+
+            const students = JSON.parse(localStorage.getItem('teachflow_students')) || [];
+            const hasStudents = students.some(s => s.group === group.name);
+
+            if (hasStudents) {
+                if (!confirm(`⚠️ يوجد ${students.filter(s => s.group === group.name).length} طالب في هذه المجموعة. هل أنت متأكد من حذفها؟ سيتم إزالة المجموعة من الطلاب.`)) {
+                    return;
+                }
+                students.forEach(s => {
+                    if (s.group === group.name) s.group = '';
+                });
+                localStorage.setItem('teachflow_students', JSON.stringify(students));
+            }
+
+            if (confirm(`🗑️ هل أنت متأكد من حذف المجموعة "${group.name}"؟`)) {
+                groups = groups.filter(g => g.id !== id);
+                filteredGroups = [...groups];
+                saveGroups();
+                renderGroups();
+                alert('✅ تم حذف المجموعة!');
+            }
+        }
+
+        function logout() {
+            if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
+                localStorage.removeItem('teachflow_teacher');
+                localStorage.removeItem('teachflow_user');
+                window.location.href = 'index.html';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const teacher = localStorage.getItem('teachflow_teacher');
+            if (!teacher) {
+                window.location.href = 'index.html';
+                return;
+            }
+            loadGroups();
+        });
+    </script>
+</body>
+</html>

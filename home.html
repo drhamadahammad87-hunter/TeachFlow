@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الرئيسية - TeachFlow</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+
+        body {
+            background: #f0f2f5;
+            min-height: 100vh;
+        }
+
+        /* ===== القائمة الجانبية ===== */
+        .sidebar {
+            position: fixed;
+            right: 0;
+            top: 0;
+            width: 220px;
+            height: 100vh;
+            background: white;
+            padding: 20px 15px;
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.05);
+            overflow-y: auto;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: 700;
+            color: #667eea;
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 15px;
+        }
+
+        .logo span {
+            display: block;
+            font-size: 12px;
+            color: #999;
+            font-weight: 400;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            color: #555;
+            cursor: pointer;
+            transition: 0.3s;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: right;
+            font-size: 14px;
+        }
+
+        .sidebar-item:hover {
+            background: #f0f4ff;
+            color: #667eea;
+        }
+
+        .sidebar-item.active {
+            background: #667eea;
+            color: white;
+        }
+
+        /* ===== المحتوى ===== */
+        .main-content {
+            margin-right: 220px;
+            padding: 25px;
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .page-header h1 {
+            font-size: 26px;
+            color: #333;
+        }
+
+        .page-header h1 .teacher-name {
+            color: #667eea;
+            font-weight: 700;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: white;
+            padding: 8px 16px;
+            border-radius: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .user-info .avatar {
+            width: 36px;
+            height: 36px;
+            background: #667eea;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        /* ===== بطاقة المواد ===== */
+        .subjects-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .subjects-card h3 {
+            color: #333;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+
+        .subjects-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .subjects-tags .tag {
+            background: #667eea;
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+        }
+
+        /* ===== البطاقات ===== */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .card-icon {
+            font-size: 28px;
+            margin-bottom: 6px;
+        }
+
+        .card-number {
+            font-size: 28px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .card-label {
+            color: #888;
+            font-size: 13px;
+        }
+
+        .card.blue .card-number {
+            color: #667eea;
+        }
+        .card.green .card-number {
+            color: #2ecc71;
+        }
+        .card.orange .card-number {
+            color: #f39c12;
+        }
+        .card.red .card-number {
+            color: #e74c3c;
+        }
+
+        /* ===== الأنشطة ===== */
+        .section-title {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .activity-list {
+            background: white;
+            border-radius: 16px;
+            padding: 10px 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            flex: 1;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 18px;
+            border-bottom: 1px solid #f5f5f5;
+            cursor: pointer;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            font-size: 20px;
+            width: 40px;
+            height: 40px;
+            background: #f0f4ff;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .activity-text h4 {
+            font-size: 14px;
+            color: #333;
+        }
+
+        .activity-text p {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .activity-time {
+            font-size: 11px;
+            color: #bbb;
+            margin-right: auto;
+        }
+
+        /* ===== تذييل الصفحة ===== */
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 15px;
+            color: #aaa;
+            font-size: 13px;
+            border-top: 1px solid #e8edf2;
+            direction: ltr;
+        }
+
+        .footer .name {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        /* ===== للشاشات الصغيرة ===== */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 60px;
+                padding: 15px 8px;
+            }
+            .sidebar-item span:not(.icon) {
+                display: none;
+            }
+            .sidebar-item {
+                justify-content: center;
+                padding: 12px;
+            }
+            .logo {
+                font-size: 16px;
+            }
+            .logo span {
+                display: none;
+            }
+            .main-content {
+                margin-right: 60px;
+                padding: 15px;
+            }
+            .cards-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .page-header h1 {
+                font-size: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .cards-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+            .card {
+                padding: 14px 10px;
+            }
+            .card-number {
+                font-size: 20px;
+            }
+            .subjects-card {
+                padding: 15px;
+            }
+            .subjects-tags .tag {
+                font-size: 12px;
+                padding: 4px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== القائمة الجانبية ===== -->
+    <nav class="sidebar">
+        <div class="logo">
+            📚 TeachFlow
+            <span>نظام إدارة المعلمين</span>
+        </div>
+
+        <button class="sidebar-item active" onclick="window.location.href='home.html'">
+            🏠 <span>الرئيسية</span>
+        </button>
+        <button class="sidebar-item" onclick="window.location.href='home.html'">
+            👨‍🎓 <span>الطلاب</span>
+        </button>
+        <button class="sidebar-item" onclick="window.location.href='home.html'">
+            👥 <span>المجموعات</span>
+        </button>
+        <button class="sidebar-item" onclick="window.location.href='home.html'">
+            📚 <span>الدروس</span>
+        </button>
+        <button class="sidebar-item" onclick="window.location.href='home.html'">
+            📅 <span>الجدول</span>
+        </button>
+        <button class="sidebar-item" onclick="window.location.href='home.html'">
+            ✅ <span>الحضور</span>
+        </button>
+        <button class="sidebar-item" onclick="window.location.href='home.html'">
+            📊 <span>التقييمات</span>
+        </button>
+        <button class="sidebar-item" onclick="window.location.href='home.html'">
+            💰 <span>الحسابات</span>
+        </button>
+        <button class="sidebar-item" onclick="window.location.href='home.html'">
+            📈 <span>التقارير</span>
+        </button>
+        <button class="sidebar-item" onclick="window.location.href='home.html'">
+            🔔 <span>التنبيهات</span>
+        </button>
+        <button class="sidebar-item" onclick="window.location.href='home.html'">
+            ⚙️ <span>الإعدادات</span>
+        </button>
+        <button class="sidebar-item" onclick="logout()">
+            🚪 <span>تسجيل الخروج</span>
+        </button>
+    </nav>
+
+    <!-- ===== المحتوى ===== -->
+    <main class="main-content">
+
+        <!-- ===== الترحيب ===== -->
+        <div class="page-header">
+            <h1>
+                👋 أهلاً، <span class="teacher-name" id="teacherName">الأستاذ</span>
+            </h1>
+            <div class="user-info">
+                <span id="userEmail">📧 teacher@example.com</span>
+                <div class="avatar" id="userAvatar">م</div>
+            </div>
+        </div>
+
+        <!-- ===== المواد ===== -->
+        <div class="subjects-card">
+            <h3>📚 المواد التي تدرسها</h3>
+            <div class="subjects-tags" id="subjectsTags">
+                <!-- هتتعبأ من JavaScript -->
+            </div>
+        </div>
+
+        <!-- ===== البطاقات ===== -->
+        <div class="cards-grid">
+            <div class="card blue" onclick="window.location.href='home.html'">
+                <div class="card-icon">👨‍🎓</div>
+                <div class="card-number" id="studentCount">24</div>
+                <div class="card-label">الطلاب</div>
+            </div>
+            <div class="card green" onclick="window.location.href='home.html'">
+                <div class="card-icon">✅</div>
+                <div class="card-number" id="attendanceCount">18</div>
+                <div class="card-label">حضور اليوم</div>
+            </div>
+            <div class="card orange" onclick="window.location.href='home.html'">
+                <div class="card-icon">💰</div>
+                <div class="card-number" id="paymentCount">EGP 1,200</div>
+                <div class="card-label">المدفوعات</div>
+            </div>
+            <div class="card red" onclick="window.location.href='home.html'">
+                <div class="card-icon">📚</div>
+                <div class="card-number" id="lessonCount">8</div>
+                <div class="card-label">دروس اليوم</div>
+            </div>
+        </div>
+
+        <!-- ===== الأنشطة ===== -->
+        <div class="section-title">📋 آخر الأنشطة</div>
+        <div class="activity-list">
+            <div class="activity-item" onclick="window.location.href='home.html'">
+                <div class="activity-icon">👤</div>
+                <div class="activity-text">
+                    <h4>تم إضافة طالب جديد</h4>
+                    <p>أحمد محمد - مجموعة الرياضيات</p>
+                </div>
+                <span class="activity-time">منذ 5 دقائق</span>
+            </div>
+            <div class="activity-item" onclick="window.location.href='home.html'">
+                <div class="activity-icon">✅</div>
+                <div class="activity-text">
+                    <h4>تم تسجيل الحضور</h4>
+                    <p>5 طلاب حضروا اليوم</p>
+                </div>
+                <span class="activity-time">منذ ساعة</span>
+            </div>
+            <div class="activity-item" onclick="window.location.href='home.html'">
+                <div class="activity-icon">💰</div>
+                <div class="activity-text">
+                    <h4>تم استلام دفعة</h4>
+                    <p>من سارة علي - EGP 50</p>
+                </div>
+                <span class="activity-time">منذ ساعتين</span>
+            </div>
+            <div class="activity-item" onclick="window.location.href='home.html'">
+                <div class="activity-icon">📊</div>
+                <div class="activity-text">
+                    <h4>تقييم جديد</h4>
+                    <p>تم تقييم أداء الطلاب في الرياضيات</p>
+                </div>
+                <span class="activity-time">منذ 3 ساعات</span>
+            </div>
+        </div>
+
+        <!-- ===== التوقيع ===== -->
+        <div class="footer">
+            Designed with ❤️ by <span class="name">Dr. Hamada Fathy Hammad</span>
+        </div>
+    </main>
+
+    <script>
+        // ===== تحميل بيانات المعلم =====
+        function loadTeacherData() {
+            const data = localStorage.getItem('teachflow_teacher');
+            if (!data) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const teacher = JSON.parse(data);
+
+            // عرض اسم المعلم
+            document.getElementById('teacherName').textContent = teacher.name;
+            document.getElementById('userEmail').textContent = '📧 ' + teacher.email;
+            document.getElementById('userAvatar').textContent = teacher.name.charAt(0);
+
+            // عرض المواد
+            const tagsContainer = document.getElementById('subjectsTags');
+            tagsContainer.innerHTML = '';
+
+            if (teacher.subjects && teacher.subjects.length > 0) {
+                teacher.subjects.forEach(subject => {
+                    const tag = document.createElement('span');
+                    tag.className = 'tag';
+                    tag.textContent = subject;
+                    tagsContainer.appendChild(tag);
+                });
+            } else {
+                tagsContainer.innerHTML = '<span style="color:#999;font-size:13px;">⚠️ لم تقم بتحديد مواد بعد</span>';
+            }
+
+            // تغيير اتجاه الصفحة حسب اللغة
+            if (teacher.language === 'en' || teacher.language === 'fr' || teacher.language === 'de') {
+                document.dir = 'ltr';
+                document.documentElement.lang = teacher.language;
+            } else {
+                document.dir = 'rtl';
+                document.documentElement.lang = 'ar';
+            }
+        }
+
+        // ===== تسجيل الخروج =====
+        function logout() {
+            if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
+                localStorage.removeItem('teachflow_teacher');
+                localStorage.removeItem('teachflow_user');
+                window.location.href = 'index.html';
+            }
+        }
+
+        // ===== تحميل الصفحة =====
+        document.addEventListener('DOMContentLoaded', loadTeacherData);
+    </script>
+</body>
+</html>
