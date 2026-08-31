@@ -175,7 +175,6 @@
             transform: scale(1.02);
         }
 
-        /* ===== فلتر ===== */
         .filter-bar {
             display: flex;
             gap: 12px;
@@ -210,7 +209,6 @@
             background: white;
         }
 
-        /* ===== قائمة الإشعارات ===== */
         .notifications-list {
             display: flex;
             flex-direction: column;
@@ -406,22 +404,19 @@
 </head>
 <body>
 
+    <!-- ===== الشريط الجانبي الموحد ===== -->
     <nav class="sidebar">
         <div class="logo">📚 TeachFlow <span>نظام إدارة المعلمين</span></div>
+
         <button class="sidebar-item" onclick="window.location.href='home.html'">🏠 <span>الرئيسية</span></button>
-        <button class="sidebar-item" onclick="window.location.href='students.html'">👨‍🎓 <span>الطلاب</span></button>
         <button class="sidebar-item" onclick="window.location.href='groups.html'">👥 <span>المجموعات</span></button>
-        <button class="sidebar-item" onclick="window.location.href='home.html'">📚 <span>الدروس</span></button>
-        <button class="sidebar-item" onclick="window.location.href='home.html'">📅 <span>الجدول</span></button>
+        <button class="sidebar-item" onclick="window.location.href='students.html'">👨‍🎓 <span>الطلاب</span></button>
         <button class="sidebar-item" onclick="window.location.href='attendance.html'">✅ <span>الحضور</span></button>
         <button class="sidebar-item" onclick="window.location.href='assessments.html'">📊 <span>التقييمات</span></button>
         <button class="sidebar-item" onclick="window.location.href='finances.html'">💰 <span>الحسابات</span></button>
         <button class="sidebar-item" onclick="window.location.href='student-report.html'">📈 <span>التقارير</span></button>
-        <button class="sidebar-item active" onclick="window.location.href='notifications.html'">
-            🔔 <span>التنبيهات</span>
-            <span class="badge" id="sidebarBadge">0</span>
-        </button>
-        <button class="sidebar-item" onclick="window.location.href='home.html'">⚙️ <span>الإعدادات</span></button>
+        <button class="sidebar-item active" onclick="window.location.href='notifications.html'">🔔 <span>التنبيهات</span></button>
+        <button class="sidebar-item" onclick="window.location.href='settings.html'">⚙️ <span>الإعدادات</span></button>
         <button class="sidebar-item" onclick="logout()">🚪 <span>تسجيل الخروج</span></button>
     </nav>
 
@@ -479,57 +474,13 @@
             if (saved) {
                 notifications = JSON.parse(saved);
             } else {
-                // بيانات وهمية للتجربة
-                notifications = [{
-                    id: 1,
-                    type: 'attendance',
-                    title: '✅ تسجيل حضور',
-                    message: 'تم تسجيل حضور الطالب أحمد محمد',
-                    studentName: 'أحمد محمد',
-                    status: 'present',
-                    date: '2026-08-31',
-                    read: false,
-                    timestamp: '2026-08-31T10:30:00'
-                }, {
-                    id: 2,
-                    type: 'attendance',
-                    title: '❌ تسجيل غياب',
-                    message: 'تم تسجيل غياب الطالب سارة علي',
-                    studentName: 'سارة علي',
-                    status: 'absent',
-                    date: '2026-08-31',
-                    read: false,
-                    timestamp: '2026-08-31T10:35:00'
-                }, {
-                    id: 3,
-                    type: 'payment',
-                    title: '💰 دفعة جديدة',
-                    message: 'تم تسجيل دفعة جديدة للطالب محمد خالد بقيمة 200 EGP',
-                    studentName: 'محمد خالد',
-                    amount: 200,
-                    date: '2026-08-30',
-                    read: true,
-                    timestamp: '2026-08-30T14:20:00'
-                }, {
-                    id: 4,
-                    type: 'assessment',
-                    title: '📊 تقييم جديد',
-                    message: 'تم إضافة تقييم للطالب فاطمة أحمد في مادة الرياضيات',
-                    studentName: 'فاطمة أحمد',
-                    grade: 85,
-                    date: '2026-08-29',
-                    read: false,
-                    timestamp: '2026-08-29T09:15:00'
-                }, {
-                    id: 5,
-                    type: 'reminder',
-                    title: '⏰ تذكير بدرس',
-                    message: 'لديك درس مع أحمد محمد غداً الساعة 10:00 ص',
-                    studentName: 'أحمد محمد',
-                    date: '2026-09-01',
-                    read: false,
-                    timestamp: '2026-08-29T18:00:00'
-                }];
+                notifications = [
+                    { id: 1, type: 'attendance', title: '✅ تسجيل حضور', message: 'تم تسجيل حضور الطالب أحمد محمد', studentName: 'أحمد محمد', status: 'present', date: '2026-08-31', read: false, timestamp: '2026-08-31T10:30:00' },
+                    { id: 2, type: 'attendance', title: '❌ تسجيل غياب', message: 'تم تسجيل غياب الطالب سارة علي', studentName: 'سارة علي', status: 'absent', date: '2026-08-31', read: false, timestamp: '2026-08-31T10:35:00' },
+                    { id: 3, type: 'payment', title: '💰 دفعة جديدة', message: 'تم تسجيل دفعة جديدة للطالب محمد خالد بقيمة 200 EGP', studentName: 'محمد خالد', amount: 200, date: '2026-08-30', read: true, timestamp: '2026-08-30T14:20:00' },
+                    { id: 4, type: 'assessment', title: '📊 تقييم جديد', message: 'تم إضافة تقييم للطالب فاطمة أحمد في مادة الرياضيات', studentName: 'فاطمة أحمد', grade: 85, date: '2026-08-29', read: false, timestamp: '2026-08-29T09:15:00' },
+                    { id: 5, type: 'reminder', title: '⏰ تذكير بدرس', message: 'لديك درس مع أحمد محمد غداً الساعة 10:00 ص', studentName: 'أحمد محمد', date: '2026-09-01', read: false, timestamp: '2026-08-29T18:00:00' }
+                ];
                 saveNotifications();
             }
 
@@ -537,12 +488,10 @@
             updateBadge();
         }
 
-        // ===== حفظ الإشعارات =====
         function saveNotifications() {
             localStorage.setItem('teachflow_notifications', JSON.stringify(notifications));
         }
 
-        // ===== عرض الإشعارات =====
         function renderNotifications() {
             const list = document.getElementById('notificationsList');
             const typeFilter = document.getElementById('typeFilter').value;
@@ -560,7 +509,6 @@
                 filtered = filtered.filter(n => n.read);
             }
 
-            // ترتيب من الأحدث للأقدم
             filtered.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
             if (filtered.length === 0) {
@@ -601,7 +549,6 @@
             updateBadge();
         }
 
-        // ===== أيقونة حسب النوع =====
         function getIcon(type) {
             const icons = {
                 'attendance': '✅',
@@ -613,7 +560,6 @@
             return icons[type] || '🔔';
         }
 
-        // ===== حالة الحضور =====
         function getStatusBadge(notif) {
             if (notif.status) {
                 const statusMap = {
@@ -627,7 +573,6 @@
             return '';
         }
 
-        // ===== حساب وقت الإشعار =====
         function getTimeAgo(timestamp) {
             const now = new Date();
             const then = new Date(timestamp);
@@ -640,7 +585,6 @@
             return then.toLocaleDateString('ar-EG');
         }
 
-        // ===== تحديث عدد الإشعارات غير المقروءة =====
         function updateBadge() {
             const unread = notifications.filter(n => !n.read).length;
             const badge = document.getElementById('sidebarBadge');
@@ -650,7 +594,6 @@
             }
         }
 
-        // ===== تحديد إشعار كمقروء =====
         function markAsRead(id) {
             const notif = notifications.find(n => n.id === id);
             if (notif && !notif.read) {
@@ -660,7 +603,6 @@
             }
         }
 
-        // ===== تحديد الكل كمقروء =====
         function markAllAsRead() {
             notifications.forEach(n => n.read = true);
             saveNotifications();
@@ -668,7 +610,6 @@
             alert('✅ تم تحديد جميع الإشعارات كمقروءة');
         }
 
-        // ===== حذف الكل =====
         function clearAll() {
             if (confirm('🗑️ هل أنت متأكد من حذف جميع الإشعارات؟')) {
                 notifications = [];
@@ -678,26 +619,6 @@
             }
         }
 
-        // ===== إضافة إشعار (دالة مساعدة) =====
-        function addNotification(type, title, message, studentName = '', status = '', date = '') {
-            const today = new Date().toISOString().split('T')[0];
-            notifications.push({
-                id: Date.now(),
-                type: type,
-                title: title,
-                message: message,
-                studentName: studentName,
-                status: status,
-                date: date || today,
-                read: false,
-                timestamp: new Date().toISOString()
-            });
-            saveNotifications();
-            renderNotifications();
-            updateBadge();
-        }
-
-        // ===== تسجيل الخروج =====
         function logout() {
             if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
                 localStorage.removeItem('teachflow_teacher');
@@ -706,7 +627,6 @@
             }
         }
 
-        // ===== تحميل الصفحة =====
         document.addEventListener('DOMContentLoaded', function() {
             const teacher = localStorage.getItem('teachflow_teacher');
             if (!teacher) {

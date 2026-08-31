@@ -10,7 +10,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js">
     </script>
     <style>
-        /* ===== نفس الاستايلات السابقة مع إضافات ===== */
         * {
             margin: 0;
             padding: 0;
@@ -490,19 +489,19 @@
 </head>
 <body>
 
+    <!-- ===== الشريط الجانبي الموحد ===== -->
     <nav class="sidebar">
         <div class="logo">📚 TeachFlow <span>نظام إدارة المعلمين</span></div>
+
         <button class="sidebar-item" onclick="window.location.href='home.html'">🏠 <span>الرئيسية</span></button>
-        <button class="sidebar-item" onclick="window.location.href='students.html'">👨‍🎓 <span>الطلاب</span></button>
         <button class="sidebar-item" onclick="window.location.href='groups.html'">👥 <span>المجموعات</span></button>
-        <button class="sidebar-item" onclick="window.location.href='home.html'">📚 <span>الدروس</span></button>
-        <button class="sidebar-item" onclick="window.location.href='home.html'">📅 <span>الجدول</span></button>
+        <button class="sidebar-item" onclick="window.location.href='students.html'">👨‍🎓 <span>الطلاب</span></button>
         <button class="sidebar-item" onclick="window.location.href='attendance.html'">✅ <span>الحضور</span></button>
         <button class="sidebar-item" onclick="window.location.href='assessments.html'">📊 <span>التقييمات</span></button>
         <button class="sidebar-item" onclick="window.location.href='finances.html'">💰 <span>الحسابات</span></button>
         <button class="sidebar-item active" onclick="window.location.href='student-report.html'">📈 <span>التقارير</span></button>
         <button class="sidebar-item" onclick="window.location.href='notifications.html'">🔔 <span>التنبيهات</span></button>
-        <button class="sidebar-item" onclick="window.location.href='home.html'">⚙️ <span>الإعدادات</span></button>
+        <button class="sidebar-item" onclick="window.location.href='settings.html'">⚙️ <span>الإعدادات</span></button>
         <button class="sidebar-item" onclick="logout()">🚪 <span>تسجيل الخروج</span></button>
     </nav>
 
@@ -794,7 +793,6 @@
             const element = document.getElementById('reportContent');
             const reportCard = document.getElementById('reportCard');
 
-            // إضافة border مؤقت للطباعة
             reportCard.style.border = '1px solid #ddd';
             reportCard.style.padding = '20px';
 
@@ -811,7 +809,6 @@
                 pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
                 pdf.save(`تقرير_${currentStudent.name}.pdf`);
 
-                // إزالة border مؤقت
                 reportCard.style.border = 'none';
                 reportCard.style.padding = '30px';
             }).catch(err => {
@@ -836,7 +833,6 @@
                 return;
             }
 
-            // بناء التقرير كنص
             const student = currentStudent;
             const studentPayments = payments.filter(p => p.studentId === student.id);
             const studentAssessments = assessments.filter(a => a.studentId === student.id);
@@ -908,14 +904,11 @@ ${studentPayments.map(p => `  • ${p.type === 'lesson' ? 'بالحصة' : 'با
 Designed by Dr. Hamada Fathy Hammad
             `;
 
-            // محاكاة إرسال إيميل (في الواقع هنستخدم EmailJS)
             if (confirm(`📧 سيتم إرسال التقرير إلى:\n${parentEmail}\n\nهل أنت متأكد؟`)) {
-                // هنا هتضيف كود EmailJS
                 alert(`✅ تم إرسال التقرير إلى ${parentEmail}`);
             }
         }
 
-        // ===== تسجيل الخروج =====
         function logout() {
             if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
                 localStorage.removeItem('teachflow_teacher');
@@ -924,7 +917,6 @@ Designed by Dr. Hamada Fathy Hammad
             }
         }
 
-        // ===== تحميل الصفحة =====
         document.addEventListener('DOMContentLoaded', function() {
             const teacher = localStorage.getItem('teachflow_teacher');
             if (!teacher) {

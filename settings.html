@@ -145,7 +145,6 @@
             transform: scale(1.02);
         }
 
-        /* ===== إعدادات ===== */
         .settings-card {
             background: white;
             border-radius: 16px;
@@ -218,7 +217,6 @@
             margin-top: 4px;
         }
 
-        /* ===== تبديل ===== */
         .toggle-group {
             display: flex;
             gap: 12px;
@@ -256,7 +254,6 @@
             font-weight: 600;
         }
 
-        /* ===== رسالة نجاح ===== */
         .toast {
             position: fixed;
             bottom: 30px;
@@ -328,13 +325,13 @@
 </head>
 <body>
 
+    <!-- ===== الشريط الجانبي الموحد ===== -->
     <nav class="sidebar">
         <div class="logo">📚 TeachFlow <span>نظام إدارة المعلمين</span></div>
+
         <button class="sidebar-item" onclick="window.location.href='home.html'">🏠 <span>الرئيسية</span></button>
-        <button class="sidebar-item" onclick="window.location.href='students.html'">👨‍🎓 <span>الطلاب</span></button>
         <button class="sidebar-item" onclick="window.location.href='groups.html'">👥 <span>المجموعات</span></button>
-        <button class="sidebar-item" onclick="window.location.href='home.html'">📚 <span>الدروس</span></button>
-        <button class="sidebar-item" onclick="window.location.href='home.html'">📅 <span>الجدول</span></button>
+        <button class="sidebar-item" onclick="window.location.href='students.html'">👨‍🎓 <span>الطلاب</span></button>
         <button class="sidebar-item" onclick="window.location.href='attendance.html'">✅ <span>الحضور</span></button>
         <button class="sidebar-item" onclick="window.location.href='assessments.html'">📊 <span>التقييمات</span></button>
         <button class="sidebar-item" onclick="window.location.href='finances.html'">💰 <span>الحسابات</span></button>
@@ -354,7 +351,6 @@
             </div>
         </div>
 
-        <!-- ===== الإعدادات ===== -->
         <div class="settings-card">
 
             <!-- ===== الملف الشخصي ===== -->
@@ -483,11 +479,9 @@
         </div>
     </main>
 
-    <!-- ===== Toast ===== -->
     <div class="toast" id="toast"></div>
 
     <script>
-        // ===== تحميل الإعدادات =====
         function loadSettings() {
             const teacher = JSON.parse(localStorage.getItem('teachflow_teacher'));
 
@@ -497,18 +491,15 @@
                 document.getElementById('currentName').textContent = 'الحالي: ' + (teacher.name || 'غير محدد');
                 document.getElementById('currentEmail').textContent = 'الحالي: ' + (teacher.email || 'غير محدد');
 
-                // اللغة
                 if (teacher.language) {
                     document.getElementById('languageSelect').value = teacher.language;
                 }
                 document.getElementById('currentLanguage').textContent = 'الحالي: ' + teacher.language;
 
-                // العملة
                 const currency = localStorage.getItem('teachflow_currency') || 'EGP';
                 document.getElementById('currencySelect').value = currency;
                 document.getElementById('currentCurrency').textContent = 'الحالي: ' + currency;
 
-                // الإشعارات
                 const notifSettings = JSON.parse(localStorage.getItem('teachflow_notif_settings')) || {
                     attendance: true,
                     payment: true,
@@ -522,7 +513,6 @@
             }
         }
 
-        // ===== حفظ الإعدادات =====
         function saveSettings() {
             const name = document.getElementById('teacherName').value.trim();
             const email = document.getElementById('teacherEmail').value.trim();
@@ -531,7 +521,6 @@
             const language = document.getElementById('languageSelect').value;
             const currency = document.getElementById('currencySelect').value;
 
-            // التحقق
             if (!name) {
                 showToast('⚠️ الرجاء إدخال اسم المعلم', 'error');
                 return;
@@ -552,7 +541,6 @@
                 return;
             }
 
-            // حفظ بيانات المعلم
             const teacher = JSON.parse(localStorage.getItem('teachflow_teacher')) || {};
             teacher.name = name;
             teacher.email = email;
@@ -562,10 +550,8 @@
             teacher.language = language;
             localStorage.setItem('teachflow_teacher', JSON.stringify(teacher));
 
-            // حفظ العملة
             localStorage.setItem('teachflow_currency', currency);
 
-            // حفظ إعدادات الإشعارات
             const notifSettings = {
                 attendance: document.getElementById('notifAttendance').checked,
                 payment: document.getElementById('notifPayment').checked,
@@ -574,7 +560,6 @@
             };
             localStorage.setItem('teachflow_notif_settings', JSON.stringify(notifSettings));
 
-            // تحديث الاتجاه حسب اللغة
             if (language === 'ar' || language === 'ur') {
                 document.dir = 'rtl';
                 document.documentElement.lang = language;
@@ -584,12 +569,9 @@
             }
 
             showToast('✅ تم حفظ الإعدادات بنجاح!', 'success');
-
-            // إعادة تحميل البيانات المعروضة
             loadSettings();
         }
 
-        // ===== تصدير البيانات =====
         function exportData() {
             const data = {
                 teacher: JSON.parse(localStorage.getItem('teachflow_teacher')),
@@ -617,7 +599,6 @@
             showToast('📤 تم تصدير البيانات بنجاح!', 'success');
         }
 
-        // ===== استيراد البيانات =====
         function importData(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -652,7 +633,6 @@
             event.target.value = '';
         }
 
-        // ===== حذف جميع البيانات =====
         function clearAllData() {
             if (confirm('🗑️ هل أنت متأكد من حذف جميع البيانات؟ لا يمكن التراجع عن هذا الإجراء!')) {
                 if (confirm('⚠️ تأكيد نهائي: حذف جميع البيانات؟')) {
@@ -675,7 +655,6 @@
             }
         }
 
-        // ===== Toast =====
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
             toast.textContent = message;
@@ -684,7 +663,6 @@
             setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
-        // ===== تسجيل الخروج =====
         function logout() {
             if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
                 localStorage.removeItem('teachflow_user');
@@ -692,7 +670,6 @@
             }
         }
 
-        // ===== تحميل الصفحة =====
         document.addEventListener('DOMContentLoaded', function() {
             const teacher = localStorage.getItem('teachflow_teacher');
             if (!teacher) {

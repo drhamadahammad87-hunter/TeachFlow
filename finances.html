@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>الحسابات - TeachFlow</title>
     <style>
-        /* ===== نفس الاستايلات السابقة مع إضافات بسيطة ===== */
         * {
             margin: 0;
             padding: 0;
@@ -186,7 +185,6 @@
             color: #e74c3c;
         }
 
-        /* ===== فلتر ===== */
         .filter-bar {
             display: flex;
             gap: 12px;
@@ -223,7 +221,6 @@
             background: white;
         }
 
-        /* ===== جدول المدفوعات ===== */
         .table-container {
             background: white;
             border-radius: 16px;
@@ -369,19 +366,19 @@
 </head>
 <body>
 
+    <!-- ===== الشريط الجانبي الموحد ===== -->
     <nav class="sidebar">
         <div class="logo">📚 TeachFlow <span>نظام إدارة المعلمين</span></div>
+
         <button class="sidebar-item" onclick="window.location.href='home.html'">🏠 <span>الرئيسية</span></button>
-        <button class="sidebar-item" onclick="window.location.href='students.html'">👨‍🎓 <span>الطلاب</span></button>
         <button class="sidebar-item" onclick="window.location.href='groups.html'">👥 <span>المجموعات</span></button>
-        <button class="sidebar-item" onclick="window.location.href='home.html'">📚 <span>الدروس</span></button>
-        <button class="sidebar-item" onclick="window.location.href='home.html'">📅 <span>الجدول</span></button>
+        <button class="sidebar-item" onclick="window.location.href='students.html'">👨‍🎓 <span>الطلاب</span></button>
         <button class="sidebar-item" onclick="window.location.href='attendance.html'">✅ <span>الحضور</span></button>
         <button class="sidebar-item" onclick="window.location.href='assessments.html'">📊 <span>التقييمات</span></button>
         <button class="sidebar-item active" onclick="window.location.href='finances.html'">💰 <span>الحسابات</span></button>
-        <button class="sidebar-item" onclick="window.location.href='home.html'">📈 <span>التقارير</span></button>
+        <button class="sidebar-item" onclick="window.location.href='student-report.html'">📈 <span>التقارير</span></button>
         <button class="sidebar-item" onclick="window.location.href='notifications.html'">🔔 <span>التنبيهات</span></button>
-        <button class="sidebar-item" onclick="window.location.href='home.html'">⚙️ <span>الإعدادات</span></button>
+        <button class="sidebar-item" onclick="window.location.href='settings.html'">⚙️ <span>الإعدادات</span></button>
         <button class="sidebar-item" onclick="logout()">🚪 <span>تسجيل الخروج</span></button>
     </nav>
 
@@ -490,16 +487,12 @@
         // ===== تحميل البيانات =====
         function loadFinances() {
             students = JSON.parse(localStorage.getItem('teachflow_students')) || [];
-
-            // تحميل الطلاب في الفلتر
             loadStudentsFilter();
 
-            // تحميل المدفوعات
             const saved = localStorage.getItem('teachflow_payments');
             if (saved) {
                 payments = JSON.parse(saved);
             } else {
-                // بيانات وهمية للتجربة
                 payments = [
                     { id: 1, studentId: 1, type: 'lesson', amount: 50, status: 'paid', date: '2026-08-01', notes: 'الحصة الأولى' },
                     { id: 2, studentId: 1, type: 'month', amount: 200, status: 'pending', date: '2026-09-01', notes: 'اشتراك شهر سبتمبر' },
@@ -514,7 +507,6 @@
             updateSummary();
         }
 
-        // ===== تحميل الطلاب في الفلتر =====
         function loadStudentsFilter() {
             const select = document.getElementById('studentFilter');
             const currentValue = select.value;
@@ -528,25 +520,20 @@
             select.value = currentValue;
         }
 
-        // ===== حفظ المدفوعات =====
         function savePayments() {
             localStorage.setItem('teachflow_payments', JSON.stringify(payments));
         }
 
-        // ===== عرض المدفوعات =====
         function renderFinances() {
             const tbody = document.getElementById('financesBody');
 
-            // تصفية المدفوعات
             let filtered = [...payments];
 
-            // فلتر الطالب
             const studentFilter = document.getElementById('studentFilter').value;
             if (studentFilter !== 'all') {
                 filtered = filtered.filter(p => p.studentId == studentFilter);
             }
 
-            // فلتر الشهر
             const monthFilter = document.getElementById('monthFilter').value;
             if (monthFilter !== 'all') {
                 filtered = filtered.filter(p => {
@@ -555,19 +542,16 @@
                 });
             }
 
-            // فلتر النوع
             const typeFilter = document.getElementById('typeFilter').value;
             if (typeFilter !== 'all') {
                 filtered = filtered.filter(p => p.type === typeFilter);
             }
 
-            // فلتر الحالة
             const statusFilter = document.getElementById('statusFilter').value;
             if (statusFilter !== 'all') {
                 filtered = filtered.filter(p => p.status === statusFilter);
             }
 
-            // ترتيب من الأحدث للأقدم
             filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
 
             if (filtered.length === 0) {
@@ -617,7 +601,6 @@
             }).join('');
         }
 
-        // ===== تحديث الملخص =====
         function updateSummary() {
             let total = 0,
                 paid = 0,
@@ -639,7 +622,6 @@
             document.getElementById('overdueCount').textContent = overdueCount;
         }
 
-        // ===== إضافة دفعة =====
         function showAddPayment() {
             const activeStudents = students.filter(s => s.active);
             if (activeStudents.length === 0) {
@@ -647,7 +629,6 @@
                 return;
             }
 
-            // اختيار الطالب
             let studentOptions = activeStudents.map((s, i) => `${i + 1}. ${s.name} (${s.group})`).join('\n');
             const studentChoice = prompt(`👤 اختر الطالب:\n${studentOptions}\n\nأدخل رقم الطالب:`);
             const studentIndex = parseInt(studentChoice) - 1;
@@ -659,29 +640,23 @@
 
             const selectedStudent = activeStudents[studentIndex];
 
-            // نوع الدفعة
             const typeOptions = ['1. 📚 بالحصة', '2. 📅 بالشهر'];
             const typeChoice = prompt(`📋 اختر نوع الدفعة:\n${typeOptions.join('\n')}\n\nأدخل رقم النوع:`);
             const typeMap = { '1': 'lesson', '2': 'month' };
             const type = typeMap[typeChoice] || 'month';
 
-            // المبلغ
             const amount = prompt('💵 أدخل المبلغ (بالجنيه المصري):');
             if (amount === null || isNaN(amount) || parseInt(amount) <= 0) {
                 alert('⚠️ الرجاء إدخال مبلغ صحيح');
                 return;
             }
 
-            // الحالة
             const statusOptions = ['1. ✅ مدفوع', '2. ⏳ متبقي', '3. ⚠️ متأخر'];
             const statusChoice = prompt(`✅ اختر الحالة:\n${statusOptions.join('\n')}\n\nأدخل رقم الحالة:`);
             const statusMap = { '1': 'paid', '2': 'pending', '3': 'overdue' };
             const status = statusMap[statusChoice] || 'pending';
 
-            // التاريخ
             const date = prompt('📅 أدخل التاريخ (YYYY-MM-DD):', new Date().toISOString().split('T')[0]) || new Date().toISOString().split('T')[0];
-
-            // ملاحظات
             const notes = prompt('📌 ملاحظات (اختياري):') || '';
 
             const newPayment = {
@@ -701,7 +676,6 @@
             alert(`✅ تم إضافة دفعة للطالب ${selectedStudent.name}`);
         }
 
-        // ===== تعديل دفعة =====
         function editPayment(id) {
             const payment = payments.find(p => p.id === id);
             if (!payment) return;
@@ -709,7 +683,6 @@
             const student = students.find(s => s.id === payment.studentId);
             const studentName = student ? student.name : 'طالب محذوف';
 
-            // تعديل النوع
             const typeOptions = ['1. 📚 بالحصة', '2. 📅 بالشهر'];
             const currentTypeNum = payment.type === 'lesson' ? '1' : '2';
             const typeChoice = prompt(`📋 اختر نوع الدفعة (الحالي: ${payment.type === 'lesson' ? 'بالحصة' : 'بالشهر'}):\n${typeOptions.join('\n')}\n\nأدخل رقم النوع:`, currentTypeNum);
@@ -743,7 +716,6 @@
             alert(`✅ تم تعديل دفعة الطالب ${studentName}`);
         }
 
-        // ===== حذف دفعة =====
         function deletePayment(id) {
             const payment = payments.find(p => p.id === id);
             if (!payment) return;
@@ -760,7 +732,6 @@
             }
         }
 
-        // ===== تسجيل الخروج =====
         function logout() {
             if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
                 localStorage.removeItem('teachflow_teacher');
@@ -769,7 +740,6 @@
             }
         }
 
-        // ===== تحميل الصفحة =====
         document.addEventListener('DOMContentLoaded', function() {
             const teacher = localStorage.getItem('teachflow_teacher');
             if (!teacher) {

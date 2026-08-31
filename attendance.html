@@ -8,7 +8,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js">
     </script>
     <style>
-        /* نفس الاستايلات السابقة مع إضافة بسيطة للإشعارات */
         * {
             margin: 0;
             padding: 0;
@@ -380,24 +379,19 @@
 </head>
 <body>
 
+    <!-- ===== الشريط الجانبي الموحد ===== -->
     <nav class="sidebar">
         <div class="logo">📚 TeachFlow <span>نظام إدارة المعلمين</span></div>
+
         <button class="sidebar-item" onclick="window.location.href='home.html'">🏠 <span>الرئيسية</span></button>
-        <button class="sidebar-item" onclick="window.location.href='students.html'">👨‍🎓 <span>الطلاب</span></button>
         <button class="sidebar-item" onclick="window.location.href='groups.html'">👥 <span>المجموعات</span></button>
-        <button class="sidebar-item" onclick="window.location.href='home.html'">📚 <span>الدروس</span></button>
-        <button class="sidebar-item" onclick="window.location.href='home.html'">📅 <span>الجدول</span></button>
+        <button class="sidebar-item" onclick="window.location.href='students.html'">👨‍🎓 <span>الطلاب</span></button>
         <button class="sidebar-item active" onclick="window.location.href='attendance.html'">✅ <span>الحضور</span></button>
-        <button class="sidebar-item" onclick="window.location.href='home.html'">📊 <span>التقييمات</span></button>
-        <button class="sidebar-item" onclick="window.location.href='home.html'">💰 <span>الحسابات</span></button>
-        <button class="sidebar-item" onclick="window.location.href='home.html'">📈 <span>التقارير</span></button>
-        <button class="sidebar-item" onclick="window.location.href='notifications.html'">
-            🔔 <span>التنبيهات</span>
-            <span class="notif-badge">
-                <span class="badge" id="notifCount">0</span>
-            </span>
-        </button>
-        <button class="sidebar-item" onclick="window.location.href='home.html'">⚙️ <span>الإعدادات</span></button>
+        <button class="sidebar-item" onclick="window.location.href='assessments.html'">📊 <span>التقييمات</span></button>
+        <button class="sidebar-item" onclick="window.location.href='finances.html'">💰 <span>الحسابات</span></button>
+        <button class="sidebar-item" onclick="window.location.href='student-report.html'">📈 <span>التقارير</span></button>
+        <button class="sidebar-item" onclick="window.location.href='notifications.html'">🔔 <span>التنبيهات</span></button>
+        <button class="sidebar-item" onclick="window.location.href='settings.html'">⚙️ <span>الإعدادات</span></button>
         <button class="sidebar-item" onclick="logout()">🚪 <span>تسجيل الخروج</span></button>
     </nav>
 
@@ -455,11 +449,10 @@
 
     <script>
         // ===== تهيئة EmailJS (مجاني) =====
-        // سجل في https://www.emailjs.com/ عشان تاخد البيانات دي
         const EMAILJS_CONFIG = {
-            publicKey: 'YOUR_PUBLIC_KEY', // حط الـ Public Key بتاعك
-            serviceID: 'YOUR_SERVICE_ID', // حط الـ Service ID بتاعك
-            templateID: 'YOUR_TEMPLATE_ID' // حط الـ Template ID بتاعك
+            publicKey: 'YOUR_PUBLIC_KEY',
+            serviceID: 'YOUR_SERVICE_ID',
+            templateID: 'YOUR_TEMPLATE_ID'
         };
 
         // ===== بيانات الحضور =====
@@ -509,7 +502,6 @@
                 currentStudents = students.filter(s => s.group === groupFilter && s.active);
             }
 
-            // تحميل بيانات الحضور لهذا التاريخ
             const saved = localStorage.getItem('teachflow_attendance');
             if (saved) {
                 const allAttendance = JSON.parse(saved);
@@ -569,7 +561,6 @@
             }).join('');
         }
 
-        // ===== ألوان الحالة =====
         function getStatusColor(status) {
             const colors = {
                 'present': '#eafaf1',
@@ -600,7 +591,6 @@
             return map[status] || status;
         }
 
-        // ===== تحديث حالة الطالب =====
         function updateStatus(studentId, status) {
             const existing = attendanceData.find(a => a.studentId === studentId && a.date === currentDate);
             if (existing) {
@@ -616,7 +606,6 @@
             updateSummary();
         }
 
-        // ===== تحديث ملاحظات الطالب =====
         function updateNote(studentId, note) {
             const existing = attendanceData.find(a => a.studentId === studentId && a.date === currentDate);
             if (existing) {
@@ -631,7 +620,6 @@
             }
         }
 
-        // ===== تحديث الإحصائيات =====
         function updateSummary() {
             const total = currentStudents.length;
             let present = 0,
@@ -668,10 +656,8 @@
             document.getElementById('excusedCount').textContent = excused;
         }
 
-        // ===== إرسال إشعار داخل التطبيق =====
         function sendInAppNotification(studentName, status, date) {
             const notifications = JSON.parse(localStorage.getItem('teachflow_notifications')) || [];
-
             notifications.push({
                 id: Date.now(),
                 studentName: studentName,
@@ -681,17 +667,12 @@
                 read: false,
                 timestamp: new Date().toISOString()
             });
-
             localStorage.setItem('teachflow_notifications', JSON.stringify(notifications));
             updateNotificationBadge();
         }
 
-        // ===== إرسال إشعار إيميل (مجاني عبر EmailJS) =====
         function sendEmailNotification(student, status, date) {
-            // لو معندكش بريد ولي الأمر، نتخطى
             if (!student.parentEmail) return;
-
-            // تأكد من تهيئة EmailJS
             if (EMAILJS_CONFIG.publicKey === 'YOUR_PUBLIC_KEY') {
                 console.log('⚠️ يرجى تهيئة EmailJS أولاً');
                 return;
@@ -718,35 +699,22 @@
             });
         }
 
-        // ===== حفظ الحضور وإرسال الإشعارات =====
         function saveAttendance() {
-            // جلب جميع بيانات الحضور المحفوظة
             const saved = localStorage.getItem('teachflow_attendance');
             let allAttendance = saved ? JSON.parse(saved) : [];
-
-            // حذف البيانات القديمة لنفس التاريخ
             allAttendance = allAttendance.filter(a => a.date !== currentDate);
-
-            // إضافة البيانات الجديدة
             allAttendance = allAttendance.concat(attendanceData);
-
             localStorage.setItem('teachflow_attendance', JSON.stringify(allAttendance));
 
-            // جلب بيانات الطلاب
             const students = JSON.parse(localStorage.getItem('teachflow_students')) || [];
-
-            // ===== إرسال الإشعارات =====
             let notificationsSent = 0;
             let emailsSent = 0;
 
             attendanceData.forEach(record => {
                 const student = students.find(s => s.id === record.studentId);
                 if (student) {
-                    // 1. إشعار داخل التطبيق
                     sendInAppNotification(student.name, record.status, record.date);
                     notificationsSent++;
-
-                    // 2. إشعار إيميل (لو عندك بريد ولي الأمر)
                     if (student.parentEmail) {
                         sendEmailNotification(student, record.status, record.date);
                         emailsSent++;
@@ -754,13 +722,10 @@
                 }
             });
 
-            // تحديث إحصائيات الصفحة الرئيسية
             updateHomeStats();
-
             alert(`✅ تم حفظ الحضور بنجاح!\n📨 تم إرسال ${notificationsSent} إشعار داخل التطبيق\n📧 تم إرسال ${emailsSent} إيميل`);
         }
 
-        // ===== تحديث إحصائيات الصفحة الرئيسية =====
         function updateHomeStats() {
             const today = new Date().toISOString().split('T')[0];
             const allAttendance = JSON.parse(localStorage.getItem('teachflow_attendance')) || [];
@@ -769,7 +734,6 @@
             localStorage.setItem('teachflow_today_attendance', presentToday);
         }
 
-        // ===== تحديث عدد الإشعارات =====
         function updateNotificationBadge() {
             const notifications = JSON.parse(localStorage.getItem('teachflow_notifications')) || [];
             const unread = notifications.filter(n => !n.read).length;
@@ -780,7 +744,6 @@
             }
         }
 
-        // ===== تهيئة EmailJS =====
         function initEmailJS() {
             if (EMAILJS_CONFIG.publicKey !== 'YOUR_PUBLIC_KEY') {
                 emailjs.init(EMAILJS_CONFIG.publicKey);
@@ -788,7 +751,6 @@
             }
         }
 
-        // ===== تسجيل الخروج =====
         function logout() {
             if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
                 localStorage.removeItem('teachflow_teacher');
@@ -797,21 +759,15 @@
             }
         }
 
-        // ===== تحميل الصفحة =====
         document.addEventListener('DOMContentLoaded', function() {
             const teacher = localStorage.getItem('teachflow_teacher');
             if (!teacher) {
                 window.location.href = 'index.html';
                 return;
             }
-
-            // تهيئة EmailJS
             initEmailJS();
-
-            // تعيين تاريخ اليوم كافتراضي
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('attendanceDate').value = today;
-
             loadAttendance();
         });
     </script>

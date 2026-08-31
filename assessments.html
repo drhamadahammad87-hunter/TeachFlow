@@ -324,19 +324,19 @@
 </head>
 <body>
 
+    <!-- ===== الشريط الجانبي الموحد ===== -->
     <nav class="sidebar">
         <div class="logo">📚 TeachFlow <span>نظام إدارة المعلمين</span></div>
+
         <button class="sidebar-item" onclick="window.location.href='home.html'">🏠 <span>الرئيسية</span></button>
-        <button class="sidebar-item" onclick="window.location.href='students.html'">👨‍🎓 <span>الطلاب</span></button>
         <button class="sidebar-item" onclick="window.location.href='groups.html'">👥 <span>المجموعات</span></button>
-        <button class="sidebar-item" onclick="window.location.href='home.html'">📚 <span>الدروس</span></button>
-        <button class="sidebar-item" onclick="window.location.href='home.html'">📅 <span>الجدول</span></button>
+        <button class="sidebar-item" onclick="window.location.href='students.html'">👨‍🎓 <span>الطلاب</span></button>
         <button class="sidebar-item" onclick="window.location.href='attendance.html'">✅ <span>الحضور</span></button>
         <button class="sidebar-item active" onclick="window.location.href='assessments.html'">📊 <span>التقييمات</span></button>
-        <button class="sidebar-item" onclick="window.location.href='home.html'">💰 <span>الحسابات</span></button>
-        <button class="sidebar-item" onclick="window.location.href='home.html'">📈 <span>التقارير</span></button>
+        <button class="sidebar-item" onclick="window.location.href='finances.html'">💰 <span>الحسابات</span></button>
+        <button class="sidebar-item" onclick="window.location.href='student-report.html'">📈 <span>التقارير</span></button>
         <button class="sidebar-item" onclick="window.location.href='notifications.html'">🔔 <span>التنبيهات</span></button>
-        <button class="sidebar-item" onclick="window.location.href='home.html'">⚙️ <span>الإعدادات</span></button>
+        <button class="sidebar-item" onclick="window.location.href='settings.html'">⚙️ <span>الإعدادات</span></button>
         <button class="sidebar-item" onclick="logout()">🚪 <span>تسجيل الخروج</span></button>
     </nav>
 
@@ -406,21 +406,14 @@
 
         // ===== تحميل البيانات =====
         function loadAssessments() {
-            // تحميل الطلاب
             students = JSON.parse(localStorage.getItem('teachflow_students')) || [];
-
-            // تحميل المجموعات في الفلتر
             loadGroupsFilter();
-
-            // تحميل الطلاب في الفلتر
             loadStudentsFilter();
 
-            // تحميل التقييمات
             const saved = localStorage.getItem('teachflow_assessments');
             if (saved) {
                 assessments = JSON.parse(saved);
             } else {
-                // بيانات وهمية للتجربة
                 assessments = [
                     { id: 1, studentId: 1, type: 'واجب', grade: 85, date: '2026-08-28', notes: 'أداء جيد' },
                     { id: 2, studentId: 1, type: 'اختبار', grade: 92, date: '2026-08-20', notes: 'ممتاز' },
@@ -429,11 +422,9 @@
                 ];
                 saveAssessments();
             }
-
             renderAssessments();
         }
 
-        // ===== تحميل المجموعات في الفلتر =====
         function loadGroupsFilter() {
             const groups = JSON.parse(localStorage.getItem('teachflow_groups')) || [];
             const select = document.getElementById('groupFilter');
@@ -448,13 +439,11 @@
             select.value = currentValue;
         }
 
-        // ===== تحميل الطلاب في الفلتر =====
         function loadStudentsFilter() {
             const select = document.getElementById('studentFilter');
             const currentValue = select.value;
             select.innerHTML = '<option value="all">كل الطلاب</option>';
 
-            // تصفية الطلاب حسب المجموعة المختارة
             const groupFilter = document.getElementById('groupFilter').value;
             let filteredStudents = students;
             if (groupFilter !== 'all') {
@@ -470,38 +459,31 @@
             select.value = currentValue;
         }
 
-        // ===== حفظ التقييمات =====
         function saveAssessments() {
             localStorage.setItem('teachflow_assessments', JSON.stringify(assessments));
         }
 
-        // ===== عرض التقييمات =====
         function renderAssessments() {
             const tbody = document.getElementById('assessmentsBody');
 
-            // تصفية التقييمات
             let filtered = [...assessments];
 
-            // فلتر المجموعة
             const groupFilter = document.getElementById('groupFilter').value;
             if (groupFilter !== 'all') {
                 const studentIds = students.filter(s => s.group === groupFilter).map(s => s.id);
                 filtered = filtered.filter(a => studentIds.includes(a.studentId));
             }
 
-            // فلتر الطالب
             const studentFilter = document.getElementById('studentFilter').value;
             if (studentFilter !== 'all') {
                 filtered = filtered.filter(a => a.studentId == studentFilter);
             }
 
-            // فلتر النوع
             const typeFilter = document.getElementById('typeFilter').value;
             if (typeFilter !== 'all') {
                 filtered = filtered.filter(a => a.type === typeFilter);
             }
 
-            // ترتيب من الأحدث للأقدم
             filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
 
             if (filtered.length === 0) {
@@ -546,16 +528,13 @@
             }).join('');
         }
 
-        // ===== إضافة تقييم =====
         function showAddAssessment() {
-            // جلب الطلاب النشطين
             const activeStudents = students.filter(s => s.active);
             if (activeStudents.length === 0) {
                 alert('⚠️ لا يوجد طلاب نشطين!');
                 return;
             }
 
-            // اختيار الطالب
             let studentOptions = activeStudents.map((s, i) => `${i + 1}. ${s.name} (${s.group})`).join('\n');
             const studentChoice = prompt(`👤 اختر الطالب:\n${studentOptions}\n\nأدخل رقم الطالب:`);
             const studentIndex = parseInt(studentChoice) - 1;
@@ -567,23 +546,18 @@
 
             const selectedStudent = activeStudents[studentIndex];
 
-            // نوع التقييم
             const typeOptions = ['1. واجب', '2. اختبار', '3. مشاركة', '4. مشروع', '5. أخرى'];
             const typeChoice = prompt(`📝 اختر نوع التقييم:\n${typeOptions.join('\n')}\n\nأدخل رقم النوع:`);
             const typeMap = { '1': 'واجب', '2': 'اختبار', '3': 'مشاركة', '4': 'مشروع', '5': 'أخرى' };
             const type = typeMap[typeChoice] || 'أخرى';
 
-            // الدرجة
             const grade = prompt('📊 أدخل الدرجة (0-100):');
             if (grade === null || isNaN(grade) || parseInt(grade) < 0 || parseInt(grade) > 100) {
                 alert('⚠️ الرجاء إدخال درجة صحيحة بين 0 و 100');
                 return;
             }
 
-            // التاريخ
             const date = prompt('📅 أدخل التاريخ (YYYY-MM-DD):', new Date().toISOString().split('T')[0]) || new Date().toISOString().split('T')[0];
-
-            // ملاحظات
             const notes = prompt('📌 ملاحظات (اختياري):') || '';
 
             const newAssessment = {
@@ -601,7 +575,6 @@
             alert(`✅ تم إضافة تقييم للطالب ${selectedStudent.name}`);
         }
 
-        // ===== تعديل تقييم =====
         function editAssessment(id) {
             const assessment = assessments.find(a => a.id === id);
             if (!assessment) return;
@@ -634,7 +607,6 @@
             alert(`✅ تم تعديل تقييم الطالب ${studentName}`);
         }
 
-        // ===== حذف تقييم =====
         function deleteAssessment(id) {
             const assessment = assessments.find(a => a.id === id);
             if (!assessment) return;
@@ -650,7 +622,6 @@
             }
         }
 
-        // ===== تسجيل الخروج =====
         function logout() {
             if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
                 localStorage.removeItem('teachflow_teacher');
@@ -659,7 +630,6 @@
             }
         }
 
-        // ===== تحميل الصفحة =====
         document.addEventListener('DOMContentLoaded', function() {
             const teacher = localStorage.getItem('teachflow_teacher');
             if (!teacher) {
