@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - TeachFlow</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+
+        body {
+            background: #f0f2f5;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            background: white;
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header .badge {
+            background: #667eea;
+            color: white;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .btn-refresh {
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        .btn-refresh:hover {
+            background: #2980b9;
+            transform: scale(1.02);
+        }
+
+        .btn-back {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        .btn-back:hover {
+            background: #5a6fd6;
+            transform: scale(1.02);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: #f8fafc;
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid #e8edf2;
+        }
+
+        .stat-card .number {
+            font-size: 28px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .stat-card .label {
+            color: #888;
+            font-size: 13px;
+            margin-top: 4px;
+        }
+
+        .stat-card .number.green {
+            color: #2ecc71;
+        }
+        .stat-card .number.orange {
+            color: #f39c12;
+        }
+        .stat-card .number.red {
+            color: #e74c3c;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        .teachers-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        .teachers-table th {
+            background: #f8fafc;
+            padding: 12px 16px;
+            text-align: right;
+            font-weight: 600;
+            color: #555;
+            font-size: 13px;
+            border-bottom: 2px solid #e8edf2;
+            white-space: nowrap;
+        }
+
+        .teachers-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f0f2f5;
+            font-size: 13px;
+            color: #333;
+            vertical-align: middle;
+        }
+
+        .teachers-table tr:hover td {
+            background: #f8fafc;
+        }
+
+        .teachers-table .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .status-paid {
+            background: #eafaf1;
+            color: #27ae60;
+        }
+
+        .status-trial {
+            background: #fef9e7;
+            color: #f39c12;
+        }
+
+        .status-expired {
+            background: #fdedec;
+            color: #e74c3c;
+        }
+
+        .btn-toggle {
+            padding: 6px 14px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        .btn-toggle.activate {
+            background: #2ecc71;
+            color: white;
+        }
+
+        .btn-toggle.activate:hover {
+            background: #27ae60;
+        }
+
+        .btn-toggle.deactivate {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-toggle.deactivate:hover {
+            background: #c0392b;
+        }
+
+        .btn-toggle.extend {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-toggle.extend:hover {
+            background: #2980b9;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .empty-state .big-icon {
+            font-size: 48px;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e8edf2;
+            color: #aaa;
+            font-size: 13px;
+        }
+
+        .footer .name {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        /* ===== رسائل ===== */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #2ecc71;
+            color: white;
+            padding: 14px 24px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: 0.5s;
+            z-index: 999;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.error {
+            background: #e74c3c;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 15px;
+            }
+            .header h1 {
+                font-size: 22px;
+            }
+            .stats {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats {
+                grid-template-columns: 1fr;
+            }
+            .teachers-table {
+                font-size: 12px;
+                min-width: 600px;
+            }
+            .teachers-table th,
+            .teachers-table td {
+                padding: 8px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- ===== الهيدر ===== -->
+        <div class="header">
+            <h1>
+                🛠️ لوحة التحكم
+                <span class="badge">مدير</span>
+            </h1>
+            <div>
+                <button class="btn-back" onclick="window.location.href='home.html'">🔙 رجوع</button>
+                <button class="btn-refresh" onclick="loadTeachers()">🔄 تحديث</button>
+            </div>
+        </div>
+
+        <!-- ===== الإحصائيات ===== -->
+        <div class="stats" id="statsContainer">
+            <div class="stat-card">
+                <div class="number" id="totalTeachers">0</div>
+                <div class="label">👥 إجمالي المعلمين</div>
+            </div>
+            <div class="stat-card">
+                <div class="number green" id="paidTeachers">0</div>
+                <div class="label">✅ مدفوع</div>
+            </div>
+            <div class="stat-card">
+                <div class="number orange" id="trialTeachers">0</div>
+                <div class="label">⏳ تجريبي</div>
+            </div>
+            <div class="stat-card">
+                <div class="number red" id="expiredTeachers">0</div>
+                <div class="label">⚠️ منتهي</div>
+            </div>
+        </div>
+
+        <!-- ===== جدول المعلمين ===== -->
+        <div class="table-container">
+            <table class="teachers-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>👤 اسم المعلم</th>
+                        <th>📧 البريد</th>
+                        <th>📅 تاريخ التسجيل</th>
+                        <th>📋 الخطة</th>
+                        <th>📊 الحالة</th>
+                        <th>⚡ الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody id="teachersBody">
+                    <!-- هتتعبأ من JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="footer">
+            Designed with ❤️ by <span class="name">Dr. Hamada Fathy Hammad</span>
+        </div>
+    </div>
+
+    <!-- ===== Toast ===== -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ===== تحميل المعلمين =====
+        function loadTeachers() {
+            const tbody = document.getElementById('teachersBody');
+
+            // جلب جميع المعلمين من localStorage
+            const teachers = getAllTeachers();
+
+            if (teachers.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7">
+                            <div class="empty-state">
+                                <span class="big-icon">👥</span>
+                                <p>لا يوجد معلمين مسجلين حتى الآن</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                updateStats(teachers);
+                return;
+            }
+
+            // ترتيب من الأحدث للأقدم
+            teachers.sort((a, b) => new Date(b.registeredAt) - new Date(a.registeredAt));
+
+            tbody.innerHTML = teachers.map((teacher, index) => {
+                const isPaid = teacher.isPaid || false;
+                const plan = teacher.plan || 'trial';
+                const trialEnd = new Date(teacher.trialEndDate);
+                const now = new Date();
+                const isExpired = !isPaid && now > trialEnd;
+
+                let statusClass = 'status-trial';
+                let statusText = '⏳ تجريبي';
+                let daysLeft = '';
+
+                if (isPaid) {
+                    statusClass = 'status-paid';
+                    statusText = '✅ مدفوع';
+                } else if (isExpired) {
+                    statusClass = 'status-expired';
+                    statusText = '❌ منتهي';
+                } else {
+                    const days = Math.ceil((trialEnd - now) / (1000 * 60 * 60 * 24));
+                    daysLeft = ` (${days} يوم)`;
+                }
+
+                return `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td><strong>${teacher.name}</strong></td>
+                        <td style="direction:ltr;">${teacher.email}</td>
+                        <td>${new Date(teacher.registeredAt).toLocaleDateString('ar-EG')}</td>
+                        <td>${plan === 'paid' ? '💎 مدفوع' : '🎁 تجريبي'}</td>
+                        <td><span class="status-badge ${statusClass}">${statusText}${daysLeft}</span></td>
+                        <td>
+                            ${!isPaid ? `
+                                <button class="btn-toggle activate" onclick="activateTeacher('${teacher.email}')">✅ تفعيل</button>
+                            ` : `
+                                <button class="btn-toggle deactivate" onclick="deactivateTeacher('${teacher.email}')">⛔ إلغاء</button>
+                            `}
+                            <button class="btn-toggle extend" onclick="extendTrial('${teacher.email}')">📅 تمديد</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            updateStats(teachers);
+        }
+
+        // ===== جلب جميع المعلمين =====
+        function getAllTeachers() {
+            const teachers = [];
+            // نبحث في localStorage عن كل المفاتيح اللي تبدأ بـ teachflow_teacher
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key === 'teachflow_teacher') {
+                    try {
+                        const teacher = JSON.parse(localStorage.getItem(key));
+                        if (teacher && teacher.email) {
+                            teachers.push(teacher);
+                        }
+                    } catch (e) {}
+                }
+            }
+            return teachers;
+        }
+
+        // ===== تحديث الإحصائيات =====
+        function updateStats(teachers) {
+            const total = teachers.length;
+            const paid = teachers.filter(t => t.isPaid).length;
+            const trial = teachers.filter(t => !t.isPaid && new Date(t.trialEndDate) > new Date()).length;
+            const expired = teachers.filter(t => !t.isPaid && new Date(t.trialEndDate) <= new Date()).length;
+
+            document.getElementById('totalTeachers').textContent = total;
+            document.getElementById('paidTeachers').textContent = paid;
+            document.getElementById('trialTeachers').textContent = trial;
+            document.getElementById('expiredTeachers').textContent = expired;
+        }
+
+        // ===== تفعيل اشتراك معلم =====
+        function activateTeacher(email) {
+            if (!confirm(`✅ هل أنت متأكد من تفعيل الاشتراك المدفوع للمعلم "${email}"؟`)) return;
+
+            const teacher = getTeacherByEmail(email);
+            if (!teacher) {
+                showToast('⚠️ المعلم غير موجود', 'error');
+                return;
+            }
+
+            teacher.isPaid = true;
+            teacher.plan = 'paid';
+            teacher.maxStudents = Infinity;
+            teacher.paidSince = new Date().toISOString();
+
+            saveTeacher(teacher);
+            showToast(`✅ تم تفعيل الاشتراك المدفوع للمعلم ${teacher.name}`);
+            loadTeachers();
+        }
+
+        // ===== إلغاء اشتراك معلم =====
+        function deactivateTeacher(email) {
+            if (!confirm(`⛔ هل أنت متأكد من إلغاء الاشتراك المدفوع للمعلم "${email}"؟`)) return;
+
+            const teacher = getTeacherByEmail(email);
+            if (!teacher) {
+                showToast('⚠️ المعلم غير موجود', 'error');
+                return;
+            }
+
+            teacher.isPaid = false;
+            teacher.plan = 'trial';
+            teacher.maxStudents = 10;
+            // تمديد الفترة التجريبية 7 أيام بعد الإلغاء
+            const newTrialEnd = new Date();
+            newTrialEnd.setDate(newTrialEnd.getDate() + 7);
+            teacher.trialEndDate = newTrialEnd.toISOString();
+
+            saveTeacher(teacher);
+            showToast(`⛔ تم إلغاء الاشتراك المدفوع للمعلم ${teacher.name}`);
+            loadTeachers();
+        }
+
+        // ===== تمديد الفترة التجريبية =====
+        function extendTrial(email) {
+            const days = prompt('📅 كم يوم تريد تمديد الفترة التجريبية؟ (أدخل عدد الأيام)', '14');
+            if (!days || isNaN(days) || parseInt(days) <= 0) return;
+
+            const teacher = getTeacherByEmail(email);
+            if (!teacher) {
+                showToast('⚠️ المعلم غير موجود', 'error');
+                return;
+            }
+
+            const newTrialEnd = new Date();
+            newTrialEnd.setDate(newTrialEnd.getDate() + parseInt(days));
+            teacher.trialEndDate = newTrialEnd.toISOString();
+
+            // لو كان مدفوع، نلغيه ونحوله لتجريبي
+            if (teacher.isPaid) {
+                teacher.isPaid = false;
+                teacher.plan = 'trial';
+                teacher.maxStudents = 10;
+            }
+
+            saveTeacher(teacher);
+            showToast(`✅ تم تمديد الفترة التجريبية ${days} يوم للمعلم ${teacher.name}`);
+            loadTeachers();
+        }
+
+        // ===== الحصول على معلم بالبريد =====
+        function getTeacherByEmail(email) {
+            const teacherData = localStorage.getItem('teachflow_teacher');
+            if (!teacherData) return null;
+            const teacher = JSON.parse(teacherData);
+            return teacher.email === email ? teacher : null;
+        }
+
+        // ===== حفظ المعلم =====
+        function saveTeacher(teacher) {
+            localStorage.setItem('teachflow_teacher', JSON.stringify(teacher));
+        }
+
+        // ===== Toast =====
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast' + (type === 'error' ? ' error' : '');
+            setTimeout(() => toast.classList.add('show'), 100);
+            setTimeout(() => toast.classList.remove('show'), 3500);
+        }
+
+        // ===== التحقق من وجود مدير =====
+        function checkAdmin() {
+            // بسيطة: نشوف لو في معلم مسجل، نعتبره مدير
+            const teacher = localStorage.getItem('teachflow_teacher');
+            if (!teacher) {
+                window.location.href = 'index.html';
+                return;
+            }
+        }
+
+        // ===== تحميل الصفحة =====
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAdmin();
+            loadTeachers();
+
+            // تحديث كل 30 ثانية
+            setInterval(loadTeachers, 30000);
+        });
+    </script>
+</body>
+</html>
