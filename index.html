@@ -112,6 +112,31 @@
             background: #5a6fd6;
         }
 
+        .custom-subject-input {
+            display: none;
+            margin-top: 8px;
+        }
+
+        .custom-subject-input.show {
+            display: block;
+        }
+
+        .custom-subject-input input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid #e8edf2;
+            border-radius: 12px;
+            font-size: 15px;
+            background: #f8fafc;
+            transition: 0.3s;
+        }
+
+        .custom-subject-input input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+        }
+
         .selected-subjects {
             display: flex;
             flex-wrap: wrap;
@@ -296,7 +321,7 @@
                     </div>
                 </div>
 
-                <!-- ===== المواد (اختيار متعدد) ===== -->
+                <!-- ===== المواد ===== -->
                 <div class="form-group">
                     <label id="subjectLabel">📚 المواد التي تدرسها</label>
 
@@ -318,8 +343,8 @@
                     </div>
 
                     <!-- حقل كتابة مادة مخصصة -->
-                    <div class="custom-subject-input" id="customSubjectContainer" style="display:none; margin-top:8px;">
-                        <input type="text" id="customSubject" placeholder="✏️ اكتب اسم المادة..." style="width:100%;padding:10px 14px;border:2px solid #e8edf2;border-radius:12px;font-size:15px;background:#f8fafc;transition:0.3s;">
+                    <div class="custom-subject-input" id="customSubjectContainer">
+                        <input type="text" id="customSubject" placeholder="✏️ اكتب اسم المادة...">
                     </div>
 
                     <!-- المواد المختارة -->
@@ -445,7 +470,8 @@
             }
 
             applyTranslation(lang);
-            updateSubjects(lang);
+            updateSubjectSelect(lang);
+            renderSelectedSubjects();
         }
 
         // ===== تطبيق الترجمة =====
@@ -467,13 +493,12 @@
             document.getElementById('subjectLabel').textContent = t.subjectLabel;
             document.getElementById('subjectHint').textContent = t.subjectHint;
             document.getElementById('addSubjectBtn').textContent = t.addBtn;
-            document.getElementById('emptyMsg').textContent = t.emptyMsg;
             document.getElementById('customSubject').placeholder = t.customPlaceholder;
             document.getElementById('registerBtn').textContent = t.registerBtn;
         }
 
         // ===== تحديث قائمة المواد =====
-        function updateSubjects(lang) {
+        function updateSubjectSelect(lang) {
             const t = translations[lang];
             const select = document.getElementById('subjectSelect');
             const currentValue = select.value;
@@ -487,20 +512,20 @@
                 select.appendChild(option);
             });
 
-            select.value = currentValue;
-
-            // تحديث عرض المواد المختارة
-            renderSelectedSubjects();
+            // استرجاع القيمة المحددة
+            if ([...select.options].some(o => o.value === currentValue)) {
+                select.value = currentValue;
+            }
         }
 
         // ===== إظهار/إخفاء حقل المادة المخصصة =====
         document.getElementById('subjectSelect').addEventListener('change', function() {
             const container = document.getElementById('customSubjectContainer');
             if (this.value === 'أخرى') {
-                container.style.display = 'block';
+                container.classList.add('show');
                 document.getElementById('customSubject').focus();
             } else {
-                container.style.display = 'none';
+                container.classList.remove('show');
                 document.getElementById('customSubject').value = '';
             }
         });
@@ -518,11 +543,10 @@
                 }
                 subject = custom;
                 document.getElementById('customSubject').value = '';
-                document.getElementById('customSubjectContainer').style.display = 'none';
+                document.getElementById('customSubjectContainer').classList.remove('show');
                 select.value = 'الرياضيات';
             }
 
-            // منع التكرار
             if (selectedSubjects.includes(subject)) {
                 alert(currentLang === 'ar' ? '⚠️ هذه المادة مضافة بالفعل' : '⚠️ This subject is already added');
                 return;
@@ -567,6 +591,14 @@
             const btn = document.getElementById('registerBtn');
             btn.disabled = selectedSubjects.length === 0;
         }
+
+        // ===== الضغط على Enter في حقل المادة المخصصة =====
+        document.getElementById('customSubject').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addSubject();
+            }
+        });
 
         // ===== معالجة التسجيل =====
         document.getElementById('registerForm').addEventListener('submit', function(e) {
