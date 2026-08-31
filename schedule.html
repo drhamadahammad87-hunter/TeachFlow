@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>الجدول الأسبوعي - TeachFlow</title>
     <style>
+        /* نفس الاستايلات السابقة */
         * {
             margin: 0;
             padding: 0;
@@ -183,19 +184,20 @@
         .schedule-table th {
             background: #667eea;
             color: white;
-            padding: 16px;
+            padding: 16px 12px;
             text-align: center;
             font-weight: 600;
-            font-size: 15px;
+            font-size: 14px;
             border: 1px solid #5a6fd6;
+            white-space: nowrap;
         }
 
         .schedule-table td {
-            padding: 14px 12px;
+            padding: 12px 8px;
             text-align: center;
             border: 1px solid #e8edf2;
             vertical-align: middle;
-            min-height: 70px;
+            min-height: 60px;
         }
 
         .schedule-table tr:hover td {
@@ -206,14 +208,15 @@
             background: #f8fafc;
             font-weight: 600;
             color: #555;
-            width: 80px;
+            width: 70px;
             white-space: nowrap;
+            font-size: 13px;
         }
 
         .schedule-table .lesson-cell {
             background: #f0f4ff;
             border-radius: 8px;
-            padding: 6px 10px;
+            padding: 6px 8px;
             margin: 2px 0;
             cursor: pointer;
             transition: 0.3s;
@@ -227,24 +230,24 @@
         .schedule-table .lesson-cell .group-name {
             font-weight: 600;
             color: #333;
-            font-size: 14px;
+            font-size: 13px;
         }
 
         .schedule-table .lesson-cell .subject {
             color: #667eea;
-            font-size: 12px;
+            font-size: 11px;
         }
 
         .schedule-table .lesson-cell .location {
-            font-size: 11px;
+            font-size: 10px;
             color: #888;
         }
 
         .schedule-table .lesson-cell .from-group {
-            font-size: 10px;
+            font-size: 9px;
             color: #2e7d32;
             background: #e8f5e9;
-            padding: 2px 8px;
+            padding: 1px 6px;
             border-radius: 10px;
             display: inline-block;
             margin-top: 2px;
@@ -252,7 +255,7 @@
 
         .schedule-table .empty-cell {
             color: #ccc;
-            font-size: 13px;
+            font-size: 12px;
         }
 
         .footer {
@@ -296,19 +299,8 @@
                 font-size: 20px;
             }
             .schedule-table {
-                font-size: 13px;
-                min-width: 600px;
-            }
-            .schedule-table th,
-            .schedule-table td {
-                padding: 10px 8px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .schedule-table {
                 font-size: 12px;
-                min-width: 500px;
+                min-width: 600px;
             }
             .schedule-table th,
             .schedule-table td {
@@ -317,6 +309,21 @@
             .schedule-table .time-col {
                 width: 60px;
                 font-size: 11px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .schedule-table {
+                font-size: 11px;
+                min-width: 500px;
+            }
+            .schedule-table th,
+            .schedule-table td {
+                padding: 6px 4px;
+            }
+            .schedule-table .time-col {
+                width: 50px;
+                font-size: 10px;
             }
             .page-header .actions {
                 flex-direction: column;
@@ -387,7 +394,13 @@
     <script>
         // ===== أيام الأسبوع =====
         const days = ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'];
-        const times = ['8:00 ص', '9:00 ص', '10:00 ص', '11:00 ص', '12:00 م', '1:00 م', '2:00 م', '3:00 م', '4:00 م', '5:00 م', '6:00 م', '7:00 م'];
+
+        // ===== الأوقات (من 8 ص إلى 10 م) =====
+        const times = [
+            '8:00 ص', '9:00 ص', '10:00 ص', '11:00 ص', '12:00 م',
+            '1:00 م', '2:00 م', '3:00 م', '4:00 م', '5:00 م',
+            '6:00 م', '7:00 م', '8:00 م', '9:00 م', '10:00 م'
+        ];
 
         // ===== بيانات الجدول =====
         let schedule = [];
@@ -420,7 +433,6 @@
         // ===== عرض الجدول =====
         function renderSchedule() {
             const tbody = document.getElementById('scheduleBody');
-            // جلب المجموعات من localStorage
             const groups = JSON.parse(localStorage.getItem('teachflow_groups')) || [];
 
             tbody.innerHTML = times.map(time => {
@@ -451,17 +463,14 @@
                             const isGroup = lesson.isGroup || false;
                             const locationText = lesson.location ? `📍 ${lesson.location}` : '';
 
-                            // تحديد لون الخلفية
                             let bgColor = '#f0f4ff';
-                            let borderColor = '';
                             if (isGroup) {
                                 bgColor = '#e8f5e9';
-                                borderColor = 'border-right: 3px solid #2e7d32;';
                             }
 
                             row += `
                                 <div class="lesson-cell" 
-                                     style="background:${bgColor}; ${borderColor} padding:6px 10px; margin:2px 0; border-radius:8px; cursor:pointer; transition:0.3s;"
+                                     style="background:${bgColor}; padding:6px 8px; margin:2px 0; border-radius:8px; cursor:pointer; transition:0.3s;"
                                      onclick="${isGroup ? `showGroupDetails('${lesson.group}')` : `deleteLesson(${lesson.id})`}">
                                     <div class="group-name">${lesson.group}</div>
                                     <div class="subject">${lesson.subject}</div>
