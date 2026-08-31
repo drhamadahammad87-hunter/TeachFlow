@@ -17,6 +17,7 @@
             min-height: 100vh;
         }
 
+        /* ===== القائمة الجانبية ===== */
         .sidebar {
             position: fixed;
             right: 0;
@@ -73,6 +74,7 @@
             color: white;
         }
 
+        /* ===== المحتوى ===== */
         .main-content {
             margin-right: 220px;
             padding: 25px;
@@ -124,6 +126,7 @@
             font-size: 16px;
         }
 
+        /* ===== بطاقة المواد ===== */
         .subjects-card {
             background: white;
             border-radius: 16px;
@@ -152,6 +155,7 @@
             font-size: 13px;
         }
 
+        /* ===== البطاقات ===== */
         .cards-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -203,6 +207,7 @@
             color: #e74c3c;
         }
 
+        /* ===== الأنشطة ===== */
         .section-title {
             font-size: 18px;
             color: #333;
@@ -257,6 +262,7 @@
             margin-right: auto;
         }
 
+        /* ===== تذييل الصفحة ===== */
         .footer {
             text-align: center;
             margin-top: 40px;
@@ -272,6 +278,7 @@
             font-weight: 600;
         }
 
+        /* ===== للشاشات الصغيرة ===== */
         @media (max-width: 768px) {
             .sidebar {
                 width: 60px;
@@ -325,7 +332,7 @@
 </head>
 <body>
 
-    <!-- ===== القائمة الجانبية (الترتيب الجديد) ===== -->
+    <!-- ===== القائمة الجانبية ===== -->
     <nav class="sidebar">
         <div class="logo">📚 TeachFlow <span>نظام إدارة المعلمين</span></div>
 
@@ -350,8 +357,11 @@
     <!-- ===== المحتوى ===== -->
     <main class="main-content">
 
+        <!-- ===== الترحيب ===== -->
         <div class="page-header">
-            <h1>👋 أهلاً، <span class="teacher-name" id="teacherName">الأستاذ</span></h1>
+            <h1>
+                👋 أهلاً، <span class="teacher-name" id="teacherName">الأستاذ</span>
+            </h1>
             <div class="user-info">
                 <span id="userEmail">📧 teacher@example.com</span>
                 <div class="avatar" id="userAvatar">م</div>
@@ -361,10 +371,12 @@
         <!-- ===== المواد ===== -->
         <div class="subjects-card">
             <h3>📚 المواد التي تدرسها</h3>
-            <div class="subjects-tags" id="subjectsTags"></div>
+            <div class="subjects-tags" id="subjectsTags">
+                <!-- هتتعبأ من JavaScript -->
+            </div>
         </div>
 
-        <!-- ===== البطاقات (الترتيب الجديد: المجموعات قبل الطلاب) ===== -->
+        <!-- ===== البطاقات (الترتيب: مجموعات ← طلاب ← حضور ← مدفوعات) ===== -->
         <div class="cards-grid">
             <!-- 1. المجموعات (أزرق) -->
             <div class="card blue" onclick="window.location.href='groups.html'">
@@ -446,7 +458,10 @@
                 window.location.href = 'index.html';
                 return;
             }
+
             const teacher = JSON.parse(data);
+
+            // عرض اسم المعلم
             document.getElementById('teacherName').textContent = teacher.name;
             document.getElementById('userEmail').textContent = '📧 ' + teacher.email;
             document.getElementById('userAvatar').textContent = teacher.name.charAt(0);
@@ -454,6 +469,7 @@
             // عرض المواد
             const tagsContainer = document.getElementById('subjectsTags');
             tagsContainer.innerHTML = '';
+
             if (teacher.subjects && teacher.subjects.length > 0) {
                 teacher.subjects.forEach(subject => {
                     const tag = document.createElement('span');
@@ -488,13 +504,13 @@
             const students = JSON.parse(localStorage.getItem('teachflow_students')) || [];
             document.getElementById('studentCount').textContent = students.length;
 
-            // عدد الحضور اليوم (بيانات وهمية)
+            // عدد الحضور اليوم (من attendance)
             const attendance = JSON.parse(localStorage.getItem('teachflow_attendance')) || [];
             const today = new Date().toISOString().split('T')[0];
             const todayAttendance = attendance.filter(a => a.date === today);
             document.getElementById('attendanceCount').textContent = todayAttendance.length || 0;
 
-            // المدفوعات (بيانات وهمية)
+            // إجمالي المدفوعات
             const payments = JSON.parse(localStorage.getItem('teachflow_payments')) || [];
             const totalPaid = payments.reduce((sum, p) => sum + (p.status === 'paid' ? p.amount : 0), 0);
             document.getElementById('paymentCount').textContent = 'EGP ' + totalPaid;

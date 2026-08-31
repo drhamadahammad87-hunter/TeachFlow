@@ -195,11 +195,17 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
         }
 
         .group-card .group-icon {
             font-size: 36px;
+        }
+
+        .group-card .group-number {
+            font-size: 13px;
+            color: #999;
+            margin-bottom: 4px;
         }
 
         .group-card .group-name {
@@ -407,8 +413,8 @@
     <nav class="sidebar">
         <div class="logo">📚 TeachFlow <span>نظام إدارة المعلمين</span></div>
         <button class="sidebar-item" onclick="window.location.href='home.html'">🏠 <span>الرئيسية</span></button>
-        <button class="sidebar-item" onclick="window.location.href='students.html'">👨‍🎓 <span>الطلاب</span></button>
         <button class="sidebar-item active" onclick="window.location.href='groups.html'">👥 <span>المجموعات</span></button>
+        <button class="sidebar-item" onclick="window.location.href='students.html'">👨‍🎓 <span>الطلاب</span></button>
         <button class="sidebar-item" onclick="window.location.href='attendance.html'">✅ <span>الحضور</span></button>
         <button class="sidebar-item" onclick="window.location.href='assessments.html'">📊 <span>التقييمات</span></button>
         <button class="sidebar-item" onclick="window.location.href='finances.html'">💰 <span>الحسابات</span></button>
@@ -458,7 +464,8 @@
                 groups = [
                     {
                         id: 1,
-                        name: 'مجموعة الرياضيات المتقدمة',
+                        number: 'G-001',
+                        name: 'الرياضيات المتقدمة',
                         icon: '📐',
                         description: 'طلاب الرياضيات المتقدمين - المنهج الدولي',
                         locationType: '🏠 بيت',
@@ -471,7 +478,8 @@
                     },
                     {
                         id: 2,
-                        name: 'مجموعة العلوم الأساسية',
+                        number: 'G-002',
+                        name: 'العلوم الأساسية',
                         icon: '🔬',
                         description: 'طلاب العلوم - المنهج المصري',
                         locationType: '🏢 سنتر',
@@ -484,7 +492,8 @@
                     },
                     {
                         id: 3,
-                        name: 'مجموعة اللغة العربية',
+                        number: 'G-003',
+                        name: 'اللغة العربية',
                         icon: '📖',
                         description: 'تقوية اللغة العربية - القراءة والإملاء',
                         locationType: '💻 أونلاين',
@@ -522,13 +531,13 @@
                 `;
             } else {
                 grid.innerHTML = filteredGroups.map(group => {
-                    // حساب عدد الطلاب في هذه المجموعة
                     const studentCount = students.filter(s => s.group === group.name).length;
                     const statusClass = group.active ? 'badge-active' : 'badge-inactive';
                     const statusText = group.active ? '✅ نشطة' : '❌ غير نشطة';
 
                     return `
                         <div class="group-card">
+                            <div class="group-number"># ${group.number}</div>
                             <div class="group-header">
                                 <span class="group-icon">${group.icon || '👥'}</span>
                                 <span class="group-name">${group.name}</span>
@@ -567,6 +576,7 @@
             const filter = document.getElementById('searchInput').value.trim().toLowerCase();
             filteredGroups = groups.filter(g =>
                 g.name.toLowerCase().includes(filter) ||
+                (g.number && g.number.toLowerCase().includes(filter)) ||
                 (g.description && g.description.toLowerCase().includes(filter)) ||
                 (g.locationAddress && g.locationAddress.toLowerCase().includes(filter)) ||
                 (g.locationType && g.locationType.includes(filter)) ||
@@ -578,6 +588,19 @@
 
         // ===== إضافة مجموعة =====
         function showAddGroup() {
+            // رقم المجموعة (تلقائي)
+            const nextNumber = groups.length + 1;
+            const defaultNumber = 'G-' + String(nextNumber).padStart(3, '0');
+
+            const number = prompt('🔢 رقم المجموعة (مثلاً G-001):', defaultNumber);
+            if (!number) return;
+
+            // التأكد من عدم تكرار الرقم
+            if (groups.some(g => g.number === number)) {
+                alert('⚠️ هذا الرقم موجود بالفعل! الرجاء إدخال رقم مختلف.');
+                return;
+            }
+
             const name = prompt('👥 اسم المجموعة:');
             if (!name) return;
 
@@ -603,6 +626,7 @@
 
             const newGroup = {
                 id: Date.now(),
+                number: number,
                 name: name,
                 icon: icon,
                 description: description,
@@ -619,13 +643,22 @@
             filteredGroups = [...groups];
             saveGroups();
             renderGroups();
-            alert('✅ تم إضافة المجموعة بنجاح!');
+            alert(`✅ تم إضافة المجموعة "${name}" برقم ${number}`);
         }
 
         // ===== تعديل مجموعة =====
         function editGroup(id) {
             const group = groups.find(g => g.id === id);
             if (!group) return;
+
+            const number = prompt('🔢 رقم المجموعة:', group.number);
+            if (number && number !== group.number) {
+                if (groups.some(g => g.number === number && g.id !== id)) {
+                    alert('⚠️ هذا الرقم موجود بالفعل!');
+                    return;
+                }
+                group.number = number;
+            }
 
             const name = prompt('👥 اسم المجموعة:', group.name);
             if (name) group.name = name;
@@ -682,7 +715,6 @@
                 if (!confirm(`⚠️ يوجد ${students.filter(s => s.group === group.name).length} طالب في هذه المجموعة. هل أنت متأكد من حذفها؟ سيتم إزالة المجموعة من الطلاب.`)) {
                     return;
                 }
-                // إزالة المجموعة من الطلاب
                 students.forEach(s => {
                     if (s.group === group.name) s.group = '';
                 });

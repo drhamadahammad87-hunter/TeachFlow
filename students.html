@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>الطلاب - TeachFlow</title>
     <style>
-        /* نفس الاستايلات السابقة */
         * {
             margin: 0;
             padding: 0;
@@ -343,8 +342,8 @@
     <nav class="sidebar">
         <div class="logo">📚 TeachFlow <span>نظام إدارة المعلمين</span></div>
         <button class="sidebar-item" onclick="window.location.href='home.html'">🏠 <span>الرئيسية</span></button>
-        <button class="sidebar-item active" onclick="window.location.href='students.html'">👨‍🎓 <span>الطلاب</span></button>
         <button class="sidebar-item" onclick="window.location.href='groups.html'">👥 <span>المجموعات</span></button>
+        <button class="sidebar-item active" onclick="window.location.href='students.html'">👨‍🎓 <span>الطلاب</span></button>
         <button class="sidebar-item" onclick="window.location.href='attendance.html'">✅ <span>الحضور</span></button>
         <button class="sidebar-item" onclick="window.location.href='assessments.html'">📊 <span>التقييمات</span></button>
         <button class="sidebar-item" onclick="window.location.href='finances.html'">💰 <span>الحسابات</span></button>
@@ -401,7 +400,7 @@
         let students = [];
         let groups = [];
 
-        // ===== تحميل الطلاب والمجموعات من LocalStorage =====
+        // ===== تحميل الطلاب والمجموعات =====
         function loadData() {
             // تحميل المجموعات
             const savedGroups = localStorage.getItem('teachflow_groups');
@@ -485,9 +484,9 @@
             renderStudents(filter);
         }
 
-        // ===== عرض قائمة المجموعات في رسالة =====
+        // ===== عرض قائمة المجموعات =====
         function getGroupsList() {
-            return groups.map((g, i) => `${i + 1}. ${g.name}`).join('\n');
+            return groups.map((g, i) => `${i + 1}. ${g.number || ''} - ${g.name}`).join('\n');
         }
 
         // ===== إضافة طالب =====
@@ -505,7 +504,7 @@
             if (!name) return;
 
             // عرض قائمة المجموعات للاختيار
-            const groupOptions = groups.map((g, i) => `${i + 1}. ${g.name}`).join('\n');
+            const groupOptions = groups.map((g, i) => `${i + 1}. ${g.number || ''} - ${g.name}`).join('\n');
             const groupChoice = prompt(`📚 اختر المجموعة:\n${groupOptions}\n\nأدخل رقم المجموعة:`);
             const groupIndex = parseInt(groupChoice) - 1;
 
@@ -534,7 +533,7 @@
             students.push(newStudent);
             saveStudents();
             renderStudents();
-            alert(`✅ تم إضافة الطالب ${name} إلى مجموعة ${selectedGroup}`);
+            alert(`✅ تم إضافة الطالب ${name} إلى مجموعة "${selectedGroup}"`);
         }
 
         // ===== تعديل طالب =====
@@ -545,12 +544,12 @@
             const name = prompt('👤 اسم الطالب:', student.name);
             if (name) student.name = name;
 
-            // جلب المجموعات من localStorage
+            // جلب المجموعات
             const savedGroups = localStorage.getItem('teachflow_groups');
             const groups = savedGroups ? JSON.parse(savedGroups) : [];
 
             if (groups.length > 0) {
-                const groupOptions = groups.map((g, i) => `${i + 1}. ${g.name}`).join('\n');
+                const groupOptions = groups.map((g, i) => `${i + 1}. ${g.number || ''} - ${g.name}`).join('\n');
                 const currentGroupIndex = groups.findIndex(g => g.name === student.group) + 1;
                 const groupChoice = prompt(`📚 اختر المجموعة (الحالية: ${student.group}):\n${groupOptions}\n\nأدخل رقم المجموعة:`, currentGroupIndex);
                 if (groupChoice) {
