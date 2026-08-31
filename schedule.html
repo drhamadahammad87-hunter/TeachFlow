@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>الجدول الأسبوعي - TeachFlow</title>
-    <!-- ===== jsPDF لتحويل الجدول إلى PDF ===== -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js">
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js">
@@ -317,7 +316,6 @@
             font-weight: 600;
         }
 
-        /* ===== تحسينات الطباعة ===== */
         @media print {
             .sidebar,
             .btn-back,
@@ -340,10 +338,6 @@
             .schedule-table th {
                 background: #667eea !important;
                 color: white !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-            }
-            .schedule-table .lesson-cell {
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
@@ -423,7 +417,6 @@
 </head>
 <body>
 
-    <!-- ===== الشريط الجانبي الموحد ===== -->
     <nav class="sidebar">
         <div class="logo">📚 TeachFlow <span>نظام إدارة المعلمين</span></div>
 
@@ -494,20 +487,16 @@
 
         // ===== تحميل الجدول =====
         function loadSchedule() {
+            // 1. تحميل الحصص المسجلة يدوياً
             const saved = localStorage.getItem('teachflow_schedule');
             if (saved) {
                 schedule = JSON.parse(saved);
             } else {
-                schedule = [
-                    { id: 1, day: 'السبت', time: '10:00 ص', group: 'الرياضيات المتقدمة', subject: 'الرياضيات' },
-                    { id: 2, day: 'السبت', time: '12:00 م', group: 'العلوم الأساسية', subject: 'العلوم' },
-                    { id: 3, day: 'الأحد', time: '10:00 ص', group: 'اللغة العربية', subject: 'اللغة العربية' },
-                    { id: 4, day: 'الأحد', time: '2:00 م', group: 'الرياضيات المتقدمة', subject: 'الرياضيات' },
-                    { id: 5, day: 'الثلاثاء', time: '10:00 ص', group: 'العلوم الأساسية', subject: 'العلوم' },
-                    { id: 6, day: 'الثلاثاء', time: '12:00 م', group: 'اللغة العربية', subject: 'اللغة العربية' }
-                ];
+                schedule = [];
                 saveSchedule();
             }
+
+            // 2. عرض الجدول
             renderSchedule();
         }
 
@@ -519,14 +508,17 @@
         // ===== عرض الجدول =====
         function renderSchedule() {
             const tbody = document.getElementById('scheduleBody');
+            // جلب المجموعات من localStorage
             const groups = JSON.parse(localStorage.getItem('teachflow_groups')) || [];
 
             tbody.innerHTML = times.map(time => {
                 let row = `<tr><td class="time-col">${time}</td>`;
 
                 days.forEach(day => {
+                    // 1. الحصص المسجلة يدوياً
                     const scheduledLessons = schedule.filter(s => s.day === day && s.time === time);
 
+                    // 2. المجموعات اللي ليها يوم ووقت محدد (من بيانات المجموعة)
                     const groupLessons = groups
                         .filter(g => g.day === day && g.time === time && g.active !== false)
                         .map(g => ({
@@ -538,6 +530,7 @@
                             fromGroup: true
                         }));
 
+                    // دمج الحصص (المجموعات أولاً ثم الحصص اليدوية)
                     const allLessons = [...groupLessons, ...scheduledLessons];
 
                     if (allLessons.length > 0) {
@@ -666,7 +659,6 @@
             const originalOverflow = document.body.style.overflow;
             document.body.style.overflow = 'hidden';
 
-            // إضافة border مؤقت للطباعة
             element.style.border = '1px solid #ddd';
             element.style.padding = '10px';
 
