@@ -17,7 +17,6 @@
             min-height: 100vh;
         }
 
-        /* ===== القائمة الجانبية ===== */
         .sidebar {
             position: fixed;
             right: 0;
@@ -74,7 +73,6 @@
             color: white;
         }
 
-        /* ===== المحتوى ===== */
         .main-content {
             margin-right: 220px;
             padding: 25px;
@@ -126,7 +124,6 @@
             font-size: 16px;
         }
 
-        /* ===== بطاقة المواد ===== */
         .subjects-card {
             background: white;
             border-radius: 16px;
@@ -155,7 +152,6 @@
             font-size: 13px;
         }
 
-        /* ===== البطاقات ===== */
         .cards-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -207,7 +203,6 @@
             color: #e74c3c;
         }
 
-        /* ===== الأنشطة ===== */
         .section-title {
             font-size: 18px;
             color: #333;
@@ -262,7 +257,6 @@
             margin-right: auto;
         }
 
-        /* ===== تذييل الصفحة ===== */
         .footer {
             text-align: center;
             margin-top: 40px;
@@ -278,7 +272,6 @@
             font-weight: 600;
         }
 
-        /* ===== للشاشات الصغيرة ===== */
         @media (max-width: 768px) {
             .sidebar {
                 width: 60px;
@@ -332,19 +325,12 @@
 </head>
 <body>
 
-    <!-- ===== القائمة الجانبية ===== -->
     <nav class="sidebar">
         <div class="logo">📚 TeachFlow <span>نظام إدارة المعلمين</span></div>
 
-        <!-- الرئيسية -->
         <button class="sidebar-item active" onclick="window.location.href='home.html'">🏠 <span>الرئيسية</span></button>
-
-        <!-- المجموعات (قبل الطلاب) -->
         <button class="sidebar-item" onclick="window.location.href='groups.html'">👥 <span>المجموعات</span></button>
-
-        <!-- الطلاب (بعد المجموعات) -->
         <button class="sidebar-item" onclick="window.location.href='students.html'">👨‍🎓 <span>الطلاب</span></button>
-
         <button class="sidebar-item" onclick="window.location.href='attendance.html'">✅ <span>الحضور</span></button>
         <button class="sidebar-item" onclick="window.location.href='assessments.html'">📊 <span>التقييمات</span></button>
         <button class="sidebar-item" onclick="window.location.href='finances.html'">💰 <span>الحسابات</span></button>
@@ -354,52 +340,37 @@
         <button class="sidebar-item" onclick="logout()">🚪 <span>تسجيل الخروج</span></button>
     </nav>
 
-    <!-- ===== المحتوى ===== -->
     <main class="main-content">
 
-        <!-- ===== الترحيب ===== -->
         <div class="page-header">
-            <h1>
-                👋 أهلاً، <span class="teacher-name" id="teacherName">الأستاذ</span>
-            </h1>
+            <h1>👋 أهلاً، <span class="teacher-name" id="teacherName">الأستاذ</span></h1>
             <div class="user-info">
                 <span id="userEmail">📧 teacher@example.com</span>
                 <div class="avatar" id="userAvatar">م</div>
             </div>
         </div>
 
-        <!-- ===== المواد ===== -->
         <div class="subjects-card">
             <h3>📚 المواد التي تدرسها</h3>
-            <div class="subjects-tags" id="subjectsTags">
-                <!-- هتتعبأ من JavaScript -->
-            </div>
+            <div class="subjects-tags" id="subjectsTags"></div>
         </div>
 
-        <!-- ===== البطاقات (الترتيب: مجموعات ← طلاب ← حضور ← مدفوعات) ===== -->
         <div class="cards-grid">
-            <!-- 1. المجموعات (أزرق) -->
             <div class="card blue" onclick="window.location.href='groups.html'">
                 <div class="card-icon">👥</div>
                 <div class="card-number" id="groupsCount">0</div>
                 <div class="card-label">المجموعات</div>
             </div>
-
-            <!-- 2. الطلاب (أخضر) -->
             <div class="card green" onclick="window.location.href='students.html'">
                 <div class="card-icon">👨‍🎓</div>
                 <div class="card-number" id="studentCount">0</div>
                 <div class="card-label">الطلاب</div>
             </div>
-
-            <!-- 3. الحضور (برتقالي) -->
             <div class="card orange" onclick="window.location.href='attendance.html'">
                 <div class="card-icon">✅</div>
                 <div class="card-number" id="attendanceCount">0</div>
                 <div class="card-label">حضور اليوم</div>
             </div>
-
-            <!-- 4. المدفوعات (أحمر) -->
             <div class="card red" onclick="window.location.href='finances.html'">
                 <div class="card-icon">💰</div>
                 <div class="card-number" id="paymentCount">EGP 0</div>
@@ -407,7 +378,6 @@
             </div>
         </div>
 
-        <!-- ===== الأنشطة ===== -->
         <div class="section-title">📋 آخر الأنشطة</div>
         <div class="activity-list">
             <div class="activity-item" onclick="window.location.href='groups.html'">
@@ -444,32 +414,25 @@
             </div>
         </div>
 
-        <!-- ===== التوقيع ===== -->
         <div class="footer">
             Designed with ❤️ by <span class="name">Dr. Hamada Fathy Hammad</span>
         </div>
     </main>
 
     <script>
-        // ===== تحميل بيانات المعلم =====
         function loadTeacherData() {
             const data = localStorage.getItem('teachflow_teacher');
             if (!data) {
                 window.location.href = 'index.html';
                 return;
             }
-
             const teacher = JSON.parse(data);
-
-            // عرض اسم المعلم
             document.getElementById('teacherName').textContent = teacher.name;
             document.getElementById('userEmail').textContent = '📧 ' + teacher.email;
             document.getElementById('userAvatar').textContent = teacher.name.charAt(0);
 
-            // عرض المواد
             const tagsContainer = document.getElementById('subjectsTags');
             tagsContainer.innerHTML = '';
-
             if (teacher.subjects && teacher.subjects.length > 0) {
                 teacher.subjects.forEach(subject => {
                     const tag = document.createElement('span');
@@ -481,10 +444,8 @@
                 tagsContainer.innerHTML = '<span style="color:#999;font-size:13px;">⚠️ لم تقم بتحديد مواد بعد</span>';
             }
 
-            // تحديث الأرقام في البطاقات
             updateCounts();
 
-            // تغيير اتجاه الصفحة حسب اللغة
             if (teacher.language === 'en' || teacher.language === 'fr' || teacher.language === 'de') {
                 document.dir = 'ltr';
                 document.documentElement.lang = teacher.language;
@@ -494,29 +455,23 @@
             }
         }
 
-        // ===== تحديث الأرقام في البطاقات =====
         function updateCounts() {
-            // عدد المجموعات
             const groups = JSON.parse(localStorage.getItem('teachflow_groups')) || [];
             document.getElementById('groupsCount').textContent = groups.length;
 
-            // عدد الطلاب
             const students = JSON.parse(localStorage.getItem('teachflow_students')) || [];
             document.getElementById('studentCount').textContent = students.length;
 
-            // عدد الحضور اليوم (من attendance)
             const attendance = JSON.parse(localStorage.getItem('teachflow_attendance')) || [];
             const today = new Date().toISOString().split('T')[0];
             const todayAttendance = attendance.filter(a => a.date === today);
             document.getElementById('attendanceCount').textContent = todayAttendance.length || 0;
 
-            // إجمالي المدفوعات
             const payments = JSON.parse(localStorage.getItem('teachflow_payments')) || [];
             const totalPaid = payments.reduce((sum, p) => sum + (p.status === 'paid' ? p.amount : 0), 0);
             document.getElementById('paymentCount').textContent = 'EGP ' + totalPaid;
         }
 
-        // ===== تسجيل الخروج =====
         function logout() {
             if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
                 localStorage.removeItem('teachflow_teacher');
@@ -525,7 +480,6 @@
             }
         }
 
-        // ===== تحميل الصفحة =====
         document.addEventListener('DOMContentLoaded', loadTeacherData);
     </script>
 </body>
