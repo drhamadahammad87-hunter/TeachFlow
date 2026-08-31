@@ -23,7 +23,7 @@
 
         .register-container {
             width: 100%;
-            max-width: 500px;
+            max-width: 480px;
         }
 
         .register-box {
@@ -35,7 +35,7 @@
 
         .register-header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
         }
 
         .register-header h1 {
@@ -50,7 +50,7 @@
         }
 
         .form-group {
-            margin-bottom: 18px;
+            margin-bottom: 16px;
         }
 
         .form-group label {
@@ -61,7 +61,8 @@
             font-size: 14px;
         }
 
-        .form-group input {
+        .form-group input,
+        .form-group select {
             width: 100%;
             padding: 12px 14px;
             border: 2px solid #e8edf2;
@@ -71,7 +72,8 @@
             transition: 0.3s;
         }
 
-        .form-group input:focus {
+        .form-group input:focus,
+        .form-group select:focus {
             outline: none;
             border-color: #667eea;
             background: white;
@@ -83,26 +85,32 @@
             margin-top: 4px;
         }
 
-        /* ===== اختيار اللغة ===== */
+        .form-group .custom-subject-input {
+            display: none;
+            margin-top: 8px;
+        }
+
+        .form-group .custom-subject-input.show {
+            display: block;
+        }
+
+        /* ===== اختيار اللغة (مبسط) ===== */
         .language-options {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            align-items: center;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
         }
 
         .lang-option {
-            padding: 10px 16px;
+            padding: 12px;
             border: 2px solid #e8edf2;
             border-radius: 12px;
             text-align: center;
             cursor: pointer;
             transition: 0.3s;
             background: #f8fafc;
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 500;
-            flex: 1;
-            min-width: 60px;
         }
 
         .lang-option:hover {
@@ -119,140 +127,7 @@
         .lang-option .flag {
             font-size: 22px;
             display: block;
-            margin-bottom: 2px;
-        }
-
-        .lang-select-wrapper {
-            flex: 0 0 auto;
-            position: relative;
-        }
-
-        .lang-select-wrapper select {
-            padding: 10px 14px;
-            border: 2px solid #e8edf2;
-            border-radius: 12px;
-            font-size: 14px;
-            background: #f8fafc;
-            cursor: pointer;
-            outline: none;
-            transition: 0.3s;
-            appearance: none;
-            -webkit-appearance: none;
-            min-width: 120px;
-        }
-
-        .lang-select-wrapper select:focus {
-            border-color: #667eea;
-            background: white;
-        }
-
-        .lang-select-wrapper::after {
-            content: '▼';
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #999;
-            font-size: 12px;
-            pointer-events: none;
-        }
-
-        /* ===== المواد ===== */
-        .subjects-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-        }
-
-        .subject-item {
-            padding: 8px 12px;
-            border: 2px solid #e8edf2;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: 0.3s;
-            background: #f8fafc;
-            text-align: center;
-            font-size: 13px;
-        }
-
-        .subject-item:hover {
-            border-color: #667eea;
-            background: #f0f4ff;
-        }
-
-        .subject-item.selected {
-            border-color: #2ecc71;
-            background: #eafaf1;
-            color: #27ae60;
-        }
-
-        /* ===== إضافة مادة ===== */
-        .custom-row {
-            display: flex;
-            gap: 10px;
-            margin-top: 8px;
-        }
-
-        .custom-row input {
-            flex: 1;
-            padding: 10px 14px;
-            border: 2px solid #e8edf2;
-            border-radius: 10px;
-            font-size: 14px;
-            background: #f8fafc;
-            outline: none;
-            transition: 0.3s;
-        }
-
-        .custom-row input:focus {
-            border-color: #667eea;
-            background: white;
-        }
-
-        .custom-row button {
-            padding: 10px 18px;
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: 0.3s;
-            white-space: nowrap;
-        }
-
-        .custom-row button:hover {
-            background: #5a6fd6;
-        }
-
-        /* ===== المواد المختارة ===== */
-        .selected-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 10px;
-        }
-
-        .selected-tag {
-            background: #667eea;
-            color: white;
-            padding: 5px 14px;
-            border-radius: 20px;
-            font-size: 13px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .selected-tag .remove {
-            cursor: pointer;
-            font-weight: 700;
-            opacity: 0.7;
-        }
-
-        .selected-tag .remove:hover {
-            opacity: 1;
+            margin-bottom: 4px;
         }
 
         /* ===== زر التسجيل ===== */
@@ -281,7 +156,6 @@
             transform: none;
         }
 
-        /* ===== رسائل الخطأ ===== */
         .error-msg {
             color: #e74c3c;
             font-size: 13px;
@@ -294,21 +168,27 @@
             display: block;
         }
 
+        .footer {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 18px;
+            border-top: 1px solid #e8edf2;
+            color: #aaa;
+            font-size: 13px;
+            direction: ltr;
+        }
+
+        .footer .name {
+            color: #667eea;
+            font-weight: 600;
+        }
+
         @media (max-width: 480px) {
             .register-box {
                 padding: 25px 18px;
             }
             .language-options {
-                flex-direction: column;
-            }
-            .lang-select-wrapper select {
-                width: 100%;
-            }
-            .subjects-grid {
                 grid-template-columns: 1fr 1fr;
-            }
-            .custom-row {
-                flex-direction: column;
             }
         }
     </style>
@@ -317,39 +197,33 @@
     <div class="register-container">
         <div class="register-box">
             <div class="register-header">
-                <h1 id="pageTitle">📚 TeachFlow</h1>
-                <p id="pageSubtitle">تسجيل المعلم الجديد</p>
+                <h1>📚 TeachFlow</h1>
+                <p>تسجيل المعلم الجديد</p>
             </div>
 
             <form id="registerForm">
                 <!-- ===== اسم المعلم ===== -->
                 <div class="form-group">
-                    <label id="nameLabel">👨‍🏫 اسم المعلم</label>
+                    <label>👨‍🏫 اسم المعلم</label>
                     <input type="text" id="teacherName" placeholder="أدخل اسمك بالكامل" required>
                 </div>
 
                 <!-- ===== البريد الإلكتروني ===== -->
                 <div class="form-group">
-                    <label id="emailLabel">📧 البريد الإلكتروني</label>
+                    <label>📧 البريد الإلكتروني</label>
                     <input type="email" id="email" placeholder="teacher@example.com" required>
                 </div>
 
-                <!-- ===== كلمة المرور ===== -->
+                <!-- ===== كلمة المرور (بدون تأكيد) ===== -->
                 <div class="form-group">
-                    <label id="passwordLabel">🔒 كلمة المرور</label>
+                    <label>🔒 كلمة المرور</label>
                     <input type="password" id="password" placeholder="••••••••" required>
-                    <div class="hint" id="passwordHint">يجب أن تكون 6 أحرف على الأقل</div>
+                    <div class="hint">يجب أن تكون 6 أحرف على الأقل</div>
                 </div>
 
-                <!-- ===== تأكيد كلمة المرور ===== -->
+                <!-- ===== اختيار اللغة (عربي/إنجليزي فقط) ===== -->
                 <div class="form-group">
-                    <label id="confirmLabel">🔒 تأكيد كلمة المرور</label>
-                    <input type="password" id="confirmPassword" placeholder="••••••••" required>
-                </div>
-
-                <!-- ===== اختيار اللغة ===== -->
-                <div class="form-group">
-                    <label id="languageLabel">🌍 اللغة</label>
+                    <label>🌍 اللغة</label>
                     <div class="language-options">
                         <div class="lang-option selected" data-lang="ar" onclick="selectLanguage('ar')">
                             <span class="flag">🇸🇦</span>
@@ -359,417 +233,79 @@
                             <span class="flag">🇬🇧</span>
                             English
                         </div>
-                        <div class="lang-select-wrapper">
-                            <select id="otherLangSelect" onchange="selectLanguage(this.value)">
-                                <option value="">🌍 أخرى...</option>
-                                <option value="fr">🇫🇷 Français</option>
-                                <option value="tr">🇹🇷 Türkçe</option>
-                                <option value="es">🇪🇸 Español</option>
-                                <option value="de">🇩🇪 Deutsch</option>
-                                <option value="it">🇮🇹 Italiano</option>
-                                <option value="pt">🇵🇹 Português</option>
-                                <option value="ru">🇷🇺 Русский</option>
-                                <option value="zh">🇨🇳 中文</option>
-                                <option value="ja">🇯🇵 日本語</option>
-                                <option value="ko">🇰🇷 한국어</option>
-                                <option value="hi">🇮🇳 हिन्दी</option>
-                                <option value="ur">🇵🇰 اردو</option>
-                            </select>
-                        </div>
                     </div>
                 </div>
 
-                <!-- ===== اختيار المواد ===== -->
+                <!-- ===== اختيار المواد (قائمة منسدلة) ===== -->
                 <div class="form-group">
-                    <label id="subjectLabel">📚 مادة التدريس</label>
-                    <div class="subjects-grid" id="subjectsGrid">
-                        <!-- هتتعبأ من JavaScript -->
-                    </div>
+                    <label>📚 مادة التدريس</label>
+                    <select id="subjectSelect" onchange="toggleCustomSubject()">
+                        <option value="الرياضيات">📐 الرياضيات</option>
+                        <option value="اللغة العربية">📖 اللغة العربية</option>
+                        <option value="اللغة الإنجليزية">🇬🇧 اللغة الإنجليزية</option>
+                        <option value="العلوم">🔬 العلوم</option>
+                        <option value="التاريخ">🏛️ التاريخ</option>
+                        <option value="الجغرافيا">🌍 الجغرافيا</option>
+                        <option value="الفيزياء">⚡ الفيزياء</option>
+                        <option value="الكيمياء">🧪 الكيمياء</option>
+                        <option value="الأحياء">🧬 الأحياء</option>
+                        <option value="الفلسفة">💭 الفلسفة</option>
+                        <option value="أخرى">✏️ أخرى (اكتبها)</option>
+                    </select>
 
-                    <div class="custom-row">
-                        <input type="text" id="customSubject" placeholder="✏️ اكتب مادة جديدة...">
-                        <button type="button" id="addBtn" onclick="addCustomSubject()">➕ إضافة</button>
+                    <!-- حقل كتابة مادة مخصصة -->
+                    <div class="custom-subject-input" id="customSubjectContainer">
+                        <input type="text" id="customSubject" placeholder="✏️ اكتب اسم المادة..." style="width:100%;padding:10px 14px;border:2px solid #e8edf2;border-radius:12px;font-size:15px;background:#f8fafc;transition:0.3s;">
                     </div>
-
-                    <div class="selected-tags" id="selectedSubjects">
-                        <span id="noSubjectMsg" style="color:#999;font-size:13px;">⚠️ لم تختار أي مادة بعد</span>
-                    </div>
+                    <div class="hint">اختر مادة من القائمة أو اختر "أخرى" واكتبها</div>
                 </div>
 
-                <button type="submit" class="btn-register" id="registerBtn" disabled>
+                <!-- ===== زر التسجيل ===== -->
+                <button type="submit" class="btn-register" id="registerBtn">
                     🚀 تسجيل ودخول
                 </button>
 
                 <div class="error-msg" id="errorMsg"></div>
             </form>
+
+            <!-- ===== التوقيع ===== -->
+            <div class="footer">
+                Designed with ❤️ by <span class="name">Dr. Hamada Fathy Hammad</span>
+            </div>
         </div>
     </div>
 
     <script>
-        // ===== الترجمة الكاملة (مع المواد) =====
-        const translations = {
-            ar: {
-                title: '📚 TeachFlow',
-                subtitle: 'تسجيل المعلم الجديد',
-                nameLabel: '👨‍🏫 اسم المعلم',
-                namePlaceholder: 'أدخل اسمك بالكامل',
-                emailLabel: '📧 البريد الإلكتروني',
-                emailPlaceholder: 'teacher@example.com',
-                passwordLabel: '🔒 كلمة المرور',
-                passwordPlaceholder: '••••••••',
-                confirmLabel: '🔒 تأكيد كلمة المرور',
-                confirmPlaceholder: '••••••••',
-                passwordHint: 'يجب أن تكون 6 أحرف على الأقل',
-                languageLabel: '🌍 اللغة',
-                subjectLabel: '📚 مادة التدريس',
-                subjectPlaceholder: '✏️ اكتب مادة جديدة...',
-                addBtn: '➕ إضافة',
-                registerBtn: '🚀 تسجيل ودخول',
-                noSubject: '⚠️ لم تختار أي مادة بعد',
-                errorName: '⚠️ الرجاء إدخال اسم المعلم',
-                errorEmail: '⚠️ الرجاء إدخال بريد إلكتروني صحيح',
-                errorPassword: '⚠️ كلمة المرور يجب أن تكون 6 أحرف على الأقل',
-                errorMatch: '⚠️ كلمة المرور غير متطابقة مع التأكيد',
-                errorSubject: '⚠️ الرجاء اختيار مادة واحدة على الأقل',
-                success: '✅ تم تسجيل المعلم بنجاح!',
-                alertSubject: '⚠️ الرجاء كتابة اسم المادة',
-                alertDuplicate: '⚠️ هذه المادة مضافة بالفعل',
-                subjects: {
-                    math: '📐 الرياضيات',
-                    arabic: '📖 اللغة العربية',
-                    english: '🇬🇧 اللغة الإنجليزية',
-                    science: '🔬 العلوم',
-                    history: '🏛️ التاريخ',
-                    geography: '🌍 الجغرافيا',
-                    physics: '⚡ الفيزياء',
-                    chemistry: '🧪 الكيمياء',
-                    biology: '🧬 الأحياء',
-                    philosophy: '💭 الفلسفة'
-                }
-            },
-            en: {
-                title: '📚 TeachFlow',
-                subtitle: 'New Teacher Registration',
-                nameLabel: '👨‍🏫 Teacher Name',
-                namePlaceholder: 'Enter your full name',
-                emailLabel: '📧 Email',
-                emailPlaceholder: 'teacher@example.com',
-                passwordLabel: '🔒 Password',
-                passwordPlaceholder: '••••••••',
-                confirmLabel: '🔒 Confirm Password',
-                confirmPlaceholder: '••••••••',
-                passwordHint: 'Must be at least 6 characters',
-                languageLabel: '🌍 Language',
-                subjectLabel: '📚 Subject',
-                subjectPlaceholder: '✏️ Type a new subject...',
-                addBtn: '➕ Add',
-                registerBtn: '🚀 Register & Login',
-                noSubject: '⚠️ No subject selected yet',
-                errorName: '⚠️ Please enter teacher name',
-                errorEmail: '⚠️ Please enter a valid email',
-                errorPassword: '⚠️ Password must be at least 6 characters',
-                errorMatch: '⚠️ Passwords do not match',
-                errorSubject: '⚠️ Please select at least one subject',
-                success: '✅ Teacher registered successfully!',
-                alertSubject: '⚠️ Please enter a subject name',
-                alertDuplicate: '⚠️ This subject is already added',
-                subjects: {
-                    math: '📐 Mathematics',
-                    arabic: '📖 Arabic Language',
-                    english: '🇬🇧 English Language',
-                    science: '🔬 Science',
-                    history: '🏛️ History',
-                    geography: '🌍 Geography',
-                    physics: '⚡ Physics',
-                    chemistry: '🧪 Chemistry',
-                    biology: '🧬 Biology',
-                    philosophy: '💭 Philosophy'
-                }
-            },
-            fr: {
-                title: '📚 TeachFlow',
-                subtitle: 'Inscription du nouvel enseignant',
-                nameLabel: '👨‍🏫 Nom de l\'enseignant',
-                namePlaceholder: 'Entrez votre nom complet',
-                emailLabel: '📧 E-mail',
-                emailPlaceholder: 'professeur@exemple.com',
-                passwordLabel: '🔒 Mot de passe',
-                passwordPlaceholder: '••••••••',
-                confirmLabel: '🔒 Confirmer le mot de passe',
-                confirmPlaceholder: '••••••••',
-                passwordHint: 'Au moins 6 caractères',
-                languageLabel: '🌍 Langue',
-                subjectLabel: '📚 Matière',
-                subjectPlaceholder: '✏️ Tapez une nouvelle matière...',
-                addBtn: '➕ Ajouter',
-                registerBtn: '🚀 S\'inscrire et se connecter',
-                noSubject: '⚠️ Aucune matière sélectionnée',
-                errorName: '⚠️ Veuillez entrer le nom de l\'enseignant',
-                errorEmail: '⚠️ Veuillez entrer un e-mail valide',
-                errorPassword: '⚠️ Le mot de passe doit comporter au moins 6 caractères',
-                errorMatch: '⚠️ Les mots de passe ne correspondent pas',
-                errorSubject: '⚠️ Veuillez sélectionner au moins une matière',
-                success: '✅ Enseignant inscrit avec succès!',
-                alertSubject: '⚠️ Veuillez entrer un nom de matière',
-                alertDuplicate: '⚠️ Cette matière est déjà ajoutée',
-                subjects: {
-                    math: '📐 Mathématiques',
-                    arabic: '📖 Langue arabe',
-                    english: '🇬🇧 Langue anglaise',
-                    science: '🔬 Sciences',
-                    history: '🏛️ Histoire',
-                    geography: '🌍 Géographie',
-                    physics: '⚡ Physique',
-                    chemistry: '🧪 Chimie',
-                    biology: '🧬 Biologie',
-                    philosophy: '💭 Philosophie'
-                }
-            },
-            tr: {
-                title: '📚 TeachFlow',
-                subtitle: 'Yeni Öğretmen Kaydı',
-                nameLabel: '👨‍🏫 Öğretmen Adı',
-                namePlaceholder: 'Tam adınızı girin',
-                emailLabel: '📧 E-posta',
-                emailPlaceholder: 'ogretmen@ornek.com',
-                passwordLabel: '🔒 Şifre',
-                passwordPlaceholder: '••••••••',
-                confirmLabel: '🔒 Şifreyi Onayla',
-                confirmPlaceholder: '••••••••',
-                passwordHint: 'En az 6 karakter olmalı',
-                languageLabel: '🌍 Dil',
-                subjectLabel: '📚 Ders',
-                subjectPlaceholder: '✏️ Yeni bir ders yazın...',
-                addBtn: '➕ Ekle',
-                registerBtn: '🚀 Kaydol ve Giriş Yap',
-                noSubject: '⚠️ Henüz ders seçilmedi',
-                errorName: '⚠️ Lütfen öğretmen adını girin',
-                errorEmail: '⚠️ Lütfen geçerli bir e-posta girin',
-                errorPassword: '⚠️ Şifre en az 6 karakter olmalı',
-                errorMatch: '⚠️ Şifreler eşleşmiyor',
-                errorSubject: '⚠️ Lütfen en az bir ders seçin',
-                success: '✅ Öğretmen başarıyla kaydedildi!',
-                alertSubject: '⚠️ Lütfen bir ders adı girin',
-                alertDuplicate: '⚠️ Bu ders zaten eklendi',
-                subjects: {
-                    math: '📐 Matematik',
-                    arabic: '📖 Arapça',
-                    english: '🇬🇧 İngilizce',
-                    science: '🔬 Bilim',
-                    history: '🏛️ Tarih',
-                    geography: '🌍 Coğrafya',
-                    physics: '⚡ Fizik',
-                    chemistry: '🧪 Kimya',
-                    biology: '🧬 Biyoloji',
-                    philosophy: '💭 Felsefe'
-                }
-            },
-            es: {
-                title: '📚 TeachFlow',
-                subtitle: 'Registro de nuevo profesor',
-                nameLabel: '👨‍🏫 Nombre del profesor',
-                namePlaceholder: 'Ingrese su nombre completo',
-                emailLabel: '📧 Correo electrónico',
-                emailPlaceholder: 'profesor@ejemplo.com',
-                passwordLabel: '🔒 Contraseña',
-                passwordPlaceholder: '••••••••',
-                confirmLabel: '🔒 Confirmar contraseña',
-                confirmPlaceholder: '••••••••',
-                passwordHint: 'Debe tener al menos 6 caracteres',
-                languageLabel: '🌍 Idioma',
-                subjectLabel: '📚 Asignatura',
-                subjectPlaceholder: '✏️ Escribe una nueva asignatura...',
-                addBtn: '➕ Agregar',
-                registerBtn: '🚀 Registrarse e iniciar sesión',
-                noSubject: '⚠️ No se ha seleccionado ninguna asignatura',
-                errorName: '⚠️ Por favor ingrese el nombre del profesor',
-                errorEmail: '⚠️ Por favor ingrese un correo válido',
-                errorPassword: '⚠️ La contraseña debe tener al menos 6 caracteres',
-                errorMatch: '⚠️ Las contraseñas no coinciden',
-                errorSubject: '⚠️ Por favor seleccione al menos una asignatura',
-                success: '✅ ¡Profesor registrado con éxito!',
-                alertSubject: '⚠️ Por favor ingrese un nombre de asignatura',
-                alertDuplicate: '⚠️ Esta asignatura ya está agregada',
-                subjects: {
-                    math: '📐 Matemáticas',
-                    arabic: '📖 Lengua árabe',
-                    english: '🇬🇧 Inglés',
-                    science: '🔬 Ciencias',
-                    history: '🏛️ Historia',
-                    geography: '🌍 Geografía',
-                    physics: '⚡ Física',
-                    chemistry: '🧪 Química',
-                    biology: '🧬 Biología',
-                    philosophy: '💭 Filosofía'
-                }
-            }
-        };
-
         // ===== متغيرات =====
-        let currentLang = 'ar';
-        let selectedSubjects = [];
+        let selectedLang = 'ar';
 
-        // ===== المواد الأساسية (مفاتيح) =====
-        const subjectKeys = ['math', 'arabic', 'english', 'science', 'history', 'geography', 'physics', 'chemistry', 'biology', 'philosophy'];
-
-        // ===== تغيير اللغة =====
+        // ===== اختيار اللغة =====
         function selectLanguage(lang) {
-            if (!lang || lang === '') return;
-            currentLang = lang;
-
+            selectedLang = lang;
             document.querySelectorAll('.lang-option').forEach(el => {
                 el.classList.toggle('selected', el.dataset.lang === lang);
             });
-            document.getElementById('otherLangSelect').value = lang;
 
-            if (lang === 'ar' || lang === 'ur') {
+            // تغيير اتجاه الصفحة
+            if (lang === 'ar') {
                 document.dir = 'rtl';
-                document.documentElement.lang = lang;
+                document.documentElement.lang = 'ar';
             } else {
                 document.dir = 'ltr';
-                document.documentElement.lang = lang;
+                document.documentElement.lang = 'en';
             }
-
-            applyTranslation(lang);
-            renderSubjects(lang);
         }
 
-        // ===== تطبيق الترجمة =====
-        function applyTranslation(lang) {
-            const t = translations[lang];
-            if (!t) return;
-
-            document.getElementById('pageTitle').textContent = t.title;
-            document.getElementById('pageSubtitle').textContent = t.subtitle;
-            document.getElementById('nameLabel').textContent = t.nameLabel;
-            document.getElementById('teacherName').placeholder = t.namePlaceholder;
-            document.getElementById('emailLabel').textContent = t.emailLabel;
-            document.getElementById('email').placeholder = t.emailPlaceholder;
-            document.getElementById('passwordLabel').textContent = t.passwordLabel;
-            document.getElementById('password').placeholder = t.passwordPlaceholder;
-            document.getElementById('confirmLabel').textContent = t.confirmLabel;
-            document.getElementById('confirmPassword').placeholder = t.confirmPlaceholder;
-            document.getElementById('passwordHint').textContent = t.passwordHint;
-            document.getElementById('languageLabel').textContent = t.languageLabel;
-            document.getElementById('subjectLabel').textContent = t.subjectLabel;
-            document.getElementById('customSubject').placeholder = t.subjectPlaceholder;
-            document.getElementById('addBtn').textContent = t.addBtn;
-            document.getElementById('registerBtn').textContent = t.registerBtn;
-            document.getElementById('noSubjectMsg').textContent = t.noSubject;
-        }
-
-        // ===== عرض المواد حسب اللغة =====
-        function renderSubjects(lang) {
-            const t = translations[lang];
-            if (!t) return;
-
-            const grid = document.getElementById('subjectsGrid');
-            grid.innerHTML = '';
-
-            subjectKeys.forEach(key => {
-                const div = document.createElement('div');
-                div.className = 'subject-item';
-                div.dataset.subject = key;
-                div.textContent = t.subjects[key] || key;
-                div.onclick = function() { toggleSubject(this, key); };
-                grid.appendChild(div);
-            });
-
-            // إعادة تحديد المواد المختارة
-            document.querySelectorAll('.subject-item').forEach(el => {
-                if (selectedSubjects.includes(el.dataset.subject)) {
-                    el.classList.add('selected');
-                }
-            });
-        }
-
-        // ===== اختيار مادة =====
-        function toggleSubject(element, key) {
-            const index = selectedSubjects.indexOf(key);
-            if (index > -1) {
-                selectedSubjects.splice(index, 1);
-                element.classList.remove('selected');
+        // ===== إظهار/إخفاء حقل المادة المخصصة =====
+        function toggleCustomSubject() {
+            const select = document.getElementById('subjectSelect');
+            const container = document.getElementById('customSubjectContainer');
+            if (select.value === 'أخرى') {
+                container.classList.add('show');
+                document.getElementById('customSubject').focus();
             } else {
-                selectedSubjects.push(key);
-                element.classList.add('selected');
-            }
-            updateSelectedTags();
-        }
-
-        // ===== إضافة مادة مخصصة =====
-        function addCustomSubject() {
-            const input = document.getElementById('customSubject');
-            const subject = input.value.trim();
-            const t = translations[currentLang];
-
-            if (!subject) {
-                alert(t.alertSubject);
-                return;
-            }
-
-            if (selectedSubjects.includes(subject)) {
-                alert(t.alertDuplicate);
-                input.value = '';
-                return;
-            }
-
-            selectedSubjects.push(subject);
-            input.value = '';
-
-            const grid = document.getElementById('subjectsGrid');
-            const newItem = document.createElement('div');
-            newItem.className = 'subject-item selected';
-            newItem.dataset.subject = subject;
-            newItem.textContent = '📌 ' + subject;
-            newItem.onclick = function() { toggleSubject(this, subject); };
-            grid.appendChild(newItem);
-
-            updateSelectedTags();
-        }
-
-        // ===== تحديث المواد المختارة =====
-        function updateSelectedTags() {
-            const container = document.getElementById('selectedSubjects');
-            container.innerHTML = '';
-            const t = translations[currentLang];
-
-            if (selectedSubjects.length === 0) {
-                const msg = document.createElement('span');
-                msg.style.color = '#999';
-                msg.style.fontSize = '13px';
-                msg.textContent = t.noSubject;
-                container.appendChild(msg);
-                document.getElementById('registerBtn').disabled = true;
-                return;
-            }
-
-            document.getElementById('registerBtn').disabled = false;
-
-            selectedSubjects.forEach(subject => {
-                // تحويل المفتاح إلى اسم
-                let displayName = subject;
-                if (subjectKeys.includes(subject)) {
-                    displayName = t.subjects[subject] || subject;
-                }
-
-                const tag = document.createElement('span');
-                tag.className = 'selected-tag';
-                tag.innerHTML = `${displayName} <span class="remove" onclick="removeSubject('${subject}')">✕</span>`;
-                container.appendChild(tag);
-            });
-        }
-
-        // ===== حذف مادة =====
-        function removeSubject(subject) {
-            const index = selectedSubjects.indexOf(subject);
-            if (index > -1) {
-                selectedSubjects.splice(index, 1);
-                document.querySelectorAll('.subject-item').forEach(el => {
-                    if (el.dataset.subject === subject) {
-                        el.classList.remove('selected');
-                    }
-                });
-                updateSelectedTags();
+                container.classList.remove('show');
+                document.getElementById('customSubject').value = '';
             }
         }
 
@@ -780,64 +316,59 @@
             const name = document.getElementById('teacherName').value.trim();
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value.trim();
-            const confirmPassword = document.getElementById('confirmPassword').value.trim();
+            const subjectSelect = document.getElementById('subjectSelect').value;
+            const customSubject = document.getElementById('customSubject').value.trim();
             const errorEl = document.getElementById('errorMsg');
-            const t = translations[currentLang];
 
             errorEl.classList.remove('show');
 
+            // التحقق من اسم المعلم
             if (!name) {
-                errorEl.textContent = t.errorName;
+                errorEl.textContent = '⚠️ الرجاء إدخال اسم المعلم';
                 errorEl.classList.add('show');
                 return;
             }
 
+            // التحقق من البريد
             if (!email || !email.includes('@')) {
-                errorEl.textContent = t.errorEmail;
+                errorEl.textContent = '⚠️ الرجاء إدخال بريد إلكتروني صحيح';
                 errorEl.classList.add('show');
                 return;
             }
 
+            // التحقق من كلمة المرور
             if (password.length < 6) {
-                errorEl.textContent = t.errorPassword;
+                errorEl.textContent = '⚠️ كلمة المرور يجب أن تكون 6 أحرف على الأقل';
                 errorEl.classList.add('show');
                 return;
             }
 
-            if (password !== confirmPassword) {
-                errorEl.textContent = t.errorMatch;
-                errorEl.classList.add('show');
-                return;
+            // تحديد المادة النهائية
+            let finalSubject = subjectSelect;
+            if (subjectSelect === 'أخرى') {
+                if (!customSubject) {
+                    errorEl.textContent = '⚠️ الرجاء كتابة اسم المادة';
+                    errorEl.classList.add('show');
+                    return;
+                }
+                finalSubject = customSubject;
             }
 
-            if (selectedSubjects.length === 0) {
-                errorEl.textContent = t.errorSubject;
-                errorEl.classList.add('show');
-                return;
-            }
-
+            // حفظ البيانات
             const teacherData = {
                 name: name,
                 email: email,
                 password: password,
-                language: currentLang,
-                subjects: selectedSubjects,
+                language: selectedLang,
+                subjects: [finalSubject], // كمادة واحدة فقط
                 registeredAt: new Date().toISOString()
             };
 
             localStorage.setItem('teachflow_teacher', JSON.stringify(teacherData));
             localStorage.setItem('teachflow_user', JSON.stringify({ name: name, email: email }));
 
-            alert(t.success);
+            alert('✅ تم تسجيل المعلم بنجاح!');
             window.location.href = 'home.html';
-        });
-
-        // ===== الضغط على Enter =====
-        document.getElementById('customSubject').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                addCustomSubject();
-            }
         });
 
         // ===== تحميل الصفحة =====
@@ -847,14 +378,8 @@
                 window.location.href = 'home.html';
                 return;
             }
-
             selectLanguage('ar');
         });
     </script>
-    <!-- ===== تذييل الصفحة ===== -->
-<div style="text-align: center; margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee; color: #aaa; font-size: 13px; direction: ltr;">
-    Designed with ❤️ by 
-    <span style="color: #667eea; font-weight: 600;">Dr. Hamada Fathy Hammad</span>
-</div>
 </body>
 </html>
