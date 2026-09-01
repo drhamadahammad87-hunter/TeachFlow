@@ -17,6 +17,39 @@
             min-height: 100vh;
         }
 
+        /* ===== Hamburger ===== */
+        .hamburger {
+            display: none;
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            z-index: 999;
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 99;
+        }
+
+        .sidebar-overlay.active {
+            display: block;
+        }
+
+        /* ===== Sidebar ===== */
         .sidebar {
             position: fixed;
             right: 0;
@@ -28,6 +61,18 @@
             box-shadow: -2px 0 10px rgba(0, 0, 0, 0.05);
             overflow-y: auto;
             z-index: 100;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar .close-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: #555;
+            cursor: pointer;
+            float: left;
+            margin-bottom: 10px;
         }
 
         .logo {
@@ -73,6 +118,7 @@
             color: white;
         }
 
+        /* ===== Main ===== */
         .main-content {
             margin-right: 220px;
             padding: 25px;
@@ -145,6 +191,7 @@
             transform: scale(1.02);
         }
 
+        /* ===== Settings ===== */
         .settings-card {
             background: white;
             border-radius: 16px;
@@ -217,6 +264,7 @@
             margin-top: 4px;
         }
 
+        /* ===== Toggle ===== */
         .toggle-group {
             display: flex;
             gap: 12px;
@@ -254,6 +302,7 @@
             font-weight: 600;
         }
 
+        /* ===== Toast ===== */
         .toast {
             position: fixed;
             bottom: 30px;
@@ -276,34 +325,48 @@
             opacity: 1;
         }
 
+        .toast.error {
+            background: #e74c3c;
+        }
+
+        /* ===== Mobile ===== */
         @media (max-width: 768px) {
+            .hamburger {
+                display: block;
+            }
+
             .sidebar {
-                width: 60px;
-                padding: 15px 8px;
+                width: 280px;
+                transform: translateX(100%);
+                box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
             }
-            .sidebar-item span:not(.icon) {
-                display: none;
+
+            .sidebar.open {
+                transform: translateX(0);
             }
-            .sidebar-item {
-                justify-content: center;
-                padding: 12px;
+
+            .sidebar .close-btn {
+                display: block;
             }
-            .logo {
-                font-size: 16px;
-            }
-            .logo span {
-                display: none;
-            }
+
             .main-content {
-                margin-right: 60px;
-                padding: 15px;
+                margin-right: 0;
+                padding: 70px 15px 15px 15px;
             }
+
             .page-header h1 {
                 font-size: 20px;
             }
+
             .settings-section .form-group input,
             .settings-section .form-group select {
                 max-width: 100%;
+            }
+
+            .btn-back,
+            .btn-save {
+                font-size: 12px;
+                padding: 6px 12px;
             }
         }
 
@@ -312,36 +375,63 @@
                 flex-direction: column;
                 width: 100%;
             }
+
             .page-header .actions button {
                 width: 100%;
                 justify-content: center;
             }
+
             .toggle-group {
                 flex-direction: column;
                 align-items: flex-start;
+            }
+
+            .settings-card {
+                padding: 20px 15px;
+            }
+
+            .settings-section h3 {
+                font-size: 16px;
+            }
+
+            .hamburger {
+                font-size: 20px;
+                padding: 8px 12px;
+                top: 10px;
+                right: 10px;
+            }
+
+            .sidebar {
+                width: 260px;
             }
         }
     </style>
 </head>
 <body>
 
-    <!-- ===== الشريط الجانبي الموحد ===== -->
-  <nav class="sidebar">
-    <div class="logo">📚 TeachFlow <span>نظام إدارة المعلمين</span></div>
+    <!-- ===== Hamburger ===== -->
+    <button class="hamburger" onclick="toggleSidebar()">☰</button>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
-    <button class="sidebar-item" onclick="window.location.href='home.html'">🏠 <span>الرئيسية</span></button>
-    <button class="sidebar-item" onclick="window.location.href='groups.html'">👥 <span>المجموعات</span></button>
-    <button class="sidebar-item" onclick="window.location.href='students.html'">👨‍🎓 <span>الطلاب</span></button>
-    <button class="sidebar-item" onclick="window.location.href='schedule.html'">📅 <span>الجدول</span></button>
-    <button class="sidebar-item" onclick="window.location.href='attendance.html'">✅ <span>الحضور</span></button>
-    <button class="sidebar-item" onclick="window.location.href='assessments.html'">📊 <span>التقييمات</span></button>
-    <button class="sidebar-item" onclick="window.location.href='finances.html'">💰 <span>الحسابات</span></button>
-    <button class="sidebar-item" onclick="window.location.href='student-report.html'">📈 <span>التقارير</span></button>
-    <button class="sidebar-item" onclick="window.location.href='notifications.html'">🔔 <span>التنبيهات</span></button>
-    <button class="sidebar-item" onclick="window.location.href='settings.html'">⚙️ <span>الإعدادات</span></button>
-    <button class="sidebar-item" onclick="logout()">🚪 <span>تسجيل الخروج</span></button>
-</nav>
+    <!-- ===== Sidebar ===== -->
+    <nav class="sidebar" id="sidebar">
+        <button class="close-btn" onclick="toggleSidebar()">✕</button>
+        <div class="logo">📚 TeachFlow <span>نظام إدارة المعلمين</span></div>
 
+        <button class="sidebar-item" onclick="window.location.href='home.html'">🏠 <span>الرئيسية</span></button>
+        <button class="sidebar-item" onclick="window.location.href='groups.html'">👥 <span>المجموعات</span></button>
+        <button class="sidebar-item" onclick="window.location.href='students.html'">👨‍🎓 <span>الطلاب</span></button>
+        <button class="sidebar-item" onclick="window.location.href='schedule.html'">📅 <span>الجدول</span></button>
+        <button class="sidebar-item" onclick="window.location.href='attendance.html'">✅ <span>الحضور</span></button>
+        <button class="sidebar-item" onclick="window.location.href='assessments.html'">📊 <span>التقييمات</span></button>
+        <button class="sidebar-item" onclick="window.location.href='finances.html'">💰 <span>الحسابات</span></button>
+        <button class="sidebar-item" onclick="window.location.href='student-report.html'">📈 <span>التقارير</span></button>
+        <button class="sidebar-item" onclick="window.location.href='notifications.html'">🔔 <span>التنبيهات</span></button>
+        <button class="sidebar-item active" onclick="window.location.href='settings.html'">⚙️ <span>الإعدادات</span></button>
+        <button class="sidebar-item" onclick="logout()">🚪 <span>تسجيل الخروج</span></button>
+    </nav>
+
+    <!-- ===== Main ===== -->
     <main class="main-content">
 
         <div class="page-header">
@@ -352,9 +442,10 @@
             </div>
         </div>
 
+        <!-- ===== Settings ===== -->
         <div class="settings-card">
 
-            <!-- ===== الملف الشخصي ===== -->
+            <!-- ===== Profile ===== -->
             <div class="settings-section">
                 <h3>👤 الملف الشخصي</h3>
 
@@ -382,7 +473,7 @@
                 </div>
             </div>
 
-            <!-- ===== اللغة ===== -->
+            <!-- ===== Language ===== -->
             <div class="settings-section">
                 <h3>🌍 اللغة</h3>
 
@@ -394,21 +485,12 @@
                         <option value="fr">🇫🇷 Français</option>
                         <option value="tr">🇹🇷 Türkçe</option>
                         <option value="es">🇪🇸 Español</option>
-                        <option value="de">🇩🇪 Deutsch</option>
-                        <option value="it">🇮🇹 Italiano</option>
-                        <option value="pt">🇵🇹 Português</option>
-                        <option value="ru">🇷🇺 Русский</option>
-                        <option value="zh">🇨🇳 中文</option>
-                        <option value="ja">🇯🇵 日本語</option>
-                        <option value="ko">🇰🇷 한국어</option>
-                        <option value="hi">🇮🇳 हिन्दी</option>
-                        <option value="ur">🇵🇰 اردو</option>
                     </select>
                     <div class="current-value" id="currentLanguage"></div>
                 </div>
             </div>
 
-            <!-- ===== العملة ===== -->
+            <!-- ===== Currency ===== -->
             <div class="settings-section">
                 <h3>💵 العملة</h3>
 
@@ -421,17 +503,12 @@
                         <option value="GBP">🇬🇧 جنيه إسترليني (GBP)</option>
                         <option value="SAR">🇸🇦 ريال سعودي (SAR)</option>
                         <option value="AED">🇦🇪 درهم إماراتي (AED)</option>
-                        <option value="KWD">🇰🇼 دينار كويتي (KWD)</option>
-                        <option value="QAR">🇶🇦 ريال قطري (QAR)</option>
-                        <option value="BHD">🇧🇭 دينار بحريني (BHD)</option>
-                        <option value="OMR">🇴🇲 ريال عماني (OMR)</option>
-                        <option value="JOD">🇯🇴 دينار أردني (JOD)</option>
                     </select>
                     <div class="current-value" id="currentCurrency"></div>
                 </div>
             </div>
 
-            <!-- ===== الإشعارات ===== -->
+            <!-- ===== Notifications ===== -->
             <div class="settings-section">
                 <h3>🔔 الإشعارات</h3>
 
@@ -455,7 +532,7 @@
                 </div>
             </div>
 
-            <!-- ===== البيانات ===== -->
+            <!-- ===== Data ===== -->
             <div class="settings-section" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">
                 <h3>💾 البيانات</h3>
 
@@ -480,9 +557,33 @@
         </div>
     </main>
 
+    <!-- ===== Toast ===== -->
     <div class="toast" id="toast"></div>
 
     <script>
+        // ===== Sidebar Toggle =====
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+
+            sidebar.classList.toggle('closed');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+
+            if (window.innerWidth <= 768) {
+                document.querySelectorAll('.sidebar-item').forEach(item => {
+                    item.addEventListener('click', function() {
+                        setTimeout(() => {
+                            sidebar.classList.add('closed');
+                            sidebar.classList.remove('open');
+                            overlay.classList.remove('active');
+                        }, 300);
+                    });
+                });
+            }
+        }
+
+        // ===== Load Settings =====
         function loadSettings() {
             const teacher = JSON.parse(localStorage.getItem('teachflow_teacher'));
 
@@ -514,6 +615,7 @@
             }
         }
 
+        // ===== Save Settings =====
         function saveSettings() {
             const name = document.getElementById('teacherName').value.trim();
             const email = document.getElementById('teacherEmail').value.trim();
@@ -573,6 +675,7 @@
             loadSettings();
         }
 
+        // ===== Export Data =====
         function exportData() {
             const data = {
                 teacher: JSON.parse(localStorage.getItem('teachflow_teacher')),
@@ -600,6 +703,7 @@
             showToast('📤 تم تصدير البيانات بنجاح!', 'success');
         }
 
+        // ===== Import Data =====
         function importData(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -634,6 +738,7 @@
             event.target.value = '';
         }
 
+        // ===== Clear All Data =====
         function clearAllData() {
             if (confirm('🗑️ هل أنت متأكد من حذف جميع البيانات؟ لا يمكن التراجع عن هذا الإجراء!')) {
                 if (confirm('⚠️ تأكيد نهائي: حذف جميع البيانات؟')) {
@@ -656,6 +761,7 @@
             }
         }
 
+        // ===== Toast =====
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
             toast.textContent = message;
@@ -664,6 +770,7 @@
             setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
+        // ===== Logout =====
         function logout() {
             if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
                 localStorage.removeItem('teachflow_user');
@@ -678,6 +785,24 @@
                 return;
             }
             loadSettings();
+
+            if (window.innerWidth > 768) {
+                const sidebar = document.getElementById('sidebar');
+                sidebar.classList.remove('closed');
+                sidebar.classList.remove('open');
+            }
+        });
+
+        window.addEventListener('resize', function() {
+            const sidebar = document.getElementById('sidebar');
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('closed');
+                sidebar.classList.remove('open');
+                document.getElementById('sidebarOverlay').classList.remove('active');
+            } else {
+                sidebar.classList.add('closed');
+                sidebar.classList.remove('open');
+            }
         });
     </script>
 </body>
