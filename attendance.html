@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>الحضور - TeachFlow</title>
-    <!-- ===== EmailJS (مجاني) ===== -->
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js">
     </script>
     <style>
@@ -20,6 +19,39 @@
             min-height: 100vh;
         }
 
+        /* ===== Hamburger ===== */
+        .hamburger {
+            display: none;
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            z-index: 999;
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 99;
+        }
+
+        .sidebar-overlay.active {
+            display: block;
+        }
+
+        /* ===== Sidebar ===== */
         .sidebar {
             position: fixed;
             right: 0;
@@ -31,6 +63,18 @@
             box-shadow: -2px 0 10px rgba(0, 0, 0, 0.05);
             overflow-y: auto;
             z-index: 100;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar .close-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: #555;
+            cursor: pointer;
+            float: left;
+            margin-bottom: 10px;
         }
 
         .logo {
@@ -76,6 +120,7 @@
             color: white;
         }
 
+        /* ===== Main ===== */
         .main-content {
             margin-right: 220px;
             padding: 25px;
@@ -148,7 +193,7 @@
             transform: scale(1.02);
         }
 
-        /* ===== فلتر اليوم ===== */
+        /* ===== Filter ===== */
         .filter-bar {
             display: flex;
             gap: 12px;
@@ -208,7 +253,7 @@
             color: #333;
         }
 
-        /* ===== جدول الحضور ===== */
+        /* ===== Table ===== */
         .table-container {
             background: white;
             border-radius: 16px;
@@ -313,7 +358,7 @@
             font-weight: 600;
         }
 
-        /* ===== زر الإشعارات ===== */
+        /* ===== Notifications Badge ===== */
         .notif-badge {
             position: relative;
             display: inline-block;
@@ -331,82 +376,137 @@
             font-weight: 600;
         }
 
+        /* ===== Mobile ===== */
         @media (max-width: 768px) {
+            .hamburger {
+                display: block;
+            }
+
             .sidebar {
-                width: 60px;
-                padding: 15px 8px;
+                width: 280px;
+                transform: translateX(100%);
+                box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
             }
-            .sidebar-item span:not(.icon) {
-                display: none;
+
+            .sidebar.open {
+                transform: translateX(0);
             }
-            .sidebar-item {
-                justify-content: center;
-                padding: 12px;
+
+            .sidebar .close-btn {
+                display: block;
             }
-            .logo {
-                font-size: 16px;
-            }
-            .logo span {
-                display: none;
-            }
+
             .main-content {
-                margin-right: 60px;
-                padding: 15px;
+                margin-right: 0;
+                padding: 70px 15px 15px 15px;
             }
+
             .page-header h1 {
                 font-size: 20px;
             }
+
             .filter-bar {
                 flex-direction: column;
                 align-items: stretch;
             }
+
             .filter-bar .summary {
                 margin-right: 0;
+                font-size: 12px;
+            }
+
+            .attendance-table {
+                font-size: 12px;
+                min-width: 500px;
+            }
+
+            .attendance-table th,
+            .attendance-table td {
+                padding: 8px 10px;
+            }
+
+            .btn-back,
+            .btn-save {
+                font-size: 12px;
+                padding: 6px 12px;
             }
         }
 
         @media (max-width: 480px) {
             .attendance-table {
-                font-size: 12px;
-                min-width: 500px;
+                font-size: 11px;
+                min-width: 400px;
             }
+
             .attendance-table th,
             .attendance-table td {
-                padding: 8px 10px;
+                padding: 6px 8px;
+            }
+
+            .attendance-table .status-badge {
+                font-size: 11px;
+                padding: 2px 8px;
+            }
+
+            .page-header .actions {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .page-header .actions button {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .hamburger {
+                font-size: 20px;
+                padding: 8px 12px;
+                top: 10px;
+                right: 10px;
+            }
+
+            .sidebar {
+                width: 260px;
             }
         }
     </style>
 </head>
 <body>
 
-    <!-- ===== الشريط الجانبي الموحد ===== -->
-   <nav class="sidebar">
-    <div class="logo">📚 TeachFlow <span>نظام إدارة المعلمين</span></div>
+    <!-- ===== Hamburger ===== -->
+    <button class="hamburger" onclick="toggleSidebar()">☰</button>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
-    <button class="sidebar-item" onclick="window.location.href='home.html'">🏠 <span>الرئيسية</span></button>
-    <button class="sidebar-item" onclick="window.location.href='groups.html'">👥 <span>المجموعات</span></button>
-    <button class="sidebar-item" onclick="window.location.href='students.html'">👨‍🎓 <span>الطلاب</span></button>
-    <button class="sidebar-item" onclick="window.location.href='schedule.html'">📅 <span>الجدول</span></button>
-    <button class="sidebar-item" onclick="window.location.href='attendance.html'">✅ <span>الحضور</span></button>
-    <button class="sidebar-item" onclick="window.location.href='assessments.html'">📊 <span>التقييمات</span></button>
-    <button class="sidebar-item" onclick="window.location.href='finances.html'">💰 <span>الحسابات</span></button>
-    <button class="sidebar-item" onclick="window.location.href='student-report.html'">📈 <span>التقارير</span></button>
-    <button class="sidebar-item" onclick="window.location.href='notifications.html'">🔔 <span>التنبيهات</span></button>
-    <button class="sidebar-item" onclick="window.location.href='settings.html'">⚙️ <span>الإعدادات</span></button>
-    <button class="sidebar-item" onclick="logout()">🚪 <span>تسجيل الخروج</span></button>
-</nav>
+    <!-- ===== Sidebar ===== -->
+    <nav class="sidebar" id="sidebar">
+        <button class="close-btn" onclick="toggleSidebar()">✕</button>
+        <div class="logo">📚 TeachFlow <span>نظام إدارة المعلمين</span></div>
 
+        <button class="sidebar-item" onclick="window.location.href='home.html'">🏠 <span>الرئيسية</span></button>
+        <button class="sidebar-item" onclick="window.location.href='groups.html'">👥 <span>المجموعات</span></button>
+        <button class="sidebar-item" onclick="window.location.href='students.html'">👨‍🎓 <span>الطلاب</span></button>
+        <button class="sidebar-item" onclick="window.location.href='schedule.html'">📅 <span>الجدول</span></button>
+        <button class="sidebar-item active" onclick="window.location.href='attendance.html'">✅ <span>الحضور</span></button>
+        <button class="sidebar-item" onclick="window.location.href='assessments.html'">📊 <span>التقييمات</span></button>
+        <button class="sidebar-item" onclick="window.location.href='finances.html'">💰 <span>الحسابات</span></button>
+        <button class="sidebar-item" onclick="window.location.href='student-report.html'">📈 <span>التقارير</span></button>
+        <button class="sidebar-item" onclick="window.location.href='notifications.html'">🔔 <span>التنبيهات</span></button>
+        <button class="sidebar-item" onclick="window.location.href='settings.html'">⚙️ <span>الإعدادات</span></button>
+        <button class="sidebar-item" onclick="logout()">🚪 <span>تسجيل الخروج</span></button>
+    </nav>
+
+    <!-- ===== Main ===== -->
     <main class="main-content">
 
         <div class="page-header">
             <h1>✅ الحضور</h1>
             <div class="actions">
                 <button class="btn-back" onclick="window.location.href='home.html'">🔙 رجوع</button>
-                <button class="btn-save" onclick="saveAttendance()">💾 حفظ الحضور وإرسال الإشعارات</button>
+                <button class="btn-save" onclick="saveAttendance()">💾 حفظ الحضور</button>
             </div>
         </div>
 
-        <!-- ===== فلتر ===== -->
+        <!-- ===== Filter ===== -->
         <div class="filter-bar">
             <label>📅 التاريخ:</label>
             <input type="date" id="attendanceDate" onchange="loadAttendance()">
@@ -425,7 +525,7 @@
             </div>
         </div>
 
-        <!-- ===== جدول الحضور ===== -->
+        <!-- ===== Table ===== -->
         <div class="table-container">
             <table class="attendance-table">
                 <thead>
@@ -449,12 +549,27 @@
     </main>
 
     <script>
-        // ===== تهيئة EmailJS (مجاني) =====
-        const EMAILJS_CONFIG = {
-            publicKey: 'YOUR_PUBLIC_KEY',
-            serviceID: 'YOUR_SERVICE_ID',
-            templateID: 'YOUR_TEMPLATE_ID'
-        };
+        // ===== Sidebar Toggle =====
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+
+            sidebar.classList.toggle('closed');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+
+            if (window.innerWidth <= 768) {
+                document.querySelectorAll('.sidebar-item').forEach(item => {
+                    item.addEventListener('click', function() {
+                        setTimeout(() => {
+                            sidebar.classList.add('closed');
+                            sidebar.classList.remove('open');
+                            overlay.classList.remove('active');
+                        }, 300);
+                    });
+                });
+            }
+        }
 
         // ===== بيانات الحضور =====
         let attendanceData = [];
@@ -479,7 +594,7 @@
             updateNotificationBadge();
         }
 
-        // ===== تحميل المجموعات في الفلتر =====
+        // ===== تحميل المجموعات =====
         function loadGroupsFilter() {
             const groups = JSON.parse(localStorage.getItem('teachflow_groups')) || [];
             const select = document.getElementById('groupFilter');
@@ -512,7 +627,7 @@
             }
         }
 
-        // ===== عرض جدول الحضور =====
+        // ===== عرض الجدول =====
         function renderAttendance() {
             const tbody = document.getElementById('attendanceBody');
 
@@ -562,6 +677,7 @@
             }).join('');
         }
 
+        // ===== ألوان الحالة =====
         function getStatusColor(status) {
             const colors = {
                 'present': '#eafaf1',
@@ -592,6 +708,7 @@
             return map[status] || status;
         }
 
+        // ===== تحديث حالة الطالب =====
         function updateStatus(studentId, status) {
             const existing = attendanceData.find(a => a.studentId === studentId && a.date === currentDate);
             if (existing) {
@@ -607,6 +724,7 @@
             updateSummary();
         }
 
+        // ===== تحديث ملاحظة =====
         function updateNote(studentId, note) {
             const existing = attendanceData.find(a => a.studentId === studentId && a.date === currentDate);
             if (existing) {
@@ -621,6 +739,7 @@
             }
         }
 
+        // ===== تحديث الإحصائيات =====
         function updateSummary() {
             const total = currentStudents.length;
             let present = 0,
@@ -657,6 +776,7 @@
             document.getElementById('excusedCount').textContent = excused;
         }
 
+        // ===== إرسال إشعار داخل التطبيق =====
         function sendInAppNotification(studentName, status, date) {
             const notifications = JSON.parse(localStorage.getItem('teachflow_notifications')) || [];
             notifications.push({
@@ -672,34 +792,7 @@
             updateNotificationBadge();
         }
 
-        function sendEmailNotification(student, status, date) {
-            if (!student.parentEmail) return;
-            if (EMAILJS_CONFIG.publicKey === 'YOUR_PUBLIC_KEY') {
-                console.log('⚠️ يرجى تهيئة EmailJS أولاً');
-                return;
-            }
-
-            const templateParams = {
-                to_email: student.parentEmail,
-                student_name: student.name,
-                status: getStatusText(status),
-                date: date || currentDate,
-                group: student.group,
-                note: attendanceData.find(a => a.studentId === student.id)?.note || ''
-            };
-
-            emailjs.send(
-                EMAILJS_CONFIG.serviceID,
-                EMAILJS_CONFIG.templateID,
-                templateParams,
-                EMAILJS_CONFIG.publicKey
-            ).then(() => {
-                console.log(`✅ تم إرسال إيميل لولي أمر ${student.name}`);
-            }).catch((error) => {
-                console.error('❌ فشل إرسال الإيميل:', error);
-            });
-        }
-
+        // ===== حفظ الحضور =====
         function saveAttendance() {
             const saved = localStorage.getItem('teachflow_attendance');
             let allAttendance = saved ? JSON.parse(saved) : [];
@@ -709,24 +802,20 @@
 
             const students = JSON.parse(localStorage.getItem('teachflow_students')) || [];
             let notificationsSent = 0;
-            let emailsSent = 0;
 
             attendanceData.forEach(record => {
                 const student = students.find(s => s.id === record.studentId);
                 if (student) {
                     sendInAppNotification(student.name, record.status, record.date);
                     notificationsSent++;
-                    if (student.parentEmail) {
-                        sendEmailNotification(student, record.status, record.date);
-                        emailsSent++;
-                    }
                 }
             });
 
             updateHomeStats();
-            alert(`✅ تم حفظ الحضور بنجاح!\n📨 تم إرسال ${notificationsSent} إشعار داخل التطبيق\n📧 تم إرسال ${emailsSent} إيميل`);
+            alert(`✅ تم حفظ الحضور بنجاح!\n📨 تم إرسال ${notificationsSent} إشعار`);
         }
 
+        // ===== تحديث إحصائيات الصفحة الرئيسية =====
         function updateHomeStats() {
             const today = new Date().toISOString().split('T')[0];
             const allAttendance = JSON.parse(localStorage.getItem('teachflow_attendance')) || [];
@@ -735,6 +824,7 @@
             localStorage.setItem('teachflow_today_attendance', presentToday);
         }
 
+        // ===== تحديث عدد الإشعارات =====
         function updateNotificationBadge() {
             const notifications = JSON.parse(localStorage.getItem('teachflow_notifications')) || [];
             const unread = notifications.filter(n => !n.read).length;
@@ -745,13 +835,7 @@
             }
         }
 
-        function initEmailJS() {
-            if (EMAILJS_CONFIG.publicKey !== 'YOUR_PUBLIC_KEY') {
-                emailjs.init(EMAILJS_CONFIG.publicKey);
-                console.log('✅ EmailJS initialized');
-            }
-        }
-
+        // ===== تسجيل الخروج =====
         function logout() {
             if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
                 localStorage.removeItem('teachflow_teacher');
@@ -766,10 +850,29 @@
                 window.location.href = 'index.html';
                 return;
             }
-            initEmailJS();
+
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('attendanceDate').value = today;
+
             loadAttendance();
+
+            if (window.innerWidth > 768) {
+                const sidebar = document.getElementById('sidebar');
+                sidebar.classList.remove('closed');
+                sidebar.classList.remove('open');
+            }
+        });
+
+        window.addEventListener('resize', function() {
+            const sidebar = document.getElementById('sidebar');
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('closed');
+                sidebar.classList.remove('open');
+                document.getElementById('sidebarOverlay').classList.remove('active');
+            } else {
+                sidebar.classList.add('closed');
+                sidebar.classList.remove('open');
+            }
         });
     </script>
 </body>
