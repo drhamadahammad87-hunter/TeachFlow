@@ -7,7 +7,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js">
     </script>
     <style>
-        /* نفس الاستايلات السابقة */
         * {
             margin: 0;
             padding: 0;
@@ -181,7 +180,7 @@
         .teachers-table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 800px;
+            min-width: 900px;
         }
 
         .teachers-table th {
@@ -393,6 +392,9 @@
             .charts-row {
                 grid-template-columns: 1fr;
             }
+            .teachers-table {
+                min-width: 700px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -602,7 +604,7 @@
                         <td>${index + 1}</td>
                         <td><strong>${teacher.name}</strong></td>
                         <td style="direction:ltr;">${teacher.email}</td>
-                        <td>${teacher.phone || '-'}</td>
+                        <td><strong>${teacher.phone || '-'}</strong></td>
                         <td>${new Date(teacher.registeredAt).toLocaleDateString('ar-EG')}</td>
                         <td>${isPaid ? '💎 مدفوع' : '🎁 تجريبي'}</td>
                         <td><span class="status-badge ${statusClass}">${statusText}${daysLeft}</span></td>
@@ -629,7 +631,6 @@
             const trial = teachers.filter(t => !t.isPaid && new Date(t.trialEndDate) > new Date()).length;
             const expired = teachers.filter(t => !t.isPaid && new Date(t.trialEndDate) <= new Date()).length;
 
-            // عدد الطلاب الإجمالي (من أول معلم)
             const students = JSON.parse(localStorage.getItem('teachflow_students')) || [];
             const totalStudents = students.length;
 
@@ -732,10 +733,7 @@
             teachers[index].maxStudents = Infinity;
             teachers[index].paidSince = new Date().toISOString();
             saveTeachers(teachers);
-
-            // تحديث الجلسة لو كان هو المعلم الحالي
             updateCurrentTeacher(email);
-
             showToast(`✅ تم تفعيل الاشتراك المدفوع للمعلم ${teachers[index].name}`);
             loadTeachers();
         }
@@ -753,9 +751,7 @@
             newTrialEnd.setDate(newTrialEnd.getDate() + 7);
             teachers[index].trialEndDate = newTrialEnd.toISOString();
             saveTeachers(teachers);
-
             updateCurrentTeacher(email);
-
             showToast(`⛔ تم إلغاء الاشتراك المدفوع للمعلم ${teachers[index].name}`);
             loadTeachers();
         }
@@ -776,9 +772,7 @@
                 teachers[index].maxStudents = 10;
             }
             saveTeachers(teachers);
-
             updateCurrentTeacher(email);
-
             showToast(`✅ تم تمديد الفترة التجريبية ${days} يوم للمعلم ${teachers[index].name}`);
             loadTeachers();
         }
@@ -805,7 +799,6 @@
                 return;
             }
 
-            // تحميل مكتبة XLSX
             const script = document.createElement('script');
             script.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
             document.head.appendChild(script);
