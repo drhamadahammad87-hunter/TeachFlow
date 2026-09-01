@@ -38,6 +38,21 @@
             background: #5a6fd6;
         }
 
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 99;
+        }
+
+        .sidebar-overlay.active {
+            display: block;
+        }
+
         /* ===== Sidebar ===== */
         .sidebar {
             position: fixed;
@@ -51,10 +66,6 @@
             overflow-y: auto;
             z-index: 100;
             transition: transform 0.3s ease;
-        }
-
-        .sidebar.closed {
-            transform: translateX(100%);
         }
 
         .sidebar .close-btn {
@@ -119,7 +130,6 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            transition: margin-right 0.3s ease;
         }
 
         .page-header {
@@ -421,45 +431,27 @@
                 font-size: 18px;
             }
 
-            .sidebar {
-                width: 260px;
-            }
-
             .hamburger {
                 font-size: 20px;
                 padding: 8px 12px;
                 top: 10px;
                 right: 10px;
             }
-        }
 
-        /* ===== Overlay ===== */
-        .sidebar-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.4);
-            z-index: 99;
-        }
-
-        .sidebar-overlay.active {
-            display: block;
+            .sidebar {
+                width: 260px;
+            }
         }
     </style>
 </head>
 <body>
 
-    <!-- ===== Hamburger Menu ===== -->
+    <!-- ===== Hamburger ===== -->
     <button class="hamburger" onclick="toggleSidebar()">☰</button>
-
-    <!-- ===== Overlay ===== -->
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
     <!-- ===== Sidebar ===== -->
-    <nav class="sidebar closed" id="sidebar">
+    <nav class="sidebar" id="sidebar">
         <button class="close-btn" onclick="toggleSidebar()">✕</button>
         <div class="logo">📚 TeachFlow <span>نظام إدارة المعلمين</span></div>
 
@@ -570,7 +562,6 @@
             sidebar.classList.toggle('open');
             overlay.classList.toggle('active');
 
-            // إغلاق القائمة عند الضغط على أي زر داخلها (للموبايل)
             if (window.innerWidth <= 768) {
                 document.querySelectorAll('.sidebar-item').forEach(item => {
                     item.addEventListener('click', function() {
@@ -660,7 +651,6 @@
         document.addEventListener('DOMContentLoaded', function() {
             loadTeacherData();
 
-            // لو الشاشة عرضها كبير، القائمة تظهر تلقائياً
             if (window.innerWidth > 768) {
                 const sidebar = document.getElementById('sidebar');
                 sidebar.classList.remove('closed');
@@ -668,7 +658,6 @@
             }
         });
 
-        // عند تغيير حجم الشاشة
         window.addEventListener('resize', function() {
             const sidebar = document.getElementById('sidebar');
             if (window.innerWidth > 768) {
