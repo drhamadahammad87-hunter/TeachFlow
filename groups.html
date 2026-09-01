@@ -17,6 +17,39 @@
             min-height: 100vh;
         }
 
+        /* ===== Hamburger ===== */
+        .hamburger {
+            display: none;
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            z-index: 999;
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 99;
+        }
+
+        .sidebar-overlay.active {
+            display: block;
+        }
+
+        /* ===== Sidebar ===== */
         .sidebar {
             position: fixed;
             right: 0;
@@ -28,6 +61,18 @@
             box-shadow: -2px 0 10px rgba(0, 0, 0, 0.05);
             overflow-y: auto;
             z-index: 100;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar .close-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: #555;
+            cursor: pointer;
+            float: left;
+            margin-bottom: 10px;
         }
 
         .logo {
@@ -73,6 +118,7 @@
             color: white;
         }
 
+        /* ===== Main ===== */
         .main-content {
             margin-right: 220px;
             padding: 25px;
@@ -357,36 +403,47 @@
             font-weight: 600;
         }
 
+        /* ===== الموبايل ===== */
         @media (max-width: 768px) {
+            .hamburger {
+                display: block;
+            }
+
             .sidebar {
-                width: 60px;
-                padding: 15px 8px;
+                width: 280px;
+                transform: translateX(100%);
+                box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
             }
-            .sidebar-item span:not(.icon) {
-                display: none;
+
+            .sidebar.open {
+                transform: translateX(0);
             }
-            .sidebar-item {
-                justify-content: center;
-                padding: 12px;
+
+            .sidebar .close-btn {
+                display: block;
             }
-            .logo {
-                font-size: 16px;
-            }
-            .logo span {
-                display: none;
-            }
+
             .main-content {
-                margin-right: 60px;
-                padding: 15px;
+                margin-right: 0;
+                padding: 70px 15px 15px 15px;
             }
+
             .page-header h1 {
                 font-size: 20px;
             }
+
             .groups-grid {
                 grid-template-columns: 1fr 1fr;
             }
+
             .group-card .group-meta {
                 grid-template-columns: 1fr;
+            }
+
+            .btn-add,
+            .btn-back {
+                font-size: 12px;
+                padding: 6px 12px;
             }
         }
 
@@ -394,15 +451,45 @@
             .groups-grid {
                 grid-template-columns: 1fr;
             }
+
+            .group-card {
+                padding: 16px;
+            }
+
+            .group-card .group-header {
+                flex-wrap: wrap;
+            }
+
+            .group-card .group-icon {
+                font-size: 28px;
+            }
+
+            .group-card .group-name {
+                font-size: 17px;
+            }
+
             .group-card .group-meta {
                 grid-template-columns: 1fr;
+                font-size: 12px;
             }
-            .group-card .group-footer {
+
+            .hamburger {
+                font-size: 20px;
+                padding: 8px 12px;
+                top: 10px;
+                right: 10px;
+            }
+
+            .sidebar {
+                width: 260px;
+            }
+
+            .page-header {
                 flex-direction: column;
-                gap: 10px;
                 align-items: stretch;
             }
-            .group-card .group-actions {
+
+            .page-header .actions {
                 justify-content: center;
             }
         }
@@ -410,22 +497,29 @@
 </head>
 <body>
 
-   <nav class="sidebar">
-    <div class="logo">📚 TeachFlow <span>نظام إدارة المعلمين</span></div>
+    <!-- ===== Hamburger ===== -->
+    <button class="hamburger" onclick="toggleSidebar()">☰</button>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
-    <button class="sidebar-item" onclick="window.location.href='home.html'">🏠 <span>الرئيسية</span></button>
-    <button class="sidebar-item active" onclick="window.location.href='groups.html'">👥 <span>المجموعات</span></button>
-    <button class="sidebar-item" onclick="window.location.href='students.html'">👨‍🎓 <span>الطلاب</span></button>
-    <button class="sidebar-item" onclick="window.location.href='schedule.html'">📅 <span>الجدول</span></button>
-    <button class="sidebar-item" onclick="window.location.href='attendance.html'">✅ <span>الحضور</span></button>
-    <button class="sidebar-item" onclick="window.location.href='assessments.html'">📊 <span>التقييمات</span></button>
-    <button class="sidebar-item" onclick="window.location.href='finances.html'">💰 <span>الحسابات</span></button>
-    <button class="sidebar-item" onclick="window.location.href='student-report.html'">📈 <span>التقارير</span></button>
-    <button class="sidebar-item" onclick="window.location.href='notifications.html'">🔔 <span>التنبيهات</span></button>
-    <button class="sidebar-item" onclick="window.location.href='settings.html'">⚙️ <span>الإعدادات</span></button>
-    <button class="sidebar-item" onclick="logout()">🚪 <span>تسجيل الخروج</span></button>
-</nav>
+    <!-- ===== Sidebar ===== -->
+    <nav class="sidebar" id="sidebar">
+        <button class="close-btn" onclick="toggleSidebar()">✕</button>
+        <div class="logo">📚 TeachFlow <span>نظام إدارة المعلمين</span></div>
 
+        <button class="sidebar-item" onclick="window.location.href='home.html'">🏠 <span>الرئيسية</span></button>
+        <button class="sidebar-item active" onclick="window.location.href='groups.html'">👥 <span>المجموعات</span></button>
+        <button class="sidebar-item" onclick="window.location.href='students.html'">👨‍🎓 <span>الطلاب</span></button>
+        <button class="sidebar-item" onclick="window.location.href='schedule.html'">📅 <span>الجدول</span></button>
+        <button class="sidebar-item" onclick="window.location.href='attendance.html'">✅ <span>الحضور</span></button>
+        <button class="sidebar-item" onclick="window.location.href='assessments.html'">📊 <span>التقييمات</span></button>
+        <button class="sidebar-item" onclick="window.location.href='finances.html'">💰 <span>الحسابات</span></button>
+        <button class="sidebar-item" onclick="window.location.href='student-report.html'">📈 <span>التقارير</span></button>
+        <button class="sidebar-item" onclick="window.location.href='notifications.html'">🔔 <span>التنبيهات</span></button>
+        <button class="sidebar-item" onclick="window.location.href='settings.html'">⚙️ <span>الإعدادات</span></button>
+        <button class="sidebar-item" onclick="logout()">🚪 <span>تسجيل الخروج</span></button>
+    </nav>
+
+    <!-- ===== Main ===== -->
     <main class="main-content">
 
         <div class="page-header">
@@ -451,10 +545,34 @@
     </main>
 
     <script>
+        // ===== Sidebar Toggle =====
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+
+            sidebar.classList.toggle('closed');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+
+            if (window.innerWidth <= 768) {
+                document.querySelectorAll('.sidebar-item').forEach(item => {
+                    item.addEventListener('click', function() {
+                        setTimeout(() => {
+                            sidebar.classList.add('closed');
+                            sidebar.classList.remove('open');
+                            overlay.classList.remove('active');
+                        }, 300);
+                    });
+                });
+            }
+        }
+
         // ===== بيانات المجموعات =====
         let groups = [];
         let filteredGroups = [];
         const locationTypes = ['🏠 بيت', '🏢 سنتر', '💻 أونلاين', '📚 مدرسة', '🏛️ معهد', '📍 مكان آخر'];
+        const daysList = ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'];
+        const timeList = ['8:00 ص', '9:00 ص', '10:00 ص', '11:00 ص', '12:00 م', '1:00 م', '2:00 م', '3:00 م', '4:00 م', '5:00 م', '6:00 م', '7:00 م', '8:00 م', '9:00 م', '10:00 م'];
 
         // ===== تحميل المجموعات =====
         function loadGroups() {
@@ -462,20 +580,18 @@
             if (saved) {
                 groups = JSON.parse(saved);
             } else {
-                // ❌ لا توجد بيانات وهمية
                 groups = [];
                 saveGroups();
             }
+            groups.sort((a, b) => a.number.localeCompare(b.number));
             filteredGroups = [...groups];
             renderGroups();
         }
 
-        // ===== حفظ المجموعات =====
         function saveGroups() {
             localStorage.setItem('teachflow_groups', JSON.stringify(groups));
         }
 
-        // ===== عرض المجموعات =====
         function renderGroups() {
             const grid = document.getElementById('groupsGrid');
             const students = JSON.parse(localStorage.getItem('teachflow_students')) || [];
@@ -545,18 +661,31 @@
             renderGroups();
         }
 
+        // ===== عرض قائمة منسدلة =====
+        function showDropdown(options, title, currentValue = '') {
+            let list = options.map((item, i) => `${i + 1}. ${item}`).join('\n');
+            let defaultIndex = options.indexOf(currentValue) + 1;
+            if (defaultIndex === 0) defaultIndex = '';
+            const choice = prompt(`${title}:\n${list}\n\nأدخل رقم الخيار:`, defaultIndex);
+            if (!choice) return null;
+            const index = parseInt(choice) - 1;
+            if (isNaN(index) || index < 0 || index >= options.length) {
+                alert('⚠️ اختيار غير صحيح!');
+                return null;
+            }
+            return options[index];
+        }
+
         // ===== إضافة مجموعة =====
         function showAddGroup() {
-            // رقم المجموعة (تلقائي)
             const nextNumber = groups.length + 1;
             const defaultNumber = 'G-' + String(nextNumber).padStart(3, '0');
 
             const number = prompt('🔢 رقم المجموعة (مثلاً G-001):', defaultNumber);
             if (!number) return;
 
-            // التأكد من عدم تكرار الرقم
             if (groups.some(g => g.number === number)) {
-                alert('⚠️ هذا الرقم موجود بالفعل! الرجاء إدخال رقم مختلف.');
+                alert('⚠️ هذا الرقم موجود بالفعل!');
                 return;
             }
 
@@ -565,20 +694,19 @@
 
             const icon = prompt('🎨 أيقونة المجموعة (اختياري):', '👥') || '👥';
 
-            // اختيار نوع المكان
-            let locationOptions = locationTypes.map((t, i) => `${i + 1}. ${t}`).join('\n');
-            const locationChoice = prompt(`📍 اختر مكان الانعقاد:\n${locationOptions}\n\nأدخل رقم المكان (1-6):`);
-            const locationIndex = parseInt(locationChoice) - 1;
-            let locationType = '📍 مكان آخر';
-            if (!isNaN(locationIndex) && locationIndex >= 0 && locationIndex < locationTypes.length) {
-                locationType = locationTypes[locationIndex];
-            }
+            const locationType = showDropdown(locationTypes, '📍 اختر مكان الانعقاد');
+            if (locationType === null) return;
 
             const locationAddress = prompt('📍 العنوان التفصيلي (شارع، منطقة، محافظة):') || '';
 
             const description = prompt('📝 وصف المجموعة (اختياري):') || '';
-            const day = prompt('📅 اليوم (السبت، الأحد، إلخ):') || '';
-            const time = prompt('⏰ الوقت (10:00 ص، إلخ):') || '';
+
+            const day = showDropdown(daysList, '📅 اختر اليوم');
+            if (day === null) return;
+
+            const time = showDropdown(timeList, '⏰ اختر الوقت');
+            if (time === null) return;
+
             const level = prompt('📊 المستوى (مبتدئ، متوسط، متقدم):', 'متوسط') || 'متوسط';
             const maxStudents = prompt('👥 الحد الأقصى للطلاب:', '20') || '20';
             const active = confirm('✅ هل المجموعة نشطة؟ (OK = نشطة، Cancel = غير نشطة)');
@@ -599,6 +727,7 @@
             };
 
             groups.push(newGroup);
+            groups.sort((a, b) => a.number.localeCompare(b.number));
             filteredGroups = [...groups];
             saveGroups();
             renderGroups();
@@ -625,16 +754,8 @@
             const icon = prompt('🎨 أيقونة المجموعة:', group.icon) || '👥';
             if (icon) group.icon = icon;
 
-            // اختيار نوع المكان
-            let locationOptions = locationTypes.map((t, i) => `${i + 1}. ${t}`).join('\n');
-            const currentIndex = locationTypes.indexOf(group.locationType) + 1;
-            const locationChoice = prompt(`📍 اختر مكان الانعقاد:\n${locationOptions}\n\nأدخل رقم المكان (1-6) [الحالي: ${group.locationType}]:`, currentIndex);
-            if (locationChoice) {
-                const locationIndex = parseInt(locationChoice) - 1;
-                if (!isNaN(locationIndex) && locationIndex >= 0 && locationIndex < locationTypes.length) {
-                    group.locationType = locationTypes[locationIndex];
-                }
-            }
+            const locationType = showDropdown(locationTypes, '📍 اختر مكان الانعقاد', group.locationType);
+            if (locationType !== null) group.locationType = locationType;
 
             const locationAddress = prompt('📍 العنوان التفصيلي:', group.locationAddress) || '';
             if (locationAddress !== null) group.locationAddress = locationAddress;
@@ -642,10 +763,10 @@
             const description = prompt('📝 وصف المجموعة:', group.description) || '';
             if (description !== null) group.description = description;
 
-            const day = prompt('📅 اليوم:', group.day) || '';
+            const day = showDropdown(daysList, '📅 اختر اليوم', group.day);
             if (day !== null) group.day = day;
 
-            const time = prompt('⏰ الوقت:', group.time) || '';
+            const time = showDropdown(timeList, '⏰ اختر الوقت', group.time);
             if (time !== null) group.time = time;
 
             const level = prompt('📊 المستوى (مبتدئ، متوسط، متقدم):', group.level) || 'متوسط';
@@ -656,6 +777,7 @@
 
             group.active = confirm('✅ هل المجموعة نشطة؟ (OK = نشطة، Cancel = غير نشطة)');
 
+            groups.sort((a, b) => a.number.localeCompare(b.number));
             filteredGroups = [...groups];
             saveGroups();
             renderGroups();
@@ -682,6 +804,7 @@
 
             if (confirm(`🗑️ هل أنت متأكد من حذف المجموعة "${group.name}"؟`)) {
                 groups = groups.filter(g => g.id !== id);
+                groups.sort((a, b) => a.number.localeCompare(b.number));
                 filteredGroups = [...groups];
                 saveGroups();
                 renderGroups();
@@ -706,6 +829,24 @@
                 return;
             }
             loadGroups();
+
+            if (window.innerWidth > 768) {
+                const sidebar = document.getElementById('sidebar');
+                sidebar.classList.remove('closed');
+                sidebar.classList.remove('open');
+            }
+        });
+
+        window.addEventListener('resize', function() {
+            const sidebar = document.getElementById('sidebar');
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('closed');
+                sidebar.classList.remove('open');
+                document.getElementById('sidebarOverlay').classList.remove('active');
+            } else {
+                sidebar.classList.add('closed');
+                sidebar.classList.remove('open');
+            }
         });
     </script>
 </body>
