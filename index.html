@@ -85,7 +85,6 @@
             margin-top: 4px;
         }
 
-        /* ===== إضافة المواد ===== */
         .subject-selector {
             display: flex;
             gap: 10px;
@@ -177,7 +176,6 @@
             opacity: 1;
         }
 
-        /* ===== اللغة ===== */
         .language-options {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -287,26 +285,28 @@
             </div>
 
             <form id="registerForm">
-                <!-- ===== اسم المعلم ===== -->
                 <div class="form-group">
                     <label id="nameLabel">👨‍🏫 اسم المعلم</label>
                     <input type="text" id="teacherName" placeholder="أدخل اسمك بالكامل" required>
                 </div>
 
-                <!-- ===== البريد الإلكتروني ===== -->
+                <div class="form-group">
+                    <label id="phoneLabel">📱 رقم التليفون</label>
+                    <input type="tel" id="teacherPhone" placeholder="مثال: 01001234567" required>
+                    <div class="hint" id="phoneHint">أدخل رقم التليفون الخاص بك للتواصل</div>
+                </div>
+
                 <div class="form-group">
                     <label id="emailLabel">📧 البريد الإلكتروني</label>
                     <input type="email" id="email" placeholder="teacher@example.com" required>
                 </div>
 
-                <!-- ===== كلمة المرور ===== -->
                 <div class="form-group">
                     <label id="passwordLabel">🔒 كلمة المرور</label>
                     <input type="password" id="password" placeholder="••••••••" required>
                     <div class="hint" id="passwordHint">يجب أن تكون 6 أحرف على الأقل</div>
                 </div>
 
-                <!-- ===== اللغة ===== -->
                 <div class="form-group">
                     <label id="languageLabel">🌍 اللغة</label>
                     <div class="language-options">
@@ -321,10 +321,8 @@
                     </div>
                 </div>
 
-                <!-- ===== المواد ===== -->
                 <div class="form-group">
                     <label id="subjectLabel">📚 المواد التي تدرسها</label>
-
                     <div class="subject-selector">
                         <select id="subjectSelect">
                             <option value="الرياضيات">📐 الرياضيات</option>
@@ -342,12 +340,10 @@
                         <button type="button" id="addSubjectBtn" onclick="addSubject()">➕ إضافة</button>
                     </div>
 
-                    <!-- حقل كتابة مادة مخصصة -->
                     <div class="custom-subject-input" id="customSubjectContainer">
                         <input type="text" id="customSubject" placeholder="✏️ اكتب اسم المادة...">
                     </div>
 
-                    <!-- المواد المختارة -->
                     <div class="selected-subjects" id="selectedSubjects">
                         <span class="empty-msg" id="emptyMsg">⚠️ لم تختار أي مادة بعد</span>
                     </div>
@@ -355,7 +351,6 @@
                     <div class="hint" id="subjectHint">اختر المواد التي تدرسها (يمكنك اختيار أكثر من مادة)</div>
                 </div>
 
-                <!-- ===== زر التسجيل ===== -->
                 <button type="submit" class="btn-register" id="registerBtn" disabled>
                     🚀 تسجيل ودخول
                 </button>
@@ -377,6 +372,9 @@
                 subtitle: 'تسجيل المعلم الجديد',
                 nameLabel: '👨‍🏫 اسم المعلم',
                 namePlaceholder: 'أدخل اسمك بالكامل',
+                phoneLabel: '📱 رقم التليفون',
+                phonePlaceholder: 'مثال: 01001234567',
+                phoneHint: 'أدخل رقم التليفون الخاص بك للتواصل',
                 emailLabel: '📧 البريد الإلكتروني',
                 emailPlaceholder: 'teacher@example.com',
                 passwordLabel: '🔒 كلمة المرور',
@@ -392,6 +390,7 @@
                 customPlaceholder: '✏️ اكتب اسم المادة...',
                 registerBtn: '🚀 تسجيل ودخول',
                 errorName: '⚠️ الرجاء إدخال اسم المعلم',
+                errorPhone: '⚠️ الرجاء إدخال رقم تليفون صحيح',
                 errorEmail: '⚠️ الرجاء إدخال بريد إلكتروني صحيح',
                 errorPassword: '⚠️ كلمة المرور يجب أن تكون 6 أحرف على الأقل',
                 errorSubject: '⚠️ الرجاء اختيار مادة واحدة على الأقل',
@@ -415,6 +414,9 @@
                 subtitle: 'New Teacher Registration',
                 nameLabel: '👨‍🏫 Teacher Name',
                 namePlaceholder: 'Enter your full name',
+                phoneLabel: '📱 Phone Number',
+                phonePlaceholder: 'e.g. 01001234567',
+                phoneHint: 'Enter your phone number for communication',
                 emailLabel: '📧 Email',
                 emailPlaceholder: 'teacher@example.com',
                 passwordLabel: '🔒 Password',
@@ -430,6 +432,7 @@
                 customPlaceholder: '✏️ Write the subject name...',
                 registerBtn: '🚀 Register & Login',
                 errorName: '⚠️ Please enter teacher name',
+                errorPhone: '⚠️ Please enter a valid phone number',
                 errorEmail: '⚠️ Please enter a valid email',
                 errorPassword: '⚠️ Password must be at least 6 characters',
                 errorSubject: '⚠️ Please select at least one subject',
@@ -482,6 +485,9 @@
             document.getElementById('pageSubtitle').textContent = t.subtitle;
             document.getElementById('nameLabel').textContent = t.nameLabel;
             document.getElementById('teacherName').placeholder = t.namePlaceholder;
+            document.getElementById('phoneLabel').textContent = t.phoneLabel;
+            document.getElementById('teacherPhone').placeholder = t.phonePlaceholder;
+            document.getElementById('phoneHint').textContent = t.phoneHint;
             document.getElementById('emailLabel').textContent = t.emailLabel;
             document.getElementById('email').placeholder = t.emailPlaceholder;
             document.getElementById('passwordLabel').textContent = t.passwordLabel;
@@ -497,13 +503,18 @@
             document.getElementById('registerBtn').textContent = t.registerBtn;
         }
 
-        // ===== تحديث قائمة المواد =====
+        // ===== تحديث قائمة المواد (مع الحفاظ على القيمة المحددة) =====
         function updateSubjectSelect(lang) {
             const t = translations[lang];
             const select = document.getElementById('subjectSelect');
             const currentValue = select.value;
 
+            // حفظ القيمة والنص المحددين
+            const selectedOption = select.options[select.selectedIndex];
+            const selectedText = selectedOption ? selectedOption.text : '';
+
             select.innerHTML = '';
+
             const subjectKeys = ['الرياضيات', 'اللغة العربية', 'اللغة الإنجليزية', 'العلوم', 'التاريخ', 'الجغرافيا', 'الفيزياء', 'الكيمياء', 'الأحياء', 'الفلسفة', 'أخرى'];
             subjectKeys.forEach(key => {
                 const option = document.createElement('option');
@@ -512,8 +523,32 @@
                 select.appendChild(option);
             });
 
+            // محاولة استرجاع القيمة
             if ([...select.options].some(o => o.value === currentValue)) {
                 select.value = currentValue;
+            } else {
+                // حاول بالنص
+                for (let i = 0; i < select.options.length; i++) {
+                    if (select.options[i].text === selectedText) {
+                        select.value = select.options[i].value;
+                        break;
+                    }
+                }
+            }
+
+            // لو لسه مش لاقي، اختار أول خيار
+            if (!select.value && select.options.length > 0) {
+                select.value = select.options[0].value;
+            }
+
+            // تحديث حقل المادة المخصصة
+            const container = document.getElementById('customSubjectContainer');
+            if (select.value === 'أخرى') {
+                container.classList.add('show');
+                document.getElementById('customSubject').focus();
+            } else {
+                container.classList.remove('show');
+                document.getElementById('customSubject').value = '';
             }
         }
 
@@ -599,11 +634,12 @@
             }
         });
 
-        // ===== معالجة التسجيل (مع الفترة التجريبية) =====
+        // ===== معالجة التسجيل =====
         document.getElementById('registerForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
             const name = document.getElementById('teacherName').value.trim();
+            const phone = document.getElementById('teacherPhone').value.trim();
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value.trim();
             const errorEl = document.getElementById('errorMsg');
@@ -613,6 +649,12 @@
 
             if (!name) {
                 errorEl.textContent = t.errorName;
+                errorEl.classList.add('show');
+                return;
+            }
+
+            if (!phone || phone.length < 8) {
+                errorEl.textContent = t.errorPhone;
                 errorEl.classList.add('show');
                 return;
             }
@@ -635,14 +677,13 @@
                 return;
             }
 
-            // ===== حساب الفترة التجريبية =====
             const trialDays = 14;
             const trialEndDate = new Date();
             trialEndDate.setDate(trialEndDate.getDate() + trialDays);
 
-            // حفظ بيانات المعلم مع الفترة التجريبية
             const teacherData = {
                 name: name,
+                phone: phone,
                 email: email,
                 password: password,
                 language: currentLang,
@@ -655,13 +696,12 @@
             };
 
             localStorage.setItem('teachflow_teacher', JSON.stringify(teacherData));
-            localStorage.setItem('teachflow_user', JSON.stringify({ name: name, email: email }));
+            localStorage.setItem('teachflow_user', JSON.stringify({ name: name, email: email, phone: phone }));
 
             alert(t.success);
             window.location.href = 'home.html';
         });
 
-        // ===== تحميل الصفحة =====
         window.addEventListener('load', function() {
             const teacher = localStorage.getItem('teachflow_teacher');
             if (teacher) {
