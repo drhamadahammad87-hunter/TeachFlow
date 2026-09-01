@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تقرير الطالب - TeachFlow</title>
-    <!-- ===== jsPDF لتحويل التقرير إلى PDF ===== -->
+    <title>تقارير الطلاب - TeachFlow</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js">
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js">
@@ -22,6 +21,39 @@
             min-height: 100vh;
         }
 
+        /* ===== Hamburger ===== */
+        .hamburger {
+            display: none;
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            z-index: 999;
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 99;
+        }
+
+        .sidebar-overlay.active {
+            display: block;
+        }
+
+        /* ===== Sidebar ===== */
         .sidebar {
             position: fixed;
             right: 0;
@@ -33,6 +65,18 @@
             box-shadow: -2px 0 10px rgba(0, 0, 0, 0.05);
             overflow-y: auto;
             z-index: 100;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar .close-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: #555;
+            cursor: pointer;
+            float: left;
+            margin-bottom: 10px;
         }
 
         .logo {
@@ -78,6 +122,7 @@
             color: white;
         }
 
+        /* ===== Main ===== */
         .main-content {
             margin-right: 220px;
             padding: 25px;
@@ -224,6 +269,7 @@
             background: white;
         }
 
+        /* ===== Report ===== */
         .report-card {
             background: white;
             border-radius: 16px;
@@ -284,7 +330,7 @@
 
         .report-section .info-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 15px;
         }
 
@@ -428,41 +474,80 @@
             font-weight: 600;
         }
 
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 60px;
-                padding: 15px 8px;
-            }
-            .sidebar-item span:not(.icon) {
-                display: none;
-            }
-            .sidebar-item {
-                justify-content: center;
-                padding: 12px;
-            }
-            .logo {
-                font-size: 16px;
-            }
-            .logo span {
-                display: none;
+        @media print {
+            .sidebar,
+            .btn-back,
+            .btn-print,
+            .btn-pdf,
+            .btn-email,
+            .footer,
+            .page-header .actions,
+            .hamburger,
+            .sidebar-overlay,
+            .filter-bar {
+                display: none !important;
             }
             .main-content {
-                margin-right: 60px;
-                padding: 15px;
+                margin-right: 0 !important;
+                padding: 10px !important;
             }
+            .report-card {
+                box-shadow: none !important;
+                padding: 10px !important;
+            }
+        }
+
+        /* ===== Mobile ===== */
+        @media (max-width: 768px) {
+            .hamburger {
+                display: block;
+            }
+
+            .sidebar {
+                width: 280px;
+                transform: translateX(100%);
+                box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .sidebar .close-btn {
+                display: block;
+            }
+
+            .main-content {
+                margin-right: 0;
+                padding: 70px 15px 15px 15px;
+            }
+
             .page-header h1 {
                 font-size: 20px;
             }
+
+            .filter-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
             .report-header {
                 flex-direction: column;
                 align-items: flex-start;
             }
+
             .info-grid {
                 grid-template-columns: 1fr 1fr;
             }
+
+            .report-card {
+                padding: 20px 15px;
+            }
+
             .page-header .actions {
                 gap: 6px;
             }
+
             .page-header .actions button {
                 padding: 6px 12px;
                 font-size: 12px;
@@ -473,39 +558,78 @@
             .info-grid {
                 grid-template-columns: 1fr;
             }
+
             .summary-stats {
                 grid-template-columns: 1fr 1fr;
             }
+
             .page-header .actions {
                 flex-direction: column;
                 width: 100%;
             }
+
             .page-header .actions button {
                 width: 100%;
                 justify-content: center;
+            }
+
+            .hamburger {
+                font-size: 20px;
+                padding: 8px 12px;
+                top: 10px;
+                right: 10px;
+            }
+
+            .sidebar {
+                width: 260px;
+            }
+
+            .report-header .student-avatar {
+                width: 60px;
+                height: 60px;
+                font-size: 24px;
+            }
+
+            .report-header .student-info h2 {
+                font-size: 20px;
+            }
+
+            .mini-table {
+                font-size: 12px;
+            }
+
+            .mini-table th,
+            .mini-table td {
+                padding: 6px 8px;
             }
         }
     </style>
 </head>
 <body>
 
- <!-- ===== الشريط الجانبي الموحد ===== -->
-   <nav class="sidebar">
-    <div class="logo">📚 TeachFlow <span>نظام إدارة المعلمين</span></div>
+    <!-- ===== Hamburger ===== -->
+    <button class="hamburger" onclick="toggleSidebar()">☰</button>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
-    <button class="sidebar-item" onclick="window.location.href='home.html'">🏠 <span>الرئيسية</span></button>
-    <button class="sidebar-item" onclick="window.location.href='groups.html'">👥 <span>المجموعات</span></button>
-    <button class="sidebar-item" onclick="window.location.href='students.html'">👨‍🎓 <span>الطلاب</span></button>
-    <button class="sidebar-item" onclick="window.location.href='schedule.html'">📅 <span>الجدول</span></button>
-    <button class="sidebar-item" onclick="window.location.href='attendance.html'">✅ <span>الحضور</span></button>
-    <button class="sidebar-item" onclick="window.location.href='assessments.html'">📊 <span>التقييمات</span></button>
-    <button class="sidebar-item" onclick="window.location.href='finances.html'">💰 <span>الحسابات</span></button>
-    <button class="sidebar-item" onclick="window.location.href='student-report.html'">📈 <span>التقارير</span></button>
-    <button class="sidebar-item" onclick="window.location.href='notifications.html'">🔔 <span>التنبيهات</span></button>
-    <button class="sidebar-item" onclick="window.location.href='settings.html'">⚙️ <span>الإعدادات</span></button>
-    <button class="sidebar-item" onclick="logout()">🚪 <span>تسجيل الخروج</span></button>
-</nav>
+    <!-- ===== Sidebar ===== -->
+    <nav class="sidebar" id="sidebar">
+        <button class="close-btn" onclick="toggleSidebar()">✕</button>
+        <div class="logo">📚 TeachFlow <span>نظام إدارة المعلمين</span></div>
 
+        <button class="sidebar-item" onclick="window.location.href='home.html'">🏠 <span>الرئيسية</span></button>
+        <button class="sidebar-item" onclick="window.location.href='groups.html'">👥 <span>المجموعات</span></button>
+        <button class="sidebar-item" onclick="window.location.href='students.html'">👨‍🎓 <span>الطلاب</span></button>
+        <button class="sidebar-item" onclick="window.location.href='schedule.html'">📅 <span>الجدول</span></button>
+        <button class="sidebar-item" onclick="window.location.href='attendance.html'">✅ <span>الحضور</span></button>
+        <button class="sidebar-item" onclick="window.location.href='assessments.html'">📊 <span>التقييمات</span></button>
+        <button class="sidebar-item" onclick="window.location.href='finances.html'">💰 <span>الحسابات</span></button>
+        <button class="sidebar-item active" onclick="window.location.href='student-report.html'">📈 <span>التقارير</span></button>
+        <button class="sidebar-item" onclick="window.location.href='notifications.html'">🔔 <span>التنبيهات</span></button>
+        <button class="sidebar-item" onclick="window.location.href='settings.html'">⚙️ <span>الإعدادات</span></button>
+        <button class="sidebar-item" onclick="logout()">🚪 <span>تسجيل الخروج</span></button>
+    </nav>
+
+    <!-- ===== Main ===== -->
     <main class="main-content">
 
         <div class="page-header">
@@ -518,7 +642,7 @@
             </div>
         </div>
 
-        <!-- ===== اختيار الطالب ===== -->
+        <!-- ===== Filter ===== -->
         <div class="filter-bar">
             <label>👤 اختر الطالب:</label>
             <select id="studentSelect" onchange="loadReport()">
@@ -526,7 +650,7 @@
             </select>
         </div>
 
-        <!-- ===== التقرير ===== -->
+        <!-- ===== Report ===== -->
         <div class="report-card" id="reportCard">
             <div id="reportContent">
                 <div class="empty-state">
@@ -542,13 +666,34 @@
     </main>
 
     <script>
+        // ===== Sidebar Toggle =====
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+
+            sidebar.classList.toggle('closed');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+
+            if (window.innerWidth <= 768) {
+                document.querySelectorAll('.sidebar-item').forEach(item => {
+                    item.addEventListener('click', function() {
+                        setTimeout(() => {
+                            sidebar.classList.add('closed');
+                            sidebar.classList.remove('open');
+                            overlay.classList.remove('active');
+                        }, 300);
+                    });
+                });
+            }
+        }
+
         // ===== بيانات الطالب =====
         let students = [];
         let payments = [];
         let assessments = [];
         let attendance = [];
         let currentStudent = null;
-        let teacherEmail = '';
 
         // ===== تحميل البيانات =====
         function loadData() {
@@ -556,11 +701,6 @@
             payments = JSON.parse(localStorage.getItem('teachflow_payments')) || [];
             assessments = JSON.parse(localStorage.getItem('teachflow_assessments')) || [];
             attendance = JSON.parse(localStorage.getItem('teachflow_attendance')) || [];
-
-            const teacher = JSON.parse(localStorage.getItem('teachflow_teacher'));
-            if (teacher) {
-                teacherEmail = teacher.email || '';
-            }
 
             const select = document.getElementById('studentSelect');
             select.innerHTML = '<option value="">-- اختر طالب --</option>';
@@ -858,58 +998,12 @@
                 avgGrade = Math.round(sum / studentAssessments.length);
             }
 
-            const subject = `📚 TeachFlow - تقرير الطالب ${student.name}`;
-            const message = `
-📚 TeachFlow - تقرير الطالب
-━━━━━━━━━━━━━━━━━━━━━━━━━
-👤 الطالب: ${student.name}
-📚 المجموعة: ${student.group}
-📱 تليفون الطالب: ${student.phone}
-👨‍👦 تليفون ولي الأمر: ${student.parentPhone}
-📅 تاريخ التقرير: ${new Date().toISOString().split('T')[0]}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━
-📊 التقييمات
-📝 عدد التقييمات: ${studentAssessments.length}
-📈 متوسط الدرجات: ${avgGrade}%
-
-${studentAssessments.map(a => `  • ${a.type}: ${a.grade}% (${a.date})${a.notes ? ' - ' + a.notes : ''}`).join('\n') || '  لا توجد تقييمات'}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ الحضور
-📅 إجمالي الأيام: ${totalDays}
-✅ حاضر: ${presentDays}
-❌ غائب: ${studentAttendance.filter(a => a.status === 'absent').length}
-⏰ متأخر: ${studentAttendance.filter(a => a.status === 'late').length}
-📝 معذور: ${studentAttendance.filter(a => a.status === 'excused').length}
-📊 نسبة الحضور: ${attendancePercent}%
-
-━━━━━━━━━━━━━━━━━━━━━━━━━
-💰 المدفوعات
-✅ إجمالي المدفوع: ${totalPaid} EGP
-⏳ المتبقي: ${totalPending} EGP
-⚠️ المتأخر: ${totalOverdue} EGP
-💰 الإجمالي الكلي: ${totalPaid + totalPending + totalOverdue} EGP
-
-${studentPayments.map(p => `  • ${p.type === 'lesson' ? 'بالحصة' : 'بالشهر'}: ${p.amount} EGP - ${p.status === 'paid' ? '✅ مدفوع' : p.status === 'pending' ? '⏳ متبقي' : '⚠️ متأخر'} (${p.date})${p.notes ? ' - ' + p.notes : ''}`).join('\n') || '  لا توجد مدفوعات'}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━
-📋 الملخص النهائي
-• متوسط التقييمات: ${avgGrade}%
-• نسبة الحضور: ${attendancePercent}%
-• إجمالي المدفوعات: ${totalPaid + totalPending + totalOverdue} EGP
-• عدد التقييمات: ${studentAssessments.length}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━
-تم إنشاء هذا التقرير بواسطة TeachFlow
-Designed by Dr. Hamada Fathy Hammad
-            `;
-
             if (confirm(`📧 سيتم إرسال التقرير إلى:\n${parentEmail}\n\nهل أنت متأكد؟`)) {
                 alert(`✅ تم إرسال التقرير إلى ${parentEmail}`);
             }
         }
 
+        // ===== تسجيل الخروج =====
         function logout() {
             if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
                 localStorage.removeItem('teachflow_teacher');
@@ -925,6 +1019,24 @@ Designed by Dr. Hamada Fathy Hammad
                 return;
             }
             loadData();
+
+            if (window.innerWidth > 768) {
+                const sidebar = document.getElementById('sidebar');
+                sidebar.classList.remove('closed');
+                sidebar.classList.remove('open');
+            }
+        });
+
+        window.addEventListener('resize', function() {
+            const sidebar = document.getElementById('sidebar');
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('closed');
+                sidebar.classList.remove('open');
+                document.getElementById('sidebarOverlay').classList.remove('active');
+            } else {
+                sidebar.classList.add('closed');
+                sidebar.classList.remove('open');
+            }
         });
     </script>
 </body>
