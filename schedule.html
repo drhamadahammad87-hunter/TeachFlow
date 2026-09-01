@@ -21,6 +21,39 @@
             min-height: 100vh;
         }
 
+        /* ===== Hamburger ===== */
+        .hamburger {
+            display: none;
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            z-index: 999;
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 99;
+        }
+
+        .sidebar-overlay.active {
+            display: block;
+        }
+
+        /* ===== Sidebar ===== */
         .sidebar {
             position: fixed;
             right: 0;
@@ -32,6 +65,18 @@
             box-shadow: -2px 0 10px rgba(0, 0, 0, 0.05);
             overflow-y: auto;
             z-index: 100;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar .close-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: #555;
+            cursor: pointer;
+            float: left;
+            margin-bottom: 10px;
         }
 
         .logo {
@@ -77,6 +122,7 @@
             color: white;
         }
 
+        /* ===== Main ===== */
         .main-content {
             margin-right: 220px;
             padding: 25px;
@@ -109,26 +155,6 @@
             flex-wrap: wrap;
         }
 
-        .btn-back {
-            padding: 10px 20px;
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-back:hover {
-            background: #5a6fd6;
-            transform: scale(1.02);
-        }
-
         .btn-add {
             padding: 10px 20px;
             background: #2ecc71;
@@ -146,6 +172,26 @@
 
         .btn-add:hover {
             background: #27ae60;
+            transform: scale(1.02);
+        }
+
+        .btn-back {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-back:hover {
+            background: #5a6fd6;
             transform: scale(1.02);
         }
 
@@ -316,6 +362,7 @@
             font-weight: 600;
         }
 
+        /* ===== Print ===== */
         @media print {
             .sidebar,
             .btn-back,
@@ -324,17 +371,22 @@
             .btn-print,
             .btn-pdf,
             .footer,
-            .page-header .actions {
+            .page-header .actions,
+            .hamburger,
+            .sidebar-overlay {
                 display: none !important;
             }
+
             .main-content {
                 margin-right: 0 !important;
                 padding: 10px !important;
             }
+
             .schedule-container {
                 box-shadow: none !important;
                 border: 1px solid #ddd !important;
             }
+
             .schedule-table th {
                 background: #667eea !important;
                 color: white !important;
@@ -343,46 +395,54 @@
             }
         }
 
+        /* ===== الموبايل ===== */
         @media (max-width: 768px) {
+            .hamburger {
+                display: block;
+            }
+
             .sidebar {
-                width: 60px;
-                padding: 15px 8px;
+                width: 280px;
+                transform: translateX(100%);
+                box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
             }
-            .sidebar-item span:not(.icon) {
-                display: none;
+
+            .sidebar.open {
+                transform: translateX(0);
             }
-            .sidebar-item {
-                justify-content: center;
-                padding: 12px;
+
+            .sidebar .close-btn {
+                display: block;
             }
-            .logo {
-                font-size: 16px;
-            }
-            .logo span {
-                display: none;
-            }
+
             .main-content {
-                margin-right: 60px;
-                padding: 15px;
+                margin-right: 0;
+                padding: 70px 15px 15px 15px;
             }
+
             .page-header h1 {
                 font-size: 20px;
             }
+
             .schedule-table {
                 font-size: 12px;
                 min-width: 600px;
             }
+
             .schedule-table th,
             .schedule-table td {
                 padding: 8px 6px;
             }
+
             .schedule-table .time-col {
                 width: 60px;
                 font-size: 11px;
             }
+
             .page-header .actions {
                 gap: 6px;
             }
+
             .page-header .actions button {
                 padding: 6px 12px;
                 font-size: 12px;
@@ -394,30 +454,53 @@
                 font-size: 11px;
                 min-width: 500px;
             }
+
             .schedule-table th,
             .schedule-table td {
                 padding: 6px 4px;
             }
+
             .schedule-table .time-col {
                 width: 50px;
                 font-size: 10px;
             }
+
             .page-header .actions {
                 flex-direction: row;
                 flex-wrap: wrap;
                 width: 100%;
             }
+
             .page-header .actions button {
                 flex: 1;
-                min-width: 60px;
+                min-width: 50px;
                 justify-content: center;
+                font-size: 11px;
+                padding: 4px 8px;
+            }
+
+            .hamburger {
+                font-size: 20px;
+                padding: 8px 12px;
+                top: 10px;
+                right: 10px;
+            }
+
+            .sidebar {
+                width: 260px;
             }
         }
     </style>
 </head>
 <body>
 
-    <nav class="sidebar">
+    <!-- ===== Hamburger ===== -->
+    <button class="hamburger" onclick="toggleSidebar()">☰</button>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <!-- ===== Sidebar ===== -->
+    <nav class="sidebar" id="sidebar">
+        <button class="close-btn" onclick="toggleSidebar()">✕</button>
         <div class="logo">📚 TeachFlow <span>نظام إدارة المعلمين</span></div>
 
         <button class="sidebar-item" onclick="window.location.href='home.html'">🏠 <span>الرئيسية</span></button>
@@ -433,6 +516,7 @@
         <button class="sidebar-item" onclick="logout()">🚪 <span>تسجيل الخروج</span></button>
     </nav>
 
+    <!-- ===== Main ===== -->
     <main class="main-content">
 
         <div class="page-header">
@@ -472,22 +556,42 @@
     </main>
 
     <script>
+        // ===== Sidebar Toggle =====
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+
+            sidebar.classList.toggle('closed');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+
+            if (window.innerWidth <= 768) {
+                document.querySelectorAll('.sidebar-item').forEach(item => {
+                    item.addEventListener('click', function() {
+                        setTimeout(() => {
+                            sidebar.classList.add('closed');
+                            sidebar.classList.remove('open');
+                            overlay.classList.remove('active');
+                        }, 300);
+                    });
+                });
+            }
+        }
+
         // ===== أيام الأسبوع =====
         const days = ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'];
 
-        // ===== الأوقات (من 8 ص إلى 10 م) =====
+        // ===== الأوقات =====
         const times = [
             '8:00 ص', '9:00 ص', '10:00 ص', '11:00 ص', '12:00 م',
             '1:00 م', '2:00 م', '3:00 م', '4:00 م', '5:00 م',
             '6:00 م', '7:00 م', '8:00 م', '9:00 م', '10:00 م'
         ];
 
-        // ===== بيانات الجدول =====
         let schedule = [];
 
         // ===== تحميل الجدول =====
         function loadSchedule() {
-            // 1. تحميل الحصص المسجلة يدوياً
             const saved = localStorage.getItem('teachflow_schedule');
             if (saved) {
                 schedule = JSON.parse(saved);
@@ -495,12 +599,9 @@
                 schedule = [];
                 saveSchedule();
             }
-
-            // 2. عرض الجدول
             renderSchedule();
         }
 
-        // ===== حفظ الجدول =====
         function saveSchedule() {
             localStorage.setItem('teachflow_schedule', JSON.stringify(schedule));
         }
@@ -508,17 +609,14 @@
         // ===== عرض الجدول =====
         function renderSchedule() {
             const tbody = document.getElementById('scheduleBody');
-            // جلب المجموعات من localStorage
             const groups = JSON.parse(localStorage.getItem('teachflow_groups')) || [];
 
             tbody.innerHTML = times.map(time => {
                 let row = `<tr><td class="time-col">${time}</td>`;
 
                 days.forEach(day => {
-                    // 1. الحصص المسجلة يدوياً
                     const scheduledLessons = schedule.filter(s => s.day === day && s.time === time);
 
-                    // 2. المجموعات اللي ليها يوم ووقت محدد (من بيانات المجموعة)
                     const groupLessons = groups
                         .filter(g => g.day === day && g.time === time && g.active !== false)
                         .map(g => ({
@@ -530,7 +628,6 @@
                             fromGroup: true
                         }));
 
-                    // دمج الحصص (المجموعات أولاً ثم الحصص اليدوية)
                     const allLessons = [...groupLessons, ...scheduledLessons];
 
                     if (allLessons.length > 0) {
@@ -583,7 +680,7 @@
             alert('🔄 تم تحديث الجدول!');
         }
 
-        // ===== إضافة حصة يدوية =====
+        // ===== إضافة حصة =====
         function showAddLesson() {
             const groups = JSON.parse(localStorage.getItem('teachflow_groups')) || [];
             if (groups.length === 0) {
@@ -640,7 +737,7 @@
             alert(`✅ تم إضافة الحصة: ${day} - ${time} - ${group}`);
         }
 
-        // ===== حذف حصة يدوية =====
+        // ===== حذف حصة =====
         function deleteLesson(id) {
             const lesson = schedule.find(s => s.id === id);
             if (!lesson) return;
@@ -705,8 +802,25 @@
             }
             loadSchedule();
 
-            // تحديث الجدول كل 30 ثانية
+            if (window.innerWidth > 768) {
+                const sidebar = document.getElementById('sidebar');
+                sidebar.classList.remove('closed');
+                sidebar.classList.remove('open');
+            }
+
             setInterval(renderSchedule, 30000);
+        });
+
+        window.addEventListener('resize', function() {
+            const sidebar = document.getElementById('sidebar');
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('closed');
+                sidebar.classList.remove('open');
+                document.getElementById('sidebarOverlay').classList.remove('active');
+            } else {
+                sidebar.classList.add('closed');
+                sidebar.classList.remove('open');
+            }
         });
     </script>
 </body>
