@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تسجيل المعلم - TeachFlow</title>
     <style>
+        /* نفس الاستايلات السابقة */
         * {
             margin: 0;
             padding: 0;
@@ -325,17 +326,17 @@
                     <label id="subjectLabel">📚 المواد التي تدرسها</label>
                     <div class="subject-selector">
                         <select id="subjectSelect">
-                            <option value="الرياضيات">📐 الرياضيات</option>
-                            <option value="اللغة العربية">📖 اللغة العربية</option>
-                            <option value="اللغة الإنجليزية">🇬🇧 اللغة الإنجليزية</option>
-                            <option value="العلوم">🔬 العلوم</option>
-                            <option value="التاريخ">🏛️ التاريخ</option>
-                            <option value="الجغرافيا">🌍 الجغرافيا</option>
-                            <option value="الفيزياء">⚡ الفيزياء</option>
-                            <option value="الكيمياء">🧪 الكيمياء</option>
-                            <option value="الأحياء">🧬 الأحياء</option>
-                            <option value="الفلسفة">💭 الفلسفة</option>
-                            <option value="أخرى">✏️ أخرى (اكتبها)</option>
+                            <option value="math">📐 الرياضيات</option>
+                            <option value="arabic">📖 اللغة العربية</option>
+                            <option value="english">🇬🇧 اللغة الإنجليزية</option>
+                            <option value="science">🔬 العلوم</option>
+                            <option value="history">🏛️ التاريخ</option>
+                            <option value="geography">🌍 الجغرافيا</option>
+                            <option value="physics">⚡ الفيزياء</option>
+                            <option value="chemistry">🧪 الكيمياء</option>
+                            <option value="biology">🧬 الأحياء</option>
+                            <option value="philosophy">💭 الفلسفة</option>
+                            <option value="other">✏️ أخرى (اكتبها)</option>
                         </select>
                         <button type="button" id="addSubjectBtn" onclick="addSubject()">➕ إضافة</button>
                     </div>
@@ -395,18 +396,19 @@
                 errorPassword: '⚠️ كلمة المرور يجب أن تكون 6 أحرف على الأقل',
                 errorSubject: '⚠️ الرجاء اختيار مادة واحدة على الأقل',
                 success: '✅ تم تسجيل المعلم بنجاح!',
+                errorDuplicate: '⚠️ هذا البريد الإلكتروني مسجل بالفعل!',
                 subjects: {
-                    'الرياضيات': '📐 الرياضيات',
-                    'اللغة العربية': '📖 اللغة العربية',
-                    'اللغة الإنجليزية': '🇬🇧 اللغة الإنجليزية',
-                    'العلوم': '🔬 العلوم',
-                    'التاريخ': '🏛️ التاريخ',
-                    'الجغرافيا': '🌍 الجغرافيا',
-                    'الفيزياء': '⚡ الفيزياء',
-                    'الكيمياء': '🧪 الكيمياء',
-                    'الأحياء': '🧬 الأحياء',
-                    'الفلسفة': '💭 الفلسفة',
-                    'أخرى': '✏️ أخرى (اكتبها)'
+                    math: '📐 الرياضيات',
+                    arabic: '📖 اللغة العربية',
+                    english: '🇬🇧 اللغة الإنجليزية',
+                    science: '🔬 العلوم',
+                    history: '🏛️ التاريخ',
+                    geography: '🌍 الجغرافيا',
+                    physics: '⚡ الفيزياء',
+                    chemistry: '🧪 الكيمياء',
+                    biology: '🧬 الأحياء',
+                    philosophy: '💭 الفلسفة',
+                    other: '✏️ أخرى (اكتبها)'
                 }
             },
             en: {
@@ -437,18 +439,19 @@
                 errorPassword: '⚠️ Password must be at least 6 characters',
                 errorSubject: '⚠️ Please select at least one subject',
                 success: '✅ Teacher registered successfully!',
+                errorDuplicate: '⚠️ This email is already registered!',
                 subjects: {
-                    'الرياضيات': '📐 Mathematics',
-                    'اللغة العربية': '📖 Arabic Language',
-                    'اللغة الإنجليزية': '🇬🇧 English Language',
-                    'العلوم': '🔬 Science',
-                    'التاريخ': '🏛️ History',
-                    'الجغرافيا': '🌍 Geography',
-                    'الفيزياء': '⚡ Physics',
-                    'الكيمياء': '🧪 Chemistry',
-                    'الأحياء': '🧬 Biology',
-                    'الفلسفة': '💭 Philosophy',
-                    'أخرى': '✏️ Other (write it)'
+                    math: '📐 Mathematics',
+                    arabic: '📖 Arabic Language',
+                    english: '🇬🇧 English Language',
+                    science: '🔬 Science',
+                    history: '🏛️ History',
+                    geography: '🌍 Geography',
+                    physics: '⚡ Physics',
+                    chemistry: '🧪 Chemistry',
+                    biology: '🧬 Biology',
+                    philosophy: '💭 Philosophy',
+                    other: '✏️ Other (write it)'
                 }
             }
         };
@@ -456,6 +459,21 @@
         // ===== متغيرات =====
         let currentLang = 'ar';
         let selectedSubjects = [];
+
+        // ===== خريطة المواد =====
+        const subjectKeys = {
+            math: 'math',
+            arabic: 'arabic',
+            english: 'english',
+            science: 'science',
+            history: 'history',
+            geography: 'geography',
+            physics: 'physics',
+            chemistry: 'chemistry',
+            biology: 'biology',
+            philosophy: 'philosophy',
+            other: 'other'
+        };
 
         // ===== اختيار اللغة =====
         function selectLanguage(lang) {
@@ -503,59 +521,30 @@
             document.getElementById('registerBtn').textContent = t.registerBtn;
         }
 
-        // ===== تحديث قائمة المواد (مع الحفاظ على القيمة المحددة) =====
+        // ===== تحديث قائمة المواد =====
         function updateSubjectSelect(lang) {
             const t = translations[lang];
             const select = document.getElementById('subjectSelect');
             const currentValue = select.value;
 
-            // حفظ القيمة والنص المحددين
-            const selectedOption = select.options[select.selectedIndex];
-            const selectedText = selectedOption ? selectedOption.text : '';
-
             select.innerHTML = '';
-
-            const subjectKeys = ['الرياضيات', 'اللغة العربية', 'اللغة الإنجليزية', 'العلوم', 'التاريخ', 'الجغرافيا', 'الفيزياء', 'الكيمياء', 'الأحياء', 'الفلسفة', 'أخرى'];
-            subjectKeys.forEach(key => {
+            const keys = ['math', 'arabic', 'english', 'science', 'history', 'geography', 'physics', 'chemistry', 'biology', 'philosophy', 'other'];
+            keys.forEach(key => {
                 const option = document.createElement('option');
                 option.value = key;
                 option.textContent = t.subjects[key] || key;
                 select.appendChild(option);
             });
 
-            // محاولة استرجاع القيمة
-            if ([...select.options].some(o => o.value === currentValue)) {
+            if (currentValue && [...select.options].some(o => o.value === currentValue)) {
                 select.value = currentValue;
-            } else {
-                // حاول بالنص
-                for (let i = 0; i < select.options.length; i++) {
-                    if (select.options[i].text === selectedText) {
-                        select.value = select.options[i].value;
-                        break;
-                    }
-                }
-            }
-
-            // لو لسه مش لاقي، اختار أول خيار
-            if (!select.value && select.options.length > 0) {
-                select.value = select.options[0].value;
-            }
-
-            // تحديث حقل المادة المخصصة
-            const container = document.getElementById('customSubjectContainer');
-            if (select.value === 'أخرى') {
-                container.classList.add('show');
-                document.getElementById('customSubject').focus();
-            } else {
-                container.classList.remove('show');
-                document.getElementById('customSubject').value = '';
             }
         }
 
         // ===== إظهار/إخفاء حقل المادة المخصصة =====
         document.getElementById('subjectSelect').addEventListener('change', function() {
             const container = document.getElementById('customSubjectContainer');
-            if (this.value === 'أخرى') {
+            if (this.value === 'other') {
                 container.classList.add('show');
                 document.getElementById('customSubject').focus();
             } else {
@@ -567,26 +556,31 @@
         // ===== إضافة مادة =====
         function addSubject() {
             const select = document.getElementById('subjectSelect');
-            let subject = select.value;
+            let key = select.value;
 
-            if (subject === 'أخرى') {
+            if (key === 'other') {
                 const custom = document.getElementById('customSubject').value.trim();
                 if (!custom) {
                     alert(currentLang === 'ar' ? '⚠️ الرجاء كتابة اسم المادة' : '⚠️ Please enter the subject name');
                     return;
                 }
-                subject = custom;
+                // للمواد المخصصة، نخزن النص نفسه
+                if (selectedSubjects.includes(custom)) {
+                    alert(currentLang === 'ar' ? '⚠️ هذه المادة مضافة بالفعل' : '⚠️ This subject is already added');
+                    return;
+                }
+                selectedSubjects.push(custom);
                 document.getElementById('customSubject').value = '';
                 document.getElementById('customSubjectContainer').classList.remove('show');
-                select.value = 'الرياضيات';
+                select.value = 'math';
+            } else {
+                if (selectedSubjects.includes(key)) {
+                    alert(currentLang === 'ar' ? '⚠️ هذه المادة مضافة بالفعل' : '⚠️ This subject is already added');
+                    return;
+                }
+                selectedSubjects.push(key);
             }
 
-            if (selectedSubjects.includes(subject)) {
-                alert(currentLang === 'ar' ? '⚠️ هذه المادة مضافة بالفعل' : '⚠️ This subject is already added');
-                return;
-            }
-
-            selectedSubjects.push(subject);
             renderSelectedSubjects();
             updateRegisterButton();
         }
@@ -605,10 +599,18 @@
                 return;
             }
 
+            const t = translations[currentLang];
+
             selectedSubjects.forEach(subject => {
+                // لو المادة من المفاتيح المعروفة، نترجمها
+                let displayName = subject;
+                if (t.subjects[subject]) {
+                    displayName = t.subjects[subject];
+                }
+
                 const tag = document.createElement('span');
                 tag.className = 'subject-tag';
-                tag.innerHTML = `${subject} <span class="remove" onclick="removeSubject('${subject}')">✕</span>`;
+                tag.innerHTML = `${displayName} <span class="remove" onclick="removeSubject('${subject}')">✕</span>`;
                 container.appendChild(tag);
             });
         }
@@ -677,17 +679,25 @@
                 return;
             }
 
+            let teachers = JSON.parse(localStorage.getItem('teachflow_teachers')) || [];
+
+            if (teachers.some(t => t.email === email)) {
+                errorEl.textContent = t.errorDuplicate;
+                errorEl.classList.add('show');
+                return;
+            }
+
             const trialDays = 14;
             const trialEndDate = new Date();
             trialEndDate.setDate(trialEndDate.getDate() + trialDays);
 
-            const teacherData = {
+            const newTeacher = {
                 name: name,
                 phone: phone,
                 email: email,
                 password: password,
                 language: currentLang,
-                subjects: selectedSubjects,
+                subjects: selectedSubjects, // المفاتيح أو النصوص المخصصة
                 registeredAt: new Date().toISOString(),
                 plan: 'trial',
                 trialEndDate: trialEndDate.toISOString(),
@@ -695,7 +705,10 @@
                 maxStudents: 10
             };
 
-            localStorage.setItem('teachflow_teacher', JSON.stringify(teacherData));
+            teachers.push(newTeacher);
+            localStorage.setItem('teachflow_teachers', JSON.stringify(teachers));
+
+            localStorage.setItem('teachflow_teacher', JSON.stringify(newTeacher));
             localStorage.setItem('teachflow_user', JSON.stringify({ name: name, email: email, phone: phone }));
 
             alert(t.success);
