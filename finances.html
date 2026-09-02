@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>الحسابات - TeachFlow</title>
+    <!-- ===== Firebase SDK ===== -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js">
+    </script>
     <style>
         * {
             margin: 0;
@@ -592,6 +599,28 @@
     </main>
 
     <script>
+        // ===== Firebase Config =====
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            projectId: "YOUR_PROJECT",
+            storageBucket: "YOUR_PROJECT.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // ===== العملات =====
+        const currencies = {
+            EGP: { symbol: 'EGP', rate: 1 },
+            USD: { symbol: 'USD', rate: 0.032 },
+            SAR: { symbol: 'SAR', rate: 0.12 },
+            AED: { symbol: 'AED', rate: 0.12 }
+        };
+
         // ===== Sidebar Toggle =====
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
@@ -617,30 +646,51 @@
         // ===== بيانات المدفوعات =====
         let payments = [];
         let students = [];
+        let groups = [];
 
-        // ===== تحميل البيانات =====
-        function loadFinances() {
-            students = JSON.parse(localStorage.getItem('teachflow_students')) || [];
-            loadStudentsFilter();
-
-            const saved = localStorage.getItem('teachflow_payments');
-            if (saved) {
-                payments = JSON.parse(saved);
-            } else {
-                payments = [
-                    { id: 1, studentId: 1, type: 'lesson', amount: 50, status: 'paid', date: '2026-08-01', notes: 'الحصة الأولى' },
-                    { id: 2, studentId: 1, type: 'month', amount: 200, status: 'pending', date: '2026-09-01', notes: 'اشتراك شهر سبتمبر' },
-                    { id: 3, studentId: 2, type: 'lesson', amount: 60, status: 'paid', date: '2026-08-05', notes: 'حصة الرياضيات' },
-                    { id: 4, studentId: 3, type: 'month', amount: 150, status: 'overdue', date: '2026-07-01', notes: 'متأخرة منذ يوليو' },
-                    { id: 5, studentId: 2, type: 'month', amount: 150, status: 'pending', date: '2026-09-01', notes: 'اشتراك شهر سبتمبر' }
-                ];
-                savePayments();
+        // ===== تحميل البيانات من Firebase =====
+        async function loadFinances() {
+            const uid = localStorage.getItem('teachflow_uid');
+            if (!uid) {
+                window.location.href = 'index.html';
+                return;
             }
 
-            renderFinances();
-            updateSummary();
+            try {
+                // جلب المجموعات
+                const groupsSnapshot = await db.collection('teachers').doc(uid).collection('groups').get();
+                groups = [];
+                groupsSnapshot.forEach(doc => {
+                    groups.push({ id: doc.id, ...doc.data() });
+                });
+
+                // جلب الطلاب
+                const studentsSnapshot = await db.collection('teachers').doc(uid).collection('students').get();
+                students = [];
+                studentsSnapshot.forEach(doc => {
+                    students.push({ id: doc.id, ...doc.data() });
+                });
+                loadStudentsFilter();
+
+                // جلب المدفوعات
+                const paymentsSnapshot = await db.collection('teachers').doc(uid).collection('payments').get();
+                payments = [];
+                paymentsSnapshot.forEach(doc => {
+                    payments.push({ id: doc.id, ...doc.data() });
+                });
+
+                renderFinances();
+                updateSummary();
+
+            } catch (error) {
+                console.error('❌ خطأ في تحميل البيانات:', error);
+                payments = [];
+                renderFinances();
+                updateSummary();
+            }
         }
 
+        // ===== تحميل الطلاب في الفلتر =====
         function loadStudentsFilter() {
             const select = document.getElementById('studentFilter');
             const currentValue = select.value;
@@ -654,10 +704,52 @@
             select.value = currentValue;
         }
 
-        function savePayments() {
-            localStorage.setItem('teachflow_payments', JSON.stringify(payments));
+        // ===== حفظ دفعة في Firebase =====
+        async function savePaymentToFirebase(paymentData) {
+            const uid = localStorage.getItem('teachflow_uid');
+            if (!uid) return;
+
+            try {
+                const docRef = await db.collection('teachers').doc(uid).collection('payments').add(paymentData);
+                return docRef.id;
+            } catch (error) {
+                console.error('❌ خطأ في حفظ الدفعة:', error);
+                alert('❌ حدث خطأ أثناء حفظ الدفعة');
+                return null;
+            }
         }
 
+        // ===== تحديث دفعة في Firebase =====
+        async function updatePaymentInFirebase(paymentId, paymentData) {
+            const uid = localStorage.getItem('teachflow_uid');
+            if (!uid) return;
+
+            try {
+                await db.collection('teachers').doc(uid).collection('payments').doc(paymentId).update(paymentData);
+                return true;
+            } catch (error) {
+                console.error('❌ خطأ في تحديث الدفعة:', error);
+                alert('❌ حدث خطأ أثناء تحديث الدفعة');
+                return false;
+            }
+        }
+
+        // ===== حذف دفعة من Firebase =====
+        async function deletePaymentFromFirebase(paymentId) {
+            const uid = localStorage.getItem('teachflow_uid');
+            if (!uid) return;
+
+            try {
+                await db.collection('teachers').doc(uid).collection('payments').doc(paymentId).delete();
+                return true;
+            } catch (error) {
+                console.error('❌ خطأ في حذف الدفعة:', error);
+                alert('❌ حدث خطأ أثناء حذف الدفعة');
+                return false;
+            }
+        }
+
+        // ===== عرض المدفوعات =====
         function renderFinances() {
             const tbody = document.getElementById('financesBody');
 
@@ -703,6 +795,10 @@
                 return;
             }
 
+            // جلب العملة المختارة من الإعدادات
+            const currency = localStorage.getItem('teachflow_currency') || 'EGP';
+            const currencySymbol = currencies[currency]?.symbol || 'EGP';
+
             tbody.innerHTML = filtered.map((payment, index) => {
                 const student = students.find(s => s.id === payment.studentId);
                 const studentName = student ? student.name : 'طالب محذوف';
@@ -722,19 +818,20 @@
                         <td><strong>${studentName}</strong></td>
                         <td>${group}</td>
                         <td><span class="payment-type">${typeText}</span></td>
-                        <td><strong>${payment.amount} EGP</strong></td>
+                        <td><strong>${payment.amount} ${currencySymbol}</strong></td>
                         <td><span class="payment-status ${statusClass}">${statusText}</span></td>
                         <td>${payment.date}</td>
                         <td>${payment.notes || '-'}</td>
                         <td>
-                            <button class="btn-edit" onclick="editPayment(${payment.id})" style="padding:4px 12px;background:#f39c12;color:white;border:none;border-radius:8px;cursor:pointer;font-size:12px;margin-left:4px;">✏️</button>
-                            <button class="btn-delete" onclick="deletePayment(${payment.id})" style="padding:4px 12px;background:#e74c3c;color:white;border:none;border-radius:8px;cursor:pointer;font-size:12px;">🗑️</button>
+                            <button class="btn-edit" onclick="editPayment('${payment.id}')" style="padding:4px 12px;background:#f39c12;color:white;border:none;border-radius:8px;cursor:pointer;font-size:12px;margin-left:4px;">✏️</button>
+                            <button class="btn-delete" onclick="deletePayment('${payment.id}')" style="padding:4px 12px;background:#e74c3c;color:white;border:none;border-radius:8px;cursor:pointer;font-size:12px;">🗑️</button>
                         </td>
                     </tr>
                 `;
             }).join('');
         }
 
+        // ===== تحديث الملخص =====
         function updateSummary() {
             let total = 0,
                 paid = 0,
@@ -748,16 +845,30 @@
                 else if (p.status === 'overdue') overdue += p.amount;
             });
 
-            document.getElementById('totalAmount').textContent = total + ' EGP';
-            document.getElementById('paidAmount').textContent = paid + ' EGP';
-            document.getElementById('pendingAmount').textContent = pending + ' EGP';
+            const currency = localStorage.getItem('teachflow_currency') || 'EGP';
+            const currencySymbol = currencies[currency]?.symbol || 'EGP';
+
+            document.getElementById('totalAmount').textContent = total + ' ' + currencySymbol;
+            document.getElementById('paidAmount').textContent = paid + ' ' + currencySymbol;
+            document.getElementById('pendingAmount').textContent = pending + ' ' + currencySymbol;
 
             const overdueCount = payments.filter(p => p.status === 'overdue').length;
             document.getElementById('overdueCount').textContent = overdueCount;
         }
 
-        function showAddPayment() {
-            const activeStudents = students.filter(s => s.active);
+        // ===== إضافة دفعة =====
+        async function showAddPayment() {
+            const uid = localStorage.getItem('teachflow_uid');
+            if (!uid) return;
+
+            // جلب الطلاب النشطين
+            const studentsSnapshot = await db.collection('teachers').doc(uid).collection('students')
+                .where('active', '==', true).get();
+            const activeStudents = [];
+            studentsSnapshot.forEach(doc => {
+                activeStudents.push({ id: doc.id, ...doc.data() });
+            });
+
             if (activeStudents.length === 0) {
                 alert('⚠️ لا يوجد طلاب نشطين!');
                 return;
@@ -779,7 +890,7 @@
             const typeMap = { '1': 'lesson', '2': 'month' };
             const type = typeMap[typeChoice] || 'month';
 
-            const amount = prompt('💵 أدخل المبلغ (بالجنيه المصري):');
+            const amount = prompt('💵 أدخل المبلغ:');
             if (amount === null || isNaN(amount) || parseInt(amount) <= 0) {
                 alert('⚠️ الرجاء إدخال مبلغ صحيح');
                 return;
@@ -794,24 +905,28 @@
             const notes = prompt('📌 ملاحظات (اختياري):') || '';
 
             const newPayment = {
-                id: Date.now(),
                 studentId: selectedStudent.id,
                 type: type,
                 amount: parseInt(amount),
                 status: status,
                 date: date,
-                notes: notes
+                notes: notes,
+                addedAt: new Date().toISOString()
             };
 
-            payments.push(newPayment);
-            savePayments();
-            renderFinances();
-            updateSummary();
-            alert(`✅ تم إضافة دفعة للطالب ${selectedStudent.name}`);
+            const docId = await savePaymentToFirebase(newPayment);
+            if (docId) {
+                newPayment.id = docId;
+                payments.push(newPayment);
+                renderFinances();
+                updateSummary();
+                alert(`✅ تم إضافة دفعة للطالب ${selectedStudent.name}`);
+            }
         }
 
-        function editPayment(id) {
-            const payment = payments.find(p => p.id === id);
+        // ===== تعديل دفعة =====
+        async function editPayment(paymentId) {
+            const payment = payments.find(p => p.id === paymentId);
             if (!payment) return;
 
             const student = students.find(s => s.id === payment.studentId);
@@ -844,39 +959,53 @@
             const notes = prompt(`📌 الملاحظات (الحالية: ${payment.notes || 'لا توجد'}):`, payment.notes || '');
             if (notes !== null) payment.notes = notes;
 
-            savePayments();
-            renderFinances();
-            updateSummary();
-            alert(`✅ تم تعديل دفعة الطالب ${studentName}`);
+            const updated = await updatePaymentInFirebase(paymentId, {
+                type: payment.type,
+                amount: payment.amount,
+                status: payment.status,
+                date: payment.date,
+                notes: payment.notes
+            });
+
+            if (updated) {
+                renderFinances();
+                updateSummary();
+                alert(`✅ تم تعديل دفعة الطالب ${studentName}`);
+            }
         }
 
-        function deletePayment(id) {
-            const payment = payments.find(p => p.id === id);
+        // ===== حذف دفعة =====
+        async function deletePayment(paymentId) {
+            const payment = payments.find(p => p.id === paymentId);
             if (!payment) return;
 
             const student = students.find(s => s.id === payment.studentId);
             const studentName = student ? student.name : 'طالب محذوف';
 
             if (confirm(`🗑️ هل أنت متأكد من حذف دفعة الطالب "${studentName}"؟`)) {
-                payments = payments.filter(p => p.id !== id);
-                savePayments();
-                renderFinances();
-                updateSummary();
-                alert('✅ تم حذف الدفعة!');
+                const deleted = await deletePaymentFromFirebase(paymentId);
+                if (deleted) {
+                    payments = payments.filter(p => p.id !== paymentId);
+                    renderFinances();
+                    updateSummary();
+                    alert('✅ تم حذف الدفعة!');
+                }
             }
         }
 
+        // ===== تسجيل الخروج =====
         function logout() {
             if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
                 localStorage.removeItem('teachflow_teacher');
                 localStorage.removeItem('teachflow_user');
+                localStorage.removeItem('teachflow_uid');
                 window.location.href = 'index.html';
             }
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            const teacher = localStorage.getItem('teachflow_teacher');
-            if (!teacher) {
+            const uid = localStorage.getItem('teachflow_uid');
+            if (!uid) {
                 window.location.href = 'index.html';
                 return;
             }
