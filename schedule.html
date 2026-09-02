@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>الجدول الأسبوعي - TeachFlow</title>
+    <!-- ===== Firebase SDK ===== -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js">
+    </script>
+    <!-- ===== jsPDF & html2canvas ===== -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js">
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js">
@@ -255,6 +263,7 @@
             transform: scale(1.02);
         }
 
+        /* ===== Schedule Table ===== */
         .schedule-container {
             background: white;
             border-radius: 16px;
@@ -281,12 +290,20 @@
             white-space: nowrap;
         }
 
+        .schedule-table th .day-sub {
+            font-size: 10px;
+            font-weight: 400;
+            opacity: 0.8;
+            display: block;
+        }
+
         .schedule-table td {
             padding: 12px 8px;
             text-align: center;
             border: 1px solid #e8edf2;
             vertical-align: middle;
             min-height: 60px;
+            transition: 0.2s;
         }
 
         .schedule-table tr:hover td {
@@ -300,20 +317,23 @@
             width: 70px;
             white-space: nowrap;
             font-size: 13px;
+            border-left: 2px solid #667eea;
         }
 
+        /* ===== Lesson Cell ===== */
         .schedule-table .lesson-cell {
-            background: #f0f4ff;
             border-radius: 8px;
             padding: 6px 8px;
             margin: 2px 0;
             cursor: pointer;
             transition: 0.3s;
+            position: relative;
+            border-right: 3px solid transparent;
         }
 
         .schedule-table .lesson-cell:hover {
-            background: #dde6f7;
             transform: scale(1.02);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         .schedule-table .lesson-cell .group-name {
@@ -340,6 +360,42 @@
             border-radius: 10px;
             display: inline-block;
             margin-top: 2px;
+        }
+
+        .schedule-table .lesson-cell .repeat-badge {
+            font-size: 8px;
+            color: #fff;
+            background: #9b59b6;
+            padding: 1px 6px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-top: 2px;
+        }
+
+        /* ===== Colors for different subjects ===== */
+        .schedule-table .lesson-cell.color-1 {
+            border-right-color: #667eea;
+            background: #eef1ff;
+        }
+        .schedule-table .lesson-cell.color-2 {
+            border-right-color: #2ecc71;
+            background: #eafaf1;
+        }
+        .schedule-table .lesson-cell.color-3 {
+            border-right-color: #f39c12;
+            background: #fef9e7;
+        }
+        .schedule-table .lesson-cell.color-4 {
+            border-right-color: #e74c3c;
+            background: #fdedec;
+        }
+        .schedule-table .lesson-cell.color-5 {
+            border-right-color: #9b59b6;
+            background: #f4ecf7;
+        }
+        .schedule-table .lesson-cell.color-6 {
+            border-right-color: #1abc9c;
+            background: #e8f8f5;
         }
 
         .schedule-table .empty-cell {
@@ -395,7 +451,7 @@
             }
         }
 
-        /* ===== الموبايل ===== */
+        /* ===== Mobile ===== */
         @media (max-width: 768px) {
             .hamburger {
                 display: block;
@@ -535,13 +591,13 @@
                 <thead>
                     <tr>
                         <th>⏰ الوقت</th>
-                        <th>السبت</th>
-                        <th>الأحد</th>
-                        <th>الإثنين</th>
-                        <th>الثلاثاء</th>
-                        <th>الأربعاء</th>
-                        <th>الخميس</th>
-                        <th>الجمعة</th>
+                        <th>السبت <span class="day-sub">يوم 1</span></th>
+                        <th>الأحد <span class="day-sub">يوم 2</span></th>
+                        <th>الإثنين <span class="day-sub">يوم 3</span></th>
+                        <th>الثلاثاء <span class="day-sub">يوم 4</span></th>
+                        <th>الأربعاء <span class="day-sub">يوم 5</span></th>
+                        <th>الخميس <span class="day-sub">يوم 6</span></th>
+                        <th>الجمعة <span class="day-sub">يوم 7</span></th>
                     </tr>
                 </thead>
                 <tbody id="scheduleBody">
@@ -556,6 +612,20 @@
     </main>
 
     <script>
+        // ===== Firebase Config =====
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            projectId: "YOUR_PROJECT",
+            storageBucket: "YOUR_PROJECT.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
         // ===== Sidebar Toggle =====
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
@@ -588,35 +658,87 @@
             '6:00 م', '7:00 م', '8:00 م', '9:00 م', '10:00 م'
         ];
 
-        let schedule = [];
+        // ===== الألوان للمواد =====
+        const colors = ['color-1', 'color-2', 'color-3', 'color-4', 'color-5', 'color-6'];
 
-        // ===== تحميل الجدول =====
-        function loadSchedule() {
-            const saved = localStorage.getItem('teachflow_schedule');
-            if (saved) {
-                schedule = JSON.parse(saved);
-            } else {
-                schedule = [];
-                saveSchedule();
+        // ===== بيانات الجدول =====
+        let schedule = [];
+        let groups = [];
+
+        // ===== تحميل الجدول من Firebase =====
+        async function loadSchedule() {
+            const uid = localStorage.getItem('teachflow_uid');
+            if (!uid) {
+                window.location.href = 'index.html';
+                return;
             }
-            renderSchedule();
+
+            try {
+                // جلب المجموعات
+                const groupsSnapshot = await db.collection('teachers').doc(uid).collection('groups').get();
+                groups = [];
+                groupsSnapshot.forEach(doc => {
+                    groups.push({ id: doc.id, ...doc.data() });
+                });
+
+                // جلب الحصص
+                const scheduleSnapshot = await db.collection('teachers').doc(uid).collection('schedule').get();
+                schedule = [];
+                scheduleSnapshot.forEach(doc => {
+                    schedule.push({ id: doc.id, ...doc.data() });
+                });
+
+                renderSchedule();
+
+            } catch (error) {
+                console.error('❌ خطأ في تحميل الجدول:', error);
+                schedule = [];
+                renderSchedule();
+            }
         }
 
-        function saveSchedule() {
-            localStorage.setItem('teachflow_schedule', JSON.stringify(schedule));
+        // ===== حفظ حصة في Firebase =====
+        async function saveLessonToFirebase(lessonData) {
+            const uid = localStorage.getItem('teachflow_uid');
+            if (!uid) return;
+
+            try {
+                const docRef = await db.collection('teachers').doc(uid).collection('schedule').add(lessonData);
+                return docRef.id;
+            } catch (error) {
+                console.error('❌ خطأ في حفظ الحصة:', error);
+                alert('❌ حدث خطأ أثناء حفظ الحصة');
+                return null;
+            }
+        }
+
+        // ===== حذف حصة من Firebase =====
+        async function deleteLessonFromFirebase(lessonId) {
+            const uid = localStorage.getItem('teachflow_uid');
+            if (!uid) return;
+
+            try {
+                await db.collection('teachers').doc(uid).collection('schedule').doc(lessonId).delete();
+                return true;
+            } catch (error) {
+                console.error('❌ خطأ في حذف الحصة:', error);
+                alert('❌ حدث خطأ أثناء حذف الحصة');
+                return false;
+            }
         }
 
         // ===== عرض الجدول =====
         function renderSchedule() {
             const tbody = document.getElementById('scheduleBody');
-            const groups = JSON.parse(localStorage.getItem('teachflow_groups')) || [];
 
             tbody.innerHTML = times.map(time => {
                 let row = `<tr><td class="time-col">${time}</td>`;
 
-                days.forEach(day => {
+                days.forEach((day, dayIndex) => {
+                    // الحصص المسجلة
                     const scheduledLessons = schedule.filter(s => s.day === day && s.time === time);
 
+                    // المجموعات اللي ليها يوم ووقت محدد
                     const groupLessons = groups
                         .filter(g => g.day === day && g.time === time && g.active !== false)
                         .map(g => ({
@@ -625,30 +747,50 @@
                             subject: g.level || 'مجموعة',
                             location: g.locationType || '',
                             isGroup: true,
-                            fromGroup: true
+                            fromGroup: true,
+                            color: colors[Math.floor(Math.random() * colors.length)]
                         }));
 
-                    const allLessons = [...groupLessons, ...scheduledLessons];
+                    // دمج الحصص
+                    let allLessons = [...groupLessons, ...scheduledLessons];
+
+                    // إضافة التكرار الأسبوعي (من الحصص اللي فيها repeatWeekly)
+                    const weeklyLessons = schedule
+                        .filter(s => s.repeatWeekly && s.day === day && s.time === time && !scheduledLessons.includes(s))
+                        .map(s => ({
+                            ...s,
+                            isGroup: false,
+                            fromGroup: false,
+                            isRepeat: true,
+                            color: colors[Math.floor(Math.random() * colors.length)]
+                        }));
+
+                    allLessons = [...allLessons, ...weeklyLessons];
 
                     if (allLessons.length > 0) {
                         row += `<td>`;
-                        allLessons.forEach(lesson => {
+                        allLessons.forEach((lesson, index) => {
                             const isGroup = lesson.isGroup || false;
+                            const isRepeat = lesson.isRepeat || false;
                             const locationText = lesson.location ? `📍 ${lesson.location}` : '';
+                            const colorClass = lesson.color || colors[index % colors.length];
 
                             let bgColor = '#f0f4ff';
                             if (isGroup) {
                                 bgColor = '#e8f5e9';
+                            } else if (isRepeat) {
+                                bgColor = '#f3e5f5';
                             }
 
                             row += `
-                                <div class="lesson-cell" 
+                                <div class="lesson-cell ${colorClass}" 
                                      style="background:${bgColor}; padding:6px 8px; margin:2px 0; border-radius:8px; cursor:pointer; transition:0.3s;"
-                                     onclick="${isGroup ? `showGroupDetails('${lesson.group}')` : `deleteLesson(${lesson.id})`}">
+                                     onclick="${isGroup ? `showGroupDetails('${lesson.group}')` : `deleteLesson('${lesson.id}')`}">
                                     <div class="group-name">${lesson.group}</div>
                                     <div class="subject">${lesson.subject}</div>
                                     ${locationText ? `<div class="location">${locationText}</div>` : ''}
                                     ${isGroup ? '<div class="from-group">🔄 من المجموعات</div>' : ''}
+                                    ${isRepeat ? '<div class="repeat-badge">🔄 متكرر</div>' : ''}
                                 </div>
                             `;
                         });
@@ -665,7 +807,6 @@
 
         // ===== عرض تفاصيل المجموعة =====
         function showGroupDetails(groupName) {
-            const groups = JSON.parse(localStorage.getItem('teachflow_groups')) || [];
             const group = groups.find(g => g.name === groupName);
             if (group) {
                 alert(`📚 ${group.name}\n📅 ${group.day || 'غير محدد'}\n⏰ ${group.time || 'غير محدد'}\n📍 ${group.locationAddress || 'لا يوجد عنوان'}\n📊 المستوى: ${group.level || 'عام'}\n👥 الحد الأقصى: ${group.maxStudents || 'غير محدد'}`);
@@ -681,8 +822,17 @@
         }
 
         // ===== إضافة حصة =====
-        function showAddLesson() {
-            const groups = JSON.parse(localStorage.getItem('teachflow_groups')) || [];
+        async function showAddLesson() {
+            const uid = localStorage.getItem('teachflow_uid');
+            if (!uid) return;
+
+            // جلب المجموعات من Firebase
+            const groupsSnapshot = await db.collection('teachers').doc(uid).collection('groups').get();
+            const groups = [];
+            groupsSnapshot.forEach(doc => {
+                groups.push({ id: doc.id, ...doc.data() });
+            });
+
             if (groups.length === 0) {
                 alert('⚠️ لا توجد مجموعات! الرجاء إضافة مجموعة أولاً.');
                 return;
@@ -716,37 +866,43 @@
             const group = groups[groupIndex].name;
 
             const subject = prompt('📚 المادة (اختياري):') || '';
-
-            const exists = schedule.some(s => s.day === day && s.time === time && s.group === group);
-            if (exists) {
-                alert('⚠️ هذه الحصة موجودة بالفعل!');
-                return;
-            }
+            const repeatWeekly = confirm('🔄 هل تريد تكرار هذه الحصة أسبوعياً؟ (OK = نعم، Cancel = لا)');
 
             const newLesson = {
-                id: Date.now(),
                 day: day,
                 time: time,
                 group: group,
-                subject: subject
+                subject: subject,
+                repeatWeekly: repeatWeekly,
+                addedAt: new Date().toISOString()
             };
 
-            schedule.push(newLesson);
-            saveSchedule();
-            renderSchedule();
-            alert(`✅ تم إضافة الحصة: ${day} - ${time} - ${group}`);
+            const docId = await saveLessonToFirebase(newLesson);
+            if (docId) {
+                newLesson.id = docId;
+                schedule.push(newLesson);
+                renderSchedule();
+                alert(`✅ تم إضافة الحصة: ${day} - ${time} - ${group}${repeatWeekly ? ' (متكرر أسبوعياً)' : ''}`);
+            }
         }
 
         // ===== حذف حصة =====
-        function deleteLesson(id) {
-            const lesson = schedule.find(s => s.id === id);
+        async function deleteLesson(lessonId) {
+            if (lessonId.toString().startsWith('group-')) {
+                alert('⚠️ هذه حصة من المجموعات، لا يمكن حذفها من هنا.\nيمكنك تعديلها من صفحة المجموعات.');
+                return;
+            }
+
+            const lesson = schedule.find(s => s.id === lessonId);
             if (!lesson) return;
 
             if (confirm(`🗑️ هل أنت متأكد من حذف حصة ${lesson.group} في ${lesson.day} ${lesson.time}؟`)) {
-                schedule = schedule.filter(s => s.id !== id);
-                saveSchedule();
-                renderSchedule();
-                alert('✅ تم حذف الحصة!');
+                const deleted = await deleteLessonFromFirebase(lessonId);
+                if (deleted) {
+                    schedule = schedule.filter(s => s.id !== lessonId);
+                    renderSchedule();
+                    alert('✅ تم حذف الحصة!');
+                }
             }
         }
 
@@ -790,13 +946,15 @@
             if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
                 localStorage.removeItem('teachflow_teacher');
                 localStorage.removeItem('teachflow_user');
+                localStorage.removeItem('teachflow_uid');
                 window.location.href = 'index.html';
             }
         }
 
+        // ===== تحميل الصفحة =====
         document.addEventListener('DOMContentLoaded', function() {
-            const teacher = localStorage.getItem('teachflow_teacher');
-            if (!teacher) {
+            const uid = localStorage.getItem('teachflow_uid');
+            if (!uid) {
                 window.location.href = 'index.html';
                 return;
             }
@@ -808,6 +966,7 @@
                 sidebar.classList.remove('open');
             }
 
+            // تحديث كل 30 ثانية
             setInterval(renderSchedule, 30000);
         });
 
