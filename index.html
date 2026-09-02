@@ -4,8 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تسجيل المعلم - TeachFlow</title>
+    <!-- ===== Firebase SDK ===== -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js">
+    </script>
     <style>
-        /* نفس الاستايلات السابقة */
         * {
             margin: 0;
             padding: 0;
@@ -86,6 +92,29 @@
             margin-top: 4px;
         }
 
+        /* ===== زر استيراد جهات الاتصال ===== */
+        .btn-import {
+            padding: 8px 16px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+
+        .btn-import:hover {
+            background: #2980b9;
+            transform: scale(1.02);
+        }
+
+        /* ===== إضافة المواد ===== */
         .subject-selector {
             display: flex;
             gap: 10px;
@@ -293,7 +322,10 @@
 
                 <div class="form-group">
                     <label id="phoneLabel">📱 رقم التليفون</label>
-                    <input type="tel" id="teacherPhone" placeholder="مثال: 01001234567" required>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                        <input type="tel" id="teacherPhone" placeholder="مثال: 01001234567" required style="flex:1;">
+                        <button type="button" class="btn-import" onclick="importContact()">📇 استيراد</button>
+                    </div>
                     <div class="hint" id="phoneHint">أدخل رقم التليفون الخاص بك للتواصل</div>
                 </div>
 
@@ -366,6 +398,20 @@
     </div>
 
     <script>
+        // ===== Firebase Config (استبدل بالقيم بتاعتك) =====
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            projectId: "YOUR_PROJECT",
+            storageBucket: "YOUR_PROJECT.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
         // ===== الترجمة =====
         const translations = {
             ar: {
@@ -460,20 +506,46 @@
         let currentLang = 'ar';
         let selectedSubjects = [];
 
-        // ===== خريطة المواد =====
-        const subjectKeys = {
-            math: 'math',
-            arabic: 'arabic',
-            english: 'english',
-            science: 'science',
-            history: 'history',
-            geography: 'geography',
-            physics: 'physics',
-            chemistry: 'chemistry',
-            biology: 'biology',
-            philosophy: 'philosophy',
-            other: 'other'
-        };
+        // ===== استيراد جهة اتصال =====
+        async function importContact() {
+            // التحقق من دعم الـ API
+            if (!navigator.contacts) {
+                alert('⚠️ هذه الميزة غير مدعومة في هذا المتصفح.\nيرجى استخدام متصفح Chrome على Android.');
+                return;
+            }
+
+            try {
+                const properties = ['name', 'tel'];
+                const options = { multiple: false };
+
+                const contacts = await navigator.contacts.select(properties, options);
+
+                if (!contacts || contacts.length === 0) {
+                    alert('⚠️ لم يتم اختيار أي جهة اتصال');
+                    return;
+                }
+
+                const contact = contacts[0];
+                const name = contact.name ? contact.name[0] : '';
+                const phone = contact.tel ? contact.tel[0] : '';
+
+                if (name) {
+                    document.getElementById('teacherName').value = name;
+                }
+                if (phone) {
+                    document.getElementById('teacherPhone').value = phone;
+                }
+
+                if (!name && !phone) {
+                    alert('⚠️ جهة الاتصال لا تحتوي على اسم أو رقم');
+                } else {
+                    alert('✅ تم استيراد بيانات جهة الاتصال');
+                }
+            } catch (error) {
+                console.error('خطأ في استيراد جهة الاتصال:', error);
+                alert('❌ حدث خطأ أثناء استيراد جهة الاتصال');
+            }
+        }
 
         // ===== اختيار اللغة =====
         function selectLanguage(lang) {
@@ -564,7 +636,6 @@
                     alert(currentLang === 'ar' ? '⚠️ الرجاء كتابة اسم المادة' : '⚠️ Please enter the subject name');
                     return;
                 }
-                // للمواد المخصصة، نخزن النص نفسه
                 if (selectedSubjects.includes(custom)) {
                     alert(currentLang === 'ar' ? '⚠️ هذه المادة مضافة بالفعل' : '⚠️ This subject is already added');
                     return;
@@ -602,7 +673,6 @@
             const t = translations[currentLang];
 
             selectedSubjects.forEach(subject => {
-                // لو المادة من المفاتيح المعروفة، نترجمها
                 let displayName = subject;
                 if (t.subjects[subject]) {
                     displayName = t.subjects[subject];
@@ -636,8 +706,8 @@
             }
         });
 
-        // ===== معالجة التسجيل =====
-        document.getElementById('registerForm').addEventListener('submit', function(e) {
+        // ===== معالجة التسجيل (مع Firebase) =====
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
             const name = document.getElementById('teacherName').value.trim();
@@ -679,50 +749,85 @@
                 return;
             }
 
-            let teachers = JSON.parse(localStorage.getItem('teachflow_teachers')) || [];
+            try {
+                // ===== 1. إنشاء حساب في Firebase Auth =====
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const uid = userCredential.user.uid;
 
-            if (teachers.some(t => t.email === email)) {
-                errorEl.textContent = t.errorDuplicate;
+                // ===== 2. حساب الفترة التجريبية =====
+                const trialDays = 14;
+                const trialEndDate = new Date();
+                trialEndDate.setDate(trialEndDate.getDate() + trialDays);
+
+                // ===== 3. حفظ بيانات المعلم في Firestore =====
+                const teacherData = {
+                    name: name,
+                    phone: phone,
+                    email: email,
+                    subjects: selectedSubjects,
+                    language: currentLang,
+                    registeredAt: new Date().toISOString(),
+                    plan: 'trial',
+                    trialEndDate: trialEndDate.toISOString(),
+                    isPaid: false,
+                    maxStudents: 10
+                };
+
+                await db.collection('teachers').doc(uid).set(teacherData);
+
+                // ===== 4. حفظ في localStorage للجلسة =====
+                localStorage.setItem('teachflow_uid', uid);
+                localStorage.setItem('teachflow_teacher', JSON.stringify(teacherData));
+                localStorage.setItem('teachflow_user', JSON.stringify({ name: name, email: email, phone: phone }));
+
+                // ===== 5. حفظ في القائمة المحلية (للوحة التحكم) =====
+                let teachers = JSON.parse(localStorage.getItem('teachflow_teachers')) || [];
+                if (!teachers.some(t => t.email === email)) {
+                    teachers.push(teacherData);
+                    localStorage.setItem('teachflow_teachers', JSON.stringify(teachers));
+                }
+
+                alert(t.success);
+                window.location.href = 'home.html';
+
+            } catch (error) {
+                console.error('❌ Firebase Error:', error);
+                let errorMessage = error.message;
+
+                // ترجمة رسائل الخطأ
+                if (error.code === 'auth/email-already-in-use') {
+                    errorMessage = t.errorDuplicate;
+                } else if (error.code === 'auth/weak-password') {
+                    errorMessage = t.errorPassword;
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = t.errorEmail;
+                }
+
+                errorEl.textContent = errorMessage;
                 errorEl.classList.add('show');
-                return;
             }
-
-            const trialDays = 14;
-            const trialEndDate = new Date();
-            trialEndDate.setDate(trialEndDate.getDate() + trialDays);
-
-            const newTeacher = {
-                name: name,
-                phone: phone,
-                email: email,
-                password: password,
-                language: currentLang,
-                subjects: selectedSubjects, // المفاتيح أو النصوص المخصصة
-                registeredAt: new Date().toISOString(),
-                plan: 'trial',
-                trialEndDate: trialEndDate.toISOString(),
-                isPaid: false,
-                maxStudents: 10
-            };
-
-            teachers.push(newTeacher);
-            localStorage.setItem('teachflow_teachers', JSON.stringify(teachers));
-
-            localStorage.setItem('teachflow_teacher', JSON.stringify(newTeacher));
-            localStorage.setItem('teachflow_user', JSON.stringify({ name: name, email: email, phone: phone }));
-
-            alert(t.success);
-            window.location.href = 'home.html';
         });
 
+        // ===== التحقق من الجلسة عند تحميل الصفحة =====
         window.addEventListener('load', function() {
-            const teacher = localStorage.getItem('teachflow_teacher');
-            if (teacher) {
-                window.location.href = 'home.html';
-                return;
+            const uid = localStorage.getItem('teachflow_uid');
+            if (uid) {
+                // جلب بيانات المعلم من Firestore
+                db.collection('teachers').doc(uid).get().then(doc => {
+                    if (doc.exists) {
+                        const teacher = doc.data();
+                        localStorage.setItem('teachflow_teacher', JSON.stringify(teacher));
+                        window.location.href = 'home.html';
+                    }
+                }).catch(() => {
+                    // لو في خطأ، نروح للتسجيل
+                    selectLanguage('ar');
+                    updateRegisterButton();
+                });
+            } else {
+                selectLanguage('ar');
+                updateRegisterButton();
             }
-            selectLanguage('ar');
-            updateRegisterButton();
         });
     </script>
 </body>
