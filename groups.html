@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>المجموعات - TeachFlow</title>
+    <!-- ===== Firebase SDK ===== -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js">
+    </script>
     <style>
         * {
             margin: 0;
@@ -230,6 +237,7 @@
             position: relative;
             display: flex;
             flex-direction: column;
+            cursor: pointer;
         }
 
         .group-card:hover {
@@ -545,6 +553,20 @@
     </main>
 
     <script>
+        // ===== Firebase Config =====
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            projectId: "YOUR_PROJECT",
+            storageBucket: "YOUR_PROJECT.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
         // ===== Sidebar Toggle =====
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
@@ -574,27 +596,82 @@
         const daysList = ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'];
         const timeList = ['8:00 ص', '9:00 ص', '10:00 ص', '11:00 ص', '12:00 م', '1:00 م', '2:00 م', '3:00 م', '4:00 م', '5:00 م', '6:00 م', '7:00 م', '8:00 م', '9:00 م', '10:00 م'];
 
-        // ===== تحميل المجموعات =====
-        function loadGroups() {
-            const saved = localStorage.getItem('teachflow_groups');
-            if (saved) {
-                groups = JSON.parse(saved);
-            } else {
-                groups = [];
-                saveGroups();
+        // ===== جلب المجموعات من Firebase =====
+        async function loadGroups() {
+            const uid = localStorage.getItem('teachflow_uid');
+            if (!uid) {
+                window.location.href = 'index.html';
+                return;
             }
-            groups.sort((a, b) => a.number.localeCompare(b.number));
-            filteredGroups = [...groups];
-            renderGroups();
+
+            try {
+                const snapshot = await db.collection('teachers').doc(uid).collection('groups').get();
+                groups = [];
+                snapshot.forEach(doc => {
+                    groups.push({ id: doc.id, ...doc.data() });
+                });
+
+                // ترتيب حسب رقم المجموعة
+                groups.sort((a, b) => (a.number || '').localeCompare(b.number || ''));
+                filteredGroups = [...groups];
+                renderGroups();
+
+            } catch (error) {
+                console.error('❌ خطأ في تحميل المجموعات:', error);
+                groups = [];
+                filteredGroups = [];
+                renderGroups();
+            }
         }
 
-        function saveGroups() {
-            localStorage.setItem('teachflow_groups', JSON.stringify(groups));
+        // ===== حفظ المجموعة في Firebase =====
+        async function saveGroup(groupData) {
+            const uid = localStorage.getItem('teachflow_uid');
+            if (!uid) return;
+
+            try {
+                const docRef = await db.collection('teachers').doc(uid).collection('groups').add(groupData);
+                return docRef.id;
+            } catch (error) {
+                console.error('❌ خطأ في حفظ المجموعة:', error);
+                alert('❌ حدث خطأ أثناء حفظ المجموعة');
+                return null;
+            }
         }
 
+        // ===== تحديث مجموعة في Firebase =====
+        async function updateGroup(groupId, groupData) {
+            const uid = localStorage.getItem('teachflow_uid');
+            if (!uid) return;
+
+            try {
+                await db.collection('teachers').doc(uid).collection('groups').doc(groupId).update(groupData);
+                return true;
+            } catch (error) {
+                console.error('❌ خطأ في تحديث المجموعة:', error);
+                alert('❌ حدث خطأ أثناء تحديث المجموعة');
+                return false;
+            }
+        }
+
+        // ===== حذف مجموعة من Firebase =====
+        async function deleteGroupFromFirebase(groupId) {
+            const uid = localStorage.getItem('teachflow_uid');
+            if (!uid) return;
+
+            try {
+                await db.collection('teachers').doc(uid).collection('groups').doc(groupId).delete();
+                return true;
+            } catch (error) {
+                console.error('❌ خطأ في حذف المجموعة:', error);
+                alert('❌ حدث خطأ أثناء حذف المجموعة');
+                return false;
+            }
+        }
+
+        // ===== عرض المجموعات =====
         function renderGroups() {
             const grid = document.getElementById('groupsGrid');
-            const students = JSON.parse(localStorage.getItem('teachflow_students')) || [];
 
             if (filteredGroups.length === 0) {
                 grid.innerHTML = `
@@ -606,13 +683,14 @@
                 `;
             } else {
                 grid.innerHTML = filteredGroups.map(group => {
-                    const studentCount = students.filter(s => s.group === group.name).length;
+                    // حساب عدد الطلاب في هذه المجموعة (من Firebase)
+                    const studentCount = group.studentCount || 0;
                     const statusClass = group.active ? 'badge-active' : 'badge-inactive';
                     const statusText = group.active ? '✅ نشطة' : '❌ غير نشطة';
 
                     return `
-                        <div class="group-card">
-                            <div class="group-number"># ${group.number}</div>
+                        <div class="group-card" onclick="showGroupStudents('${group.id}')">
+                            <div class="group-number"># ${group.number || 'G-000'}</div>
                             <div class="group-header">
                                 <span class="group-icon">${group.icon || '👥'}</span>
                                 <span class="group-name">${group.name}</span>
@@ -633,9 +711,9 @@
                                     <span class="student-count">${studentCount} طالب</span>
                                     <span class="badge-status ${statusClass}" style="margin-right:8px;">${statusText}</span>
                                 </div>
-                                <div class="group-actions">
-                                    <button class="btn-edit" onclick="editGroup(${group.id})">✏️ تعديل</button>
-                                    <button class="btn-delete" onclick="deleteGroup(${group.id})">🗑️ حذف</button>
+                                <div class="group-actions" onclick="event.stopPropagation();">
+                                    <button class="btn-edit" onclick="editGroup('${group.id}')">✏️ تعديل</button>
+                                    <button class="btn-delete" onclick="deleteGroup('${group.id}')">🗑️ حذف</button>
                                 </div>
                             </div>
                         </div>
@@ -646,17 +724,57 @@
             document.getElementById('groupsCountLabel').textContent = `(${filteredGroups.length})`;
         }
 
+        // ===== عرض طلاب المجموعة =====
+        async function showGroupStudents(groupId) {
+            const uid = localStorage.getItem('teachflow_uid');
+            if (!uid) return;
+
+            try {
+                // جلب المجموعة
+                const groupDoc = await db.collection('teachers').doc(uid).collection('groups').doc(groupId).get();
+                if (!groupDoc.exists) {
+                    alert('⚠️ المجموعة غير موجودة');
+                    return;
+                }
+                const group = groupDoc.data();
+
+                // جلب الطلاب المرتبطين بهذه المجموعة
+                const studentsSnapshot = await db.collection('teachers').doc(uid).collection('students')
+                    .where('group', '==', group.name).get();
+
+                if (studentsSnapshot.empty) {
+                    alert(`📚 ${group.name}\n\nلا يوجد طلاب في هذه المجموعة`);
+                    return;
+                }
+
+                const students = [];
+                studentsSnapshot.forEach(doc => {
+                    students.push({ id: doc.id, ...doc.data() });
+                });
+
+                const studentList = students.map((s, i) =>
+                    `${i + 1}. ${s.name} 📱 ${s.phone || '-'} 👨‍👦 ${s.parentPhone || '-'}`
+                ).join('\n');
+
+                alert(`📚 ${group.name}\n👥 ${students.length} طالب\n\n${studentList}`);
+
+            } catch (error) {
+                console.error('❌ خطأ في عرض الطلاب:', error);
+                alert('❌ حدث خطأ أثناء عرض الطلاب');
+            }
+        }
+
         // ===== البحث =====
         function searchGroups() {
             const filter = document.getElementById('searchInput').value.trim().toLowerCase();
             filteredGroups = groups.filter(g =>
-                g.name.toLowerCase().includes(filter) ||
-                (g.number && g.number.toLowerCase().includes(filter)) ||
-                (g.description && g.description.toLowerCase().includes(filter)) ||
-                (g.locationAddress && g.locationAddress.toLowerCase().includes(filter)) ||
-                (g.locationType && g.locationType.includes(filter)) ||
-                (g.day && g.day.includes(filter)) ||
-                (g.level && g.level.toLowerCase().includes(filter))
+                (g.name || '').toLowerCase().includes(filter) ||
+                (g.number || '').toLowerCase().includes(filter) ||
+                (g.description || '').toLowerCase().includes(filter) ||
+                (g.locationAddress || '').toLowerCase().includes(filter) ||
+                (g.locationType || '').includes(filter) ||
+                (g.day || '').includes(filter) ||
+                (g.level || '').toLowerCase().includes(filter)
             );
             renderGroups();
         }
@@ -677,7 +795,13 @@
         }
 
         // ===== إضافة مجموعة =====
-        function showAddGroup() {
+        async function showAddGroup() {
+            const uid = localStorage.getItem('teachflow_uid');
+            if (!uid) {
+                alert('⚠️ يرجى تسجيل الدخول أولاً');
+                return;
+            }
+
             const nextNumber = groups.length + 1;
             const defaultNumber = 'G-' + String(nextNumber).padStart(3, '0');
 
@@ -712,7 +836,6 @@
             const active = confirm('✅ هل المجموعة نشطة؟ (OK = نشطة، Cancel = غير نشطة)');
 
             const newGroup = {
-                id: Date.now(),
                 number: number,
                 name: name,
                 icon: icon,
@@ -723,25 +846,29 @@
                 time: time,
                 level: level,
                 maxStudents: parseInt(maxStudents) || 20,
-                active: active
+                active: active,
+                studentCount: 0
             };
 
-            groups.push(newGroup);
-            groups.sort((a, b) => a.number.localeCompare(b.number));
-            filteredGroups = [...groups];
-            saveGroups();
-            renderGroups();
-            alert(`✅ تم إضافة المجموعة "${name}" برقم ${number}`);
+            const docId = await saveGroup(newGroup);
+            if (docId) {
+                newGroup.id = docId;
+                groups.push(newGroup);
+                groups.sort((a, b) => (a.number || '').localeCompare(b.number || ''));
+                filteredGroups = [...groups];
+                renderGroups();
+                alert(`✅ تم إضافة المجموعة "${name}" برقم ${number}`);
+            }
         }
 
         // ===== تعديل مجموعة =====
-        function editGroup(id) {
-            const group = groups.find(g => g.id === id);
+        async function editGroup(groupId) {
+            const group = groups.find(g => g.id === groupId);
             if (!group) return;
 
             const number = prompt('🔢 رقم المجموعة:', group.number);
             if (number && number !== group.number) {
-                if (groups.some(g => g.number === number && g.id !== id)) {
+                if (groups.some(g => g.number === number && g.id !== groupId)) {
                     alert('⚠️ هذا الرقم موجود بالفعل!');
                     return;
                 }
@@ -777,38 +904,65 @@
 
             group.active = confirm('✅ هل المجموعة نشطة؟ (OK = نشطة، Cancel = غير نشطة)');
 
-            groups.sort((a, b) => a.number.localeCompare(b.number));
-            filteredGroups = [...groups];
-            saveGroups();
-            renderGroups();
-            alert('✅ تم تعديل المجموعة!');
+            const updated = await updateGroup(groupId, {
+                number: group.number,
+                name: group.name,
+                icon: group.icon,
+                description: group.description,
+                locationType: group.locationType,
+                locationAddress: group.locationAddress,
+                day: group.day,
+                time: group.time,
+                level: group.level,
+                maxStudents: group.maxStudents,
+                active: group.active
+            });
+
+            if (updated) {
+                groups.sort((a, b) => (a.number || '').localeCompare(b.number || ''));
+                filteredGroups = [...groups];
+                renderGroups();
+                alert('✅ تم تعديل المجموعة!');
+            }
         }
 
         // ===== حذف مجموعة =====
-        function deleteGroup(id) {
-            const group = groups.find(g => g.id === id);
+        async function deleteGroup(groupId) {
+            const group = groups.find(g => g.id === groupId);
             if (!group) return;
 
-            const students = JSON.parse(localStorage.getItem('teachflow_students')) || [];
-            const hasStudents = students.some(s => s.group === group.name);
+            // التحقق من وجود طلاب في المجموعة
+            const uid = localStorage.getItem('teachflow_uid');
+            if (!uid) return;
 
-            if (hasStudents) {
-                if (!confirm(`⚠️ يوجد ${students.filter(s => s.group === group.name).length} طالب في هذه المجموعة. هل أنت متأكد من حذفها؟ سيتم إزالة المجموعة من الطلاب.`)) {
-                    return;
+            try {
+                const studentsSnapshot = await db.collection('teachers').doc(uid).collection('students')
+                    .where('group', '==', group.name).get();
+
+                if (!studentsSnapshot.empty) {
+                    if (!confirm(`⚠️ يوجد ${studentsSnapshot.size} طالب في هذه المجموعة. هل أنت متأكد من حذفها؟ سيتم إزالة المجموعة من الطلاب.`)) {
+                        return;
+                    }
+                    // إزالة المجموعة من الطلاب
+                    const batch = db.batch();
+                    studentsSnapshot.forEach(doc => {
+                        batch.update(doc.ref, { group: '' });
+                    });
+                    await batch.commit();
                 }
-                students.forEach(s => {
-                    if (s.group === group.name) s.group = '';
-                });
-                localStorage.setItem('teachflow_students', JSON.stringify(students));
-            }
 
-            if (confirm(`🗑️ هل أنت متأكد من حذف المجموعة "${group.name}"؟`)) {
-                groups = groups.filter(g => g.id !== id);
-                groups.sort((a, b) => a.number.localeCompare(b.number));
-                filteredGroups = [...groups];
-                saveGroups();
-                renderGroups();
-                alert('✅ تم حذف المجموعة!');
+                if (confirm(`🗑️ هل أنت متأكد من حذف المجموعة "${group.name}"؟`)) {
+                    const deleted = await deleteGroupFromFirebase(groupId);
+                    if (deleted) {
+                        groups = groups.filter(g => g.id !== groupId);
+                        filteredGroups = [...groups];
+                        renderGroups();
+                        alert('✅ تم حذف المجموعة!');
+                    }
+                }
+            } catch (error) {
+                console.error('❌ خطأ في حذف المجموعة:', error);
+                alert('❌ حدث خطأ أثناء حذف المجموعة');
             }
         }
 
@@ -817,14 +971,15 @@
             if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
                 localStorage.removeItem('teachflow_teacher');
                 localStorage.removeItem('teachflow_user');
+                localStorage.removeItem('teachflow_uid');
                 window.location.href = 'index.html';
             }
         }
 
         // ===== تحميل الصفحة =====
         document.addEventListener('DOMContentLoaded', function() {
-            const teacher = localStorage.getItem('teachflow_teacher');
-            if (!teacher) {
+            const uid = localStorage.getItem('teachflow_uid');
+            if (!uid) {
                 window.location.href = 'index.html';
                 return;
             }

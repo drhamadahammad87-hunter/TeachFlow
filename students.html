@@ -3,7 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>المجموعات - TeachFlow</title>
+    <title>الطلاب - TeachFlow</title>
+    <!-- ===== Firebase SDK ===== -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js">
+    </script>
     <style>
         * {
             margin: 0;
@@ -191,6 +198,27 @@
             transform: scale(1.02);
         }
 
+        .btn-import {
+            padding: 8px 16px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .btn-import:hover {
+            background: #2980b9;
+            transform: scale(1.02);
+        }
+
         .search-box {
             display: flex;
             gap: 10px;
@@ -214,151 +242,83 @@
             border-color: #667eea;
         }
 
-        .groups-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-            gap: 20px;
-            flex: 1;
-        }
-
-        .group-card {
+        .table-container {
             background: white;
             border-radius: 16px;
-            padding: 24px;
+            overflow: hidden;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-            transition: 0.3s;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .group-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-        }
-
-        .group-card .group-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 8px;
-        }
-
-        .group-card .group-icon {
-            font-size: 36px;
-        }
-
-        .group-card .group-number {
-            font-size: 13px;
-            color: #999;
-            margin-bottom: 4px;
-        }
-
-        .group-card .group-name {
-            font-size: 20px;
-            font-weight: 600;
-            color: #333;
-        }
-
-        .group-card .group-meta {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 6px 12px;
-            margin: 10px 0;
-            font-size: 13px;
-            color: #666;
-        }
-
-        .group-card .group-meta span {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .group-card .group-description {
-            color: #888;
-            font-size: 14px;
-            margin: 8px 0 12px 0;
             flex: 1;
+            overflow-x: auto;
         }
 
-        .group-card .group-location {
-            background: #f0f4ff;
-            border-radius: 8px;
-            padding: 8px 12px;
-            margin: 6px 0 10px 0;
-            font-size: 13px;
-            color: #444;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        .students-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 700px;
         }
 
-        .group-card .group-location .location-type {
-            background: #667eea;
-            color: white;
-            padding: 2px 10px;
-            border-radius: 12px;
-            font-size: 11px;
+        .students-table th {
+            background: #f8fafc;
+            padding: 14px 16px;
+            text-align: right;
             font-weight: 600;
+            color: #555;
+            font-size: 14px;
+            border-bottom: 2px solid #e8edf2;
+            white-space: nowrap;
         }
 
-        .group-card .group-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 14px;
-            padding-top: 14px;
-            border-top: 1px solid #f0f2f5;
+        .students-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f0f2f5;
+            color: #333;
+            font-size: 14px;
         }
 
-        .group-card .student-count {
-            background: #667eea;
-            color: white;
-            padding: 4px 14px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 500;
+        .students-table tr:hover td {
+            background: #f8fafc;
         }
 
-        .group-card .group-actions {
+        .students-table .actions-cell {
             display: flex;
             gap: 8px;
         }
 
-        .group-card .group-actions button {
-            padding: 6px 14px;
+        .btn-edit {
+            padding: 4px 12px;
+            background: #f39c12;
+            color: white;
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 13px;
+            font-size: 12px;
             transition: 0.3s;
         }
 
-        .group-card .group-actions .btn-edit {
-            background: #f39c12;
-            color: white;
-        }
-
-        .group-card .group-actions .btn-edit:hover {
+        .btn-edit:hover {
             background: #e67e22;
         }
 
-        .group-card .group-actions .btn-delete {
+        .btn-delete {
+            padding: 4px 12px;
             background: #e74c3c;
             color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: 0.3s;
         }
 
-        .group-card .group-actions .btn-delete:hover {
+        .btn-delete:hover {
             background: #c0392b;
         }
 
-        .group-card .badge-status {
-            padding: 3px 12px;
+        .badge {
+            padding: 4px 12px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: 500;
-            display: inline-block;
         }
 
         .badge-active {
@@ -372,20 +332,15 @@
         }
 
         .empty-state {
-            grid-column: 1 / -1;
             text-align: center;
-            padding: 60px 20px;
+            padding: 40px;
             color: #999;
         }
 
         .empty-state .big-icon {
-            font-size: 56px;
+            font-size: 48px;
             display: block;
-            margin-bottom: 12px;
-        }
-
-        .empty-state p {
-            font-size: 16px;
+            margin-bottom: 10px;
         }
 
         .footer {
@@ -403,7 +358,7 @@
             font-weight: 600;
         }
 
-        /* ===== الموبايل ===== */
+        /* ===== Mobile ===== */
         @media (max-width: 768px) {
             .hamburger {
                 display: block;
@@ -432,12 +387,14 @@
                 font-size: 20px;
             }
 
-            .groups-grid {
-                grid-template-columns: 1fr 1fr;
+            .students-table {
+                font-size: 12px;
+                min-width: 600px;
             }
 
-            .group-card .group-meta {
-                grid-template-columns: 1fr;
+            .students-table th,
+            .students-table td {
+                padding: 8px 10px;
             }
 
             .btn-add,
@@ -445,32 +402,31 @@
                 font-size: 12px;
                 padding: 6px 12px;
             }
+
+            .btn-import {
+                font-size: 11px;
+                padding: 4px 10px;
+            }
         }
 
         @media (max-width: 480px) {
-            .groups-grid {
-                grid-template-columns: 1fr;
+            .students-table {
+                font-size: 11px;
+                min-width: 500px;
             }
 
-            .group-card {
-                padding: 16px;
+            .students-table th,
+            .students-table td {
+                padding: 6px 8px;
             }
 
-            .group-card .group-header {
-                flex-wrap: wrap;
+            .page-header {
+                flex-direction: column;
+                align-items: stretch;
             }
 
-            .group-card .group-icon {
-                font-size: 28px;
-            }
-
-            .group-card .group-name {
-                font-size: 17px;
-            }
-
-            .group-card .group-meta {
-                grid-template-columns: 1fr;
-                font-size: 12px;
+            .page-header .actions {
+                justify-content: center;
             }
 
             .hamburger {
@@ -484,13 +440,12 @@
                 width: 260px;
             }
 
-            .page-header {
+            .search-box {
                 flex-direction: column;
-                align-items: stretch;
             }
 
-            .page-header .actions {
-                justify-content: center;
+            .search-box input {
+                min-width: unset;
             }
         }
     </style>
@@ -507,8 +462,8 @@
         <div class="logo">📚 TeachFlow <span>نظام إدارة المعلمين</span></div>
 
         <button class="sidebar-item" onclick="window.location.href='home.html'">🏠 <span>الرئيسية</span></button>
-        <button class="sidebar-item active" onclick="window.location.href='groups.html'">👥 <span>المجموعات</span></button>
-        <button class="sidebar-item" onclick="window.location.href='students.html'">👨‍🎓 <span>الطلاب</span></button>
+        <button class="sidebar-item" onclick="window.location.href='groups.html'">👥 <span>المجموعات</span></button>
+        <button class="sidebar-item active" onclick="window.location.href='students.html'">👨‍🎓 <span>الطلاب</span></button>
         <button class="sidebar-item" onclick="window.location.href='schedule.html'">📅 <span>الجدول</span></button>
         <button class="sidebar-item" onclick="window.location.href='attendance.html'">✅ <span>الحضور</span></button>
         <button class="sidebar-item" onclick="window.location.href='assessments.html'">📊 <span>التقييمات</span></button>
@@ -524,20 +479,37 @@
 
         <div class="page-header">
             <h1>
-                👥 المجموعات
-                <span style="font-size:16px;color:#999;font-weight:400;" id="groupsCountLabel">(0)</span>
+                👨‍🎓 الطلاب
+                <span style="font-size:16px;color:#999;font-weight:400;" id="studentCountLabel">(0)</span>
             </h1>
             <div class="actions">
                 <button class="btn-back" onclick="window.location.href='home.html'">🔙 رجوع</button>
-                <button class="btn-add" onclick="showAddGroup()">➕ إضافة مجموعة</button>
+                <button class="btn-add" onclick="showAddStudent()">➕ إضافة طالب</button>
             </div>
         </div>
 
         <div class="search-box">
-            <input type="text" id="searchInput" placeholder="🔍 ابحث عن مجموعة..." oninput="searchGroups()">
+            <input type="text" id="searchInput" placeholder="🔍 ابحث عن طالب..." oninput="searchStudents()">
         </div>
 
-        <div class="groups-grid" id="groupsGrid"></div>
+        <div class="table-container">
+            <table class="students-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>👤 اسم الطالب</th>
+                        <th>📚 المجموعة</th>
+                        <th>📱 تليفون الطالب</th>
+                        <th>📱 تليفون ولي الأمر</th>
+                        <th>الحالة</th>
+                        <th>⚡ المهارات</th>
+                    </tr>
+                </thead>
+                <tbody id="studentsTableBody">
+                    <!-- هتتعبأ من JavaScript -->
+                </tbody>
+            </table>
+        </div>
 
         <div class="footer">
             Designed with ❤️ by <span class="name">Dr. Hamada Fathy Hammad</span>
@@ -545,6 +517,20 @@
     </main>
 
     <script>
+        // ===== Firebase Config =====
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            projectId: "YOUR_PROJECT",
+            storageBucket: "YOUR_PROJECT.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
         // ===== Sidebar Toggle =====
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
@@ -567,248 +553,406 @@
             }
         }
 
-        // ===== بيانات المجموعات =====
+        // ===== بيانات الطلاب =====
+        let students = [];
         let groups = [];
-        let filteredGroups = [];
-        const locationTypes = ['🏠 بيت', '🏢 سنتر', '💻 أونلاين', '📚 مدرسة', '🏛️ معهد', '📍 مكان آخر'];
-        const daysList = ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'];
-        const timeList = ['8:00 ص', '9:00 ص', '10:00 ص', '11:00 ص', '12:00 م', '1:00 م', '2:00 م', '3:00 م', '4:00 م', '5:00 م', '6:00 م', '7:00 م', '8:00 م', '9:00 م', '10:00 م'];
 
-        // ===== تحميل المجموعات =====
-        function loadGroups() {
-            const saved = localStorage.getItem('teachflow_groups');
-            if (saved) {
-                groups = JSON.parse(saved);
-            } else {
-                groups = [];
-                saveGroups();
-            }
-            groups.sort((a, b) => a.number.localeCompare(b.number));
-            filteredGroups = [...groups];
-            renderGroups();
-        }
-
-        function saveGroups() {
-            localStorage.setItem('teachflow_groups', JSON.stringify(groups));
-        }
-
-        function renderGroups() {
-            const grid = document.getElementById('groupsGrid');
-            const students = JSON.parse(localStorage.getItem('teachflow_students')) || [];
-
-            if (filteredGroups.length === 0) {
-                grid.innerHTML = `
-                    <div class="empty-state">
-                        <span class="big-icon">👥</span>
-                        <p>لا توجد مجموعات</p>
-                        <p style="font-size:12px;color:#ccc;">اضغط على "إضافة مجموعة" لإضافة أول مجموعة</p>
-                    </div>
-                `;
-            } else {
-                grid.innerHTML = filteredGroups.map(group => {
-                    const studentCount = students.filter(s => s.group === group.name).length;
-                    const statusClass = group.active ? 'badge-active' : 'badge-inactive';
-                    const statusText = group.active ? '✅ نشطة' : '❌ غير نشطة';
-
-                    return `
-                        <div class="group-card">
-                            <div class="group-number"># ${group.number}</div>
-                            <div class="group-header">
-                                <span class="group-icon">${group.icon || '👥'}</span>
-                                <span class="group-name">${group.name}</span>
-                            </div>
-                            <div class="group-description">${group.description || 'لا يوجد وصف'}</div>
-                            <div class="group-location">
-                                <span class="location-type">${group.locationType || '📍 مكان'}</span>
-                                <span>${group.locationAddress || 'لا يوجد عنوان'}</span>
-                            </div>
-                            <div class="group-meta">
-                                <span>📅 ${group.day || 'غير محدد'}</span>
-                                <span>⏰ ${group.time || 'غير محدد'}</span>
-                                <span>📊 المستوى: ${group.level || 'عام'}</span>
-                                <span>👥 الحد الأقصى: ${group.maxStudents || 'غير محدد'}</span>
-                            </div>
-                            <div class="group-footer">
-                                <div>
-                                    <span class="student-count">${studentCount} طالب</span>
-                                    <span class="badge-status ${statusClass}" style="margin-right:8px;">${statusText}</span>
-                                </div>
-                                <div class="group-actions">
-                                    <button class="btn-edit" onclick="editGroup(${group.id})">✏️ تعديل</button>
-                                    <button class="btn-delete" onclick="deleteGroup(${group.id})">🗑️ حذف</button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-            }
-
-            document.getElementById('groupsCountLabel').textContent = `(${filteredGroups.length})`;
-        }
-
-        // ===== البحث =====
-        function searchGroups() {
-            const filter = document.getElementById('searchInput').value.trim().toLowerCase();
-            filteredGroups = groups.filter(g =>
-                g.name.toLowerCase().includes(filter) ||
-                (g.number && g.number.toLowerCase().includes(filter)) ||
-                (g.description && g.description.toLowerCase().includes(filter)) ||
-                (g.locationAddress && g.locationAddress.toLowerCase().includes(filter)) ||
-                (g.locationType && g.locationType.includes(filter)) ||
-                (g.day && g.day.includes(filter)) ||
-                (g.level && g.level.toLowerCase().includes(filter))
-            );
-            renderGroups();
-        }
-
-        // ===== عرض قائمة منسدلة =====
-        function showDropdown(options, title, currentValue = '') {
-            let list = options.map((item, i) => `${i + 1}. ${item}`).join('\n');
-            let defaultIndex = options.indexOf(currentValue) + 1;
-            if (defaultIndex === 0) defaultIndex = '';
-            const choice = prompt(`${title}:\n${list}\n\nأدخل رقم الخيار:`, defaultIndex);
-            if (!choice) return null;
-            const index = parseInt(choice) - 1;
-            if (isNaN(index) || index < 0 || index >= options.length) {
-                alert('⚠️ اختيار غير صحيح!');
-                return null;
-            }
-            return options[index];
-        }
-
-        // ===== إضافة مجموعة =====
-        function showAddGroup() {
-            const nextNumber = groups.length + 1;
-            const defaultNumber = 'G-' + String(nextNumber).padStart(3, '0');
-
-            const number = prompt('🔢 رقم المجموعة (مثلاً G-001):', defaultNumber);
-            if (!number) return;
-
-            if (groups.some(g => g.number === number)) {
-                alert('⚠️ هذا الرقم موجود بالفعل!');
+        // ===== جلب الطلاب من Firebase =====
+        async function loadData() {
+            const uid = localStorage.getItem('teachflow_uid');
+            if (!uid) {
+                window.location.href = 'index.html';
                 return;
             }
 
-            const name = prompt('👥 اسم المجموعة:');
-            if (!name) return;
+            try {
+                // جلب المجموعات
+                const groupsSnapshot = await db.collection('teachers').doc(uid).collection('groups').get();
+                groups = [];
+                groupsSnapshot.forEach(doc => {
+                    groups.push({ id: doc.id, ...doc.data() });
+                });
 
-            const icon = prompt('🎨 أيقونة المجموعة (اختياري):', '👥') || '👥';
+                // جلب الطلاب
+                const studentsSnapshot = await db.collection('teachers').doc(uid).collection('students').get();
+                students = [];
+                studentsSnapshot.forEach(doc => {
+                    students.push({ id: doc.id, ...doc.data() });
+                });
 
-            const locationType = showDropdown(locationTypes, '📍 اختر مكان الانعقاد');
-            if (locationType === null) return;
+                renderStudents();
 
-            const locationAddress = prompt('📍 العنوان التفصيلي (شارع، منطقة، محافظة):') || '';
+            } catch (error) {
+                console.error('❌ خطأ في تحميل البيانات:', error);
+                students = [];
+                renderStudents();
+            }
+        }
 
-            const description = prompt('📝 وصف المجموعة (اختياري):') || '';
+        // ===== حفظ طالب في Firebase =====
+        async function saveStudent(studentData) {
+            const uid = localStorage.getItem('teachflow_uid');
+            if (!uid) return;
 
-            const day = showDropdown(daysList, '📅 اختر اليوم');
-            if (day === null) return;
+            try {
+                const docRef = await db.collection('teachers').doc(uid).collection('students').add(studentData);
+                return docRef.id;
+            } catch (error) {
+                console.error('❌ خطأ في حفظ الطالب:', error);
+                alert('❌ حدث خطأ أثناء حفظ الطالب');
+                return null;
+            }
+        }
 
-            const time = showDropdown(timeList, '⏰ اختر الوقت');
-            if (time === null) return;
+        // ===== تحديث طالب في Firebase =====
+        async function updateStudent(studentId, studentData) {
+            const uid = localStorage.getItem('teachflow_uid');
+            if (!uid) return;
 
-            const level = prompt('📊 المستوى (مبتدئ، متوسط، متقدم):', 'متوسط') || 'متوسط';
-            const maxStudents = prompt('👥 الحد الأقصى للطلاب:', '20') || '20';
-            const active = confirm('✅ هل المجموعة نشطة؟ (OK = نشطة، Cancel = غير نشطة)');
+            try {
+                await db.collection('teachers').doc(uid).collection('students').doc(studentId).update(studentData);
+                return true;
+            } catch (error) {
+                console.error('❌ خطأ في تحديث الطالب:', error);
+                alert('❌ حدث خطأ أثناء تحديث الطالب');
+                return false;
+            }
+        }
 
-            const newGroup = {
-                id: Date.now(),
-                number: number,
+        // ===== حذف طالب من Firebase =====
+        async function deleteStudentFromFirebase(studentId) {
+            const uid = localStorage.getItem('teachflow_uid');
+            if (!uid) return;
+
+            try {
+                await db.collection('teachers').doc(uid).collection('students').doc(studentId).delete();
+                return true;
+            } catch (error) {
+                console.error('❌ خطأ في حذف الطالب:', error);
+                alert('❌ حدث خطأ أثناء حذف الطالب');
+                return false;
+            }
+        }
+
+        // ===== عرض الطلاب =====
+        function renderStudents(filter = '') {
+            const tbody = document.getElementById('studentsTableBody');
+
+            let filtered = students;
+            if (filter) {
+                filtered = students.filter(s =>
+                    (s.name || '').includes(filter) ||
+                    (s.group || '').includes(filter) ||
+                    (s.phone || '').includes(filter) ||
+                    (s.parentPhone || '').includes(filter)
+                );
+            }
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7">
+                            <div class="empty-state">
+                                <span class="big-icon">👨‍🎓</span>
+                                <p>لا يوجد طلاب</p>
+                                <p style="font-size:12px;color:#ccc;">اضغط على "إضافة طالب" لإضافة أول طالب</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            } else {
+                tbody.innerHTML = filtered.map((student, index) => `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td><strong>${student.name || ''}</strong></td>
+                        <td>${student.group || '-'}</td>
+                        <td>${student.phone || '-'}</td>
+                        <td>${student.parentPhone || '-'}</td>
+                        <td>
+                            <span class="badge ${student.active ? 'badge-active' : 'badge-inactive'}">
+                                ${student.active ? '✅ نشط' : '❌ غير نشط'}
+                            </span>
+                        </td>
+                        <td class="actions-cell">
+                            <button class="btn-edit" onclick="editStudent('${student.id}')">✏️ تعديل</button>
+                            <button class="btn-delete" onclick="deleteStudent('${student.id}')">🗑️ حذف</button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            document.getElementById('studentCountLabel').textContent = `(${students.length})`;
+        }
+
+        // ===== البحث =====
+        function searchStudents() {
+            const filter = document.getElementById('searchInput').value.trim();
+            renderStudents(filter);
+        }
+
+        // ===== استيراد جهة اتصال =====
+        async function importContact() {
+            if (!navigator.contacts) {
+                alert('⚠️ هذه الميزة غير مدعومة في هذا المتصفح.\nيرجى استخدام متصفح Chrome على Android.');
+                return;
+            }
+
+            try {
+                const properties = ['name', 'tel'];
+                const options = { multiple: false };
+
+                const contacts = await navigator.contacts.select(properties, options);
+
+                if (!contacts || contacts.length === 0) {
+                    alert('⚠️ لم يتم اختيار أي جهة اتصال');
+                    return;
+                }
+
+                const contact = contacts[0];
+                const name = contact.name ? contact.name[0] : '';
+                const phone = contact.tel ? contact.tel[0] : '';
+
+                if (name || phone) {
+                    // فتح نافذة إضافة طالب مع البيانات المستوردة
+                    const studentName = prompt('👤 اسم الطالب:', name) || '';
+                    if (!studentName) return;
+
+                    const groupName = await selectGroup();
+                    if (groupName === null) return;
+
+                    const studentPhone = prompt('📱 تليفون الطالب:', phone) || '';
+                    if (!studentPhone) return;
+
+                    const parentPhone = prompt('📱 تليفون ولي الأمر:') || '';
+
+                    if (studentName && groupName && studentPhone) {
+                        await addStudentToFirebase(studentName, groupName, studentPhone, parentPhone);
+                    }
+                } else {
+                    alert('⚠️ جهة الاتصال لا تحتوي على اسم أو رقم');
+                }
+            } catch (error) {
+                console.error('❌ خطأ في استيراد جهة الاتصال:', error);
+                alert('❌ حدث خطأ أثناء استيراد جهة الاتصال');
+            }
+        }
+
+        // ===== اختيار مجموعة =====
+        function selectGroup() {
+            if (groups.length === 0) {
+                alert('⚠️ لا توجد مجموعات! الرجاء إضافة مجموعة أولاً من صفحة المجموعات.');
+                return null;
+            }
+
+            const groupOptions = groups.map((g, i) => `${i + 1}. ${g.number || ''} - ${g.name}`).join('\n');
+            const groupChoice = prompt(`📚 اختر المجموعة:\n${groupOptions}\n\nأدخل رقم المجموعة:`);
+            const groupIndex = parseInt(groupChoice) - 1;
+
+            if (isNaN(groupIndex) || groupIndex < 0 || groupIndex >= groups.length) {
+                alert('⚠️ اختيار غير صحيح!');
+                return null;
+            }
+
+            return groups[groupIndex].name;
+        }
+
+        // ===== إضافة طالب إلى Firebase =====
+        async function addStudentToFirebase(name, group, phone, parentPhone) {
+            const uid = localStorage.getItem('teachflow_uid');
+            if (!uid) return;
+
+            // التحقق من الحد الأقصى
+            const teacherDoc = await db.collection('teachers').doc(uid).get();
+            const teacher = teacherDoc.data();
+
+            if (!teacher.isPaid) {
+                const maxStudents = teacher.maxStudents || 10;
+                const studentsSnapshot = await db.collection('teachers').doc(uid).collection('students').get();
+
+                if (studentsSnapshot.size >= maxStudents) {
+                    alert(`⚠️ لقد وصلت للحد الأقصى من الطلاب (${maxStudents} طالب).\nقم بالترقية لإضافة المزيد من الطلاب.`);
+                    if (confirm('هل تريد الترقية الآن؟')) {
+                        window.location.href = 'pricing.html';
+                    }
+                    return;
+                }
+            }
+
+            const newStudent = {
                 name: name,
-                icon: icon,
-                description: description,
-                locationType: locationType,
-                locationAddress: locationAddress,
-                day: day,
-                time: time,
-                level: level,
-                maxStudents: parseInt(maxStudents) || 20,
-                active: active
+                group: group,
+                phone: phone,
+                parentPhone: parentPhone || '',
+                active: true,
+                addedAt: new Date().toISOString()
             };
 
-            groups.push(newGroup);
-            groups.sort((a, b) => a.number.localeCompare(b.number));
-            filteredGroups = [...groups];
-            saveGroups();
-            renderGroups();
-            alert(`✅ تم إضافة المجموعة "${name}" برقم ${number}`);
+            const docId = await saveStudent(newStudent);
+            if (docId) {
+                newStudent.id = docId;
+                students.push(newStudent);
+                renderStudents();
+                alert(`✅ تم إضافة الطالب ${name} إلى مجموعة "${group}"`);
+            }
         }
 
-        // ===== تعديل مجموعة =====
-        function editGroup(id) {
-            const group = groups.find(g => g.id === id);
-            if (!group) return;
+        // ===== إضافة طالب (الطريقة العادية) =====
+        async function showAddStudent() {
+            const uid = localStorage.getItem('teachflow_uid');
+            if (!uid) return;
 
-            const number = prompt('🔢 رقم المجموعة:', group.number);
-            if (number && number !== group.number) {
-                if (groups.some(g => g.number === number && g.id !== id)) {
-                    alert('⚠️ هذا الرقم موجود بالفعل!');
-                    return;
-                }
-                group.number = number;
+            // جلب المجموعات من Firebase
+            const groupsSnapshot = await db.collection('teachers').doc(uid).collection('groups').get();
+            const groups = [];
+            groupsSnapshot.forEach(doc => {
+                groups.push({ id: doc.id, ...doc.data() });
+            });
+
+            if (groups.length === 0) {
+                alert('⚠️ لا توجد مجموعات! الرجاء إضافة مجموعة أولاً من صفحة المجموعات.');
+                return;
             }
 
-            const name = prompt('👥 اسم المجموعة:', group.name);
-            if (name) group.name = name;
+            const groupOptions = groups.map((g, i) => `${i + 1}. ${g.number || ''} - ${g.name}`).join('\n');
+            const groupChoice = prompt(`📚 اختر المجموعة:\n${groupOptions}\n\nأدخل رقم المجموعة:`);
+            const groupIndex = parseInt(groupChoice) - 1;
 
-            const icon = prompt('🎨 أيقونة المجموعة:', group.icon) || '👥';
-            if (icon) group.icon = icon;
+            if (isNaN(groupIndex) || groupIndex < 0 || groupIndex >= groups.length) {
+                alert('⚠️ اختيار غير صحيح!');
+                return;
+            }
 
-            const locationType = showDropdown(locationTypes, '📍 اختر مكان الانعقاد', group.locationType);
-            if (locationType !== null) group.locationType = locationType;
+            const selectedGroup = groups[groupIndex].name;
 
-            const locationAddress = prompt('📍 العنوان التفصيلي:', group.locationAddress) || '';
-            if (locationAddress !== null) group.locationAddress = locationAddress;
+            // استيراد من جهات الاتصال أو كتابة يدوياً
+            const useImport = confirm('📇 هل تريد استيراد بيانات الطالب من جهات الاتصال؟\n(OK = نعم، Cancel = كتابة يدوية)');
 
-            const description = prompt('📝 وصف المجموعة:', group.description) || '';
-            if (description !== null) group.description = description;
+            let name, phone;
 
-            const day = showDropdown(daysList, '📅 اختر اليوم', group.day);
-            if (day !== null) group.day = day;
+            if (useImport && navigator.contacts) {
+                try {
+                    const contacts = await navigator.contacts.select(['name', 'tel'], { multiple: false });
+                    if (contacts && contacts.length > 0) {
+                        const contact = contacts[0];
+                        name = contact.name ? contact.name[0] : '';
+                        phone = contact.tel ? contact.tel[0] : '';
+                    }
+                } catch (error) {
+                    console.error('❌ خطأ في استيراد جهة الاتصال:', error);
+                }
+            }
 
-            const time = showDropdown(timeList, '⏰ اختر الوقت', group.time);
-            if (time !== null) group.time = time;
+            if (!name) {
+                name = prompt('👤 اسم الطالب:');
+                if (!name) return;
+            }
 
-            const level = prompt('📊 المستوى (مبتدئ، متوسط، متقدم):', group.level) || 'متوسط';
-            if (level !== null) group.level = level;
+            if (!phone) {
+                phone = prompt('📱 تليفون الطالب:');
+                if (!phone) return;
+            }
 
-            const maxStudents = prompt('👥 الحد الأقصى للطلاب:', group.maxStudents) || '20';
-            if (maxStudents !== null) group.maxStudents = parseInt(maxStudents) || 20;
+            const parentPhone = prompt('📱 تليفون ولي الأمر:') || '';
 
-            group.active = confirm('✅ هل المجموعة نشطة؟ (OK = نشطة، Cancel = غير نشطة)');
+            // التحقق من الحد الأقصى
+            const teacherDoc = await db.collection('teachers').doc(uid).get();
+            const teacher = teacherDoc.data();
 
-            groups.sort((a, b) => a.number.localeCompare(b.number));
-            filteredGroups = [...groups];
-            saveGroups();
-            renderGroups();
-            alert('✅ تم تعديل المجموعة!');
+            if (!teacher.isPaid) {
+                const maxStudents = teacher.maxStudents || 10;
+                const studentsSnapshot = await db.collection('teachers').doc(uid).collection('students').get();
+
+                if (studentsSnapshot.size >= maxStudents) {
+                    alert(`⚠️ لقد وصلت للحد الأقصى من الطلاب (${maxStudents} طالب).\nقم بالترقية لإضافة المزيد من الطلاب.`);
+                    if (confirm('هل تريد الترقية الآن؟')) {
+                        window.location.href = 'pricing.html';
+                    }
+                    return;
+                }
+            }
+
+            const newStudent = {
+                name: name,
+                group: selectedGroup,
+                phone: phone,
+                parentPhone: parentPhone || '',
+                active: true,
+                addedAt: new Date().toISOString()
+            };
+
+            const docId = await saveStudent(newStudent);
+            if (docId) {
+                newStudent.id = docId;
+                students.push(newStudent);
+                renderStudents();
+                alert(`✅ تم إضافة الطالب ${name} إلى مجموعة "${selectedGroup}"`);
+            }
         }
 
-        // ===== حذف مجموعة =====
-        function deleteGroup(id) {
-            const group = groups.find(g => g.id === id);
-            if (!group) return;
+        // ===== تعديل طالب =====
+        async function editStudent(studentId) {
+            const student = students.find(s => s.id === studentId);
+            if (!student) return;
 
-            const students = JSON.parse(localStorage.getItem('teachflow_students')) || [];
-            const hasStudents = students.some(s => s.group === group.name);
+            const uid = localStorage.getItem('teachflow_uid');
+            if (!uid) return;
 
-            if (hasStudents) {
-                if (!confirm(`⚠️ يوجد ${students.filter(s => s.group === group.name).length} طالب في هذه المجموعة. هل أنت متأكد من حذفها؟ سيتم إزالة المجموعة من الطلاب.`)) {
-                    return;
+            // جلب المجموعات
+            const groupsSnapshot = await db.collection('teachers').doc(uid).collection('groups').get();
+            const groups = [];
+            groupsSnapshot.forEach(doc => {
+                groups.push({ id: doc.id, ...doc.data() });
+            });
+
+            const name = prompt('👤 اسم الطالب:', student.name);
+            if (name) student.name = name;
+
+            if (groups.length > 0) {
+                const groupOptions = groups.map((g, i) => `${i + 1}. ${g.number || ''} - ${g.name}`).join('\n');
+                const currentGroupIndex = groups.findIndex(g => g.name === student.group) + 1;
+                const groupChoice = prompt(`📚 اختر المجموعة (الحالية: ${student.group}):\n${groupOptions}\n\nأدخل رقم المجموعة:`, currentGroupIndex);
+                if (groupChoice) {
+                    const groupIndex = parseInt(groupChoice) - 1;
+                    if (!isNaN(groupIndex) && groupIndex >= 0 && groupIndex < groups.length) {
+                        student.group = groups[groupIndex].name;
+                    }
                 }
-                students.forEach(s => {
-                    if (s.group === group.name) s.group = '';
-                });
-                localStorage.setItem('teachflow_students', JSON.stringify(students));
             }
 
-            if (confirm(`🗑️ هل أنت متأكد من حذف المجموعة "${group.name}"؟`)) {
-                groups = groups.filter(g => g.id !== id);
-                groups.sort((a, b) => a.number.localeCompare(b.number));
-                filteredGroups = [...groups];
-                saveGroups();
-                renderGroups();
-                alert('✅ تم حذف المجموعة!');
+            const phone = prompt('📱 تليفون الطالب:', student.phone);
+            if (phone) student.phone = phone;
+
+            const parentPhone = prompt('📱 تليفون ولي الأمر:', student.parentPhone);
+            if (parentPhone !== null) student.parentPhone = parentPhone;
+
+            student.active = confirm('✅ هل الطالب نشط؟ (OK = نشط، Cancel = غير نشط)');
+
+            const updated = await updateStudent(studentId, {
+                name: student.name,
+                group: student.group,
+                phone: student.phone,
+                parentPhone: student.parentPhone,
+                active: student.active
+            });
+
+            if (updated) {
+                renderStudents();
+                alert('✅ تم تعديل بيانات الطالب!');
+            }
+        }
+
+        // ===== حذف طالب =====
+        async function deleteStudent(studentId) {
+            const student = students.find(s => s.id === studentId);
+            if (!student) return;
+
+            if (confirm(`🗑️ هل أنت متأكد من حذف الطالب "${student.name}"؟`)) {
+                const deleted = await deleteStudentFromFirebase(studentId);
+                if (deleted) {
+                    students = students.filter(s => s.id !== studentId);
+                    renderStudents();
+                    alert('✅ تم حذف الطالب!');
+                }
             }
         }
 
@@ -817,18 +961,19 @@
             if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
                 localStorage.removeItem('teachflow_teacher');
                 localStorage.removeItem('teachflow_user');
+                localStorage.removeItem('teachflow_uid');
                 window.location.href = 'index.html';
             }
         }
 
         // ===== تحميل الصفحة =====
         document.addEventListener('DOMContentLoaded', function() {
-            const teacher = localStorage.getItem('teachflow_teacher');
-            if (!teacher) {
+            const uid = localStorage.getItem('teachflow_uid');
+            if (!uid) {
                 window.location.href = 'index.html';
                 return;
             }
-            loadGroups();
+            loadData();
 
             if (window.innerWidth > 768) {
                 const sidebar = document.getElementById('sidebar');
