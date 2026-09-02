@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>التقييمات - TeachFlow</title>
+    <!-- ===== Firebase SDK ===== -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js">
+    </script>
     <style>
         * {
             margin: 0;
@@ -500,6 +507,20 @@
     </main>
 
     <script>
+        // ===== Firebase Config =====
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            projectId: "YOUR_PROJECT",
+            storageBucket: "YOUR_PROJECT.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
         // ===== Sidebar Toggle =====
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
@@ -525,30 +546,51 @@
         // ===== بيانات التقييمات =====
         let assessments = [];
         let students = [];
+        let groups = [];
 
-        // ===== تحميل البيانات =====
-        function loadAssessments() {
-            students = JSON.parse(localStorage.getItem('teachflow_students')) || [];
-            loadGroupsFilter();
-            loadStudentsFilter();
-
-            const saved = localStorage.getItem('teachflow_assessments');
-            if (saved) {
-                assessments = JSON.parse(saved);
-            } else {
-                assessments = [
-                    { id: 1, studentId: 1, type: 'واجب', grade: 85, date: '2026-08-28', notes: 'أداء جيد' },
-                    { id: 2, studentId: 1, type: 'اختبار', grade: 92, date: '2026-08-20', notes: 'ممتاز' },
-                    { id: 3, studentId: 2, type: 'مشاركة', grade: 78, date: '2026-08-25', notes: 'محتاج تحسين' },
-                    { id: 4, studentId: 3, type: 'واجب', grade: 65, date: '2026-08-27', notes: 'يحتاج مراجعة' }
-                ];
-                saveAssessments();
+        // ===== تحميل البيانات من Firebase =====
+        async function loadAssessments() {
+            const uid = localStorage.getItem('teachflow_uid');
+            if (!uid) {
+                window.location.href = 'index.html';
+                return;
             }
-            renderAssessments();
+
+            try {
+                // جلب المجموعات
+                const groupsSnapshot = await db.collection('teachers').doc(uid).collection('groups').get();
+                groups = [];
+                groupsSnapshot.forEach(doc => {
+                    groups.push({ id: doc.id, ...doc.data() });
+                });
+                loadGroupsFilter();
+
+                // جلب الطلاب
+                const studentsSnapshot = await db.collection('teachers').doc(uid).collection('students').get();
+                students = [];
+                studentsSnapshot.forEach(doc => {
+                    students.push({ id: doc.id, ...doc.data() });
+                });
+                loadStudentsFilter();
+
+                // جلب التقييمات
+                const assessmentsSnapshot = await db.collection('teachers').doc(uid).collection('assessments').get();
+                assessments = [];
+                assessmentsSnapshot.forEach(doc => {
+                    assessments.push({ id: doc.id, ...doc.data() });
+                });
+
+                renderAssessments();
+
+            } catch (error) {
+                console.error('❌ خطأ في تحميل البيانات:', error);
+                assessments = [];
+                renderAssessments();
+            }
         }
 
+        // ===== تحميل المجموعات في الفلتر =====
         function loadGroupsFilter() {
-            const groups = JSON.parse(localStorage.getItem('teachflow_groups')) || [];
             const select = document.getElementById('groupFilter');
             const currentValue = select.value;
             select.innerHTML = '<option value="all">كل المجموعات</option>';
@@ -561,6 +603,7 @@
             select.value = currentValue;
         }
 
+        // ===== تحميل الطلاب في الفلتر =====
         function loadStudentsFilter() {
             const select = document.getElementById('studentFilter');
             const currentValue = select.value;
@@ -581,10 +624,52 @@
             select.value = currentValue;
         }
 
-        function saveAssessments() {
-            localStorage.setItem('teachflow_assessments', JSON.stringify(assessments));
+        // ===== حفظ تقييم في Firebase =====
+        async function saveAssessmentToFirebase(assessmentData) {
+            const uid = localStorage.getItem('teachflow_uid');
+            if (!uid) return;
+
+            try {
+                const docRef = await db.collection('teachers').doc(uid).collection('assessments').add(assessmentData);
+                return docRef.id;
+            } catch (error) {
+                console.error('❌ خطأ في حفظ التقييم:', error);
+                alert('❌ حدث خطأ أثناء حفظ التقييم');
+                return null;
+            }
         }
 
+        // ===== تحديث تقييم في Firebase =====
+        async function updateAssessmentInFirebase(assessmentId, assessmentData) {
+            const uid = localStorage.getItem('teachflow_uid');
+            if (!uid) return;
+
+            try {
+                await db.collection('teachers').doc(uid).collection('assessments').doc(assessmentId).update(assessmentData);
+                return true;
+            } catch (error) {
+                console.error('❌ خطأ في تحديث التقييم:', error);
+                alert('❌ حدث خطأ أثناء تحديث التقييم');
+                return false;
+            }
+        }
+
+        // ===== حذف تقييم من Firebase =====
+        async function deleteAssessmentFromFirebase(assessmentId) {
+            const uid = localStorage.getItem('teachflow_uid');
+            if (!uid) return;
+
+            try {
+                await db.collection('teachers').doc(uid).collection('assessments').doc(assessmentId).delete();
+                return true;
+            } catch (error) {
+                console.error('❌ خطأ في حذف التقييم:', error);
+                alert('❌ حدث خطأ أثناء حذف التقييم');
+                return false;
+            }
+        }
+
+        // ===== عرض التقييمات =====
         function renderAssessments() {
             const tbody = document.getElementById('assessmentsBody');
 
@@ -642,16 +727,27 @@
                         <td>${assessment.date}</td>
                         <td>${assessment.notes || '-'}</td>
                         <td>
-                            <button class="btn-edit" onclick="editAssessment(${assessment.id})" style="padding:4px 12px;background:#f39c12;color:white;border:none;border-radius:8px;cursor:pointer;font-size:12px;margin-left:4px;">✏️</button>
-                            <button class="btn-delete" onclick="deleteAssessment(${assessment.id})" style="padding:4px 12px;background:#e74c3c;color:white;border:none;border-radius:8px;cursor:pointer;font-size:12px;">🗑️</button>
+                            <button class="btn-edit" onclick="editAssessment('${assessment.id}')" style="padding:4px 12px;background:#f39c12;color:white;border:none;border-radius:8px;cursor:pointer;font-size:12px;margin-left:4px;">✏️</button>
+                            <button class="btn-delete" onclick="deleteAssessment('${assessment.id}')" style="padding:4px 12px;background:#e74c3c;color:white;border:none;border-radius:8px;cursor:pointer;font-size:12px;">🗑️</button>
                         </td>
                     </tr>
                 `;
             }).join('');
         }
 
-        function showAddAssessment() {
-            const activeStudents = students.filter(s => s.active);
+        // ===== إضافة تقييم =====
+        async function showAddAssessment() {
+            const uid = localStorage.getItem('teachflow_uid');
+            if (!uid) return;
+
+            // جلب الطلاب النشطين من Firebase
+            const studentsSnapshot = await db.collection('teachers').doc(uid).collection('students')
+                .where('active', '==', true).get();
+            const activeStudents = [];
+            studentsSnapshot.forEach(doc => {
+                activeStudents.push({ id: doc.id, ...doc.data() });
+            });
+
             if (activeStudents.length === 0) {
                 alert('⚠️ لا يوجد طلاب نشطين!');
                 return;
@@ -683,22 +779,26 @@
             const notes = prompt('📌 ملاحظات (اختياري):') || '';
 
             const newAssessment = {
-                id: Date.now(),
                 studentId: selectedStudent.id,
                 type: type,
                 grade: parseInt(grade),
                 date: date,
-                notes: notes
+                notes: notes,
+                addedAt: new Date().toISOString()
             };
 
-            assessments.push(newAssessment);
-            saveAssessments();
-            renderAssessments();
-            alert(`✅ تم إضافة تقييم للطالب ${selectedStudent.name}`);
+            const docId = await saveAssessmentToFirebase(newAssessment);
+            if (docId) {
+                newAssessment.id = docId;
+                assessments.push(newAssessment);
+                renderAssessments();
+                alert(`✅ تم إضافة تقييم للطالب ${selectedStudent.name}`);
+            }
         }
 
-        function editAssessment(id) {
-            const assessment = assessments.find(a => a.id === id);
+        // ===== تعديل تقييم =====
+        async function editAssessment(assessmentId) {
+            const assessment = assessments.find(a => a.id === assessmentId);
             if (!assessment) return;
 
             const student = students.find(s => s.id === assessment.studentId);
@@ -724,37 +824,50 @@
             const notes = prompt(`📌 الملاحظات (الحالية: ${assessment.notes || 'لا توجد'}):`, assessment.notes || '');
             if (notes !== null) assessment.notes = notes;
 
-            saveAssessments();
-            renderAssessments();
-            alert(`✅ تم تعديل تقييم الطالب ${studentName}`);
+            const updated = await updateAssessmentInFirebase(assessmentId, {
+                type: assessment.type,
+                grade: assessment.grade,
+                date: assessment.date,
+                notes: assessment.notes
+            });
+
+            if (updated) {
+                renderAssessments();
+                alert(`✅ تم تعديل تقييم الطالب ${studentName}`);
+            }
         }
 
-        function deleteAssessment(id) {
-            const assessment = assessments.find(a => a.id === id);
+        // ===== حذف تقييم =====
+        async function deleteAssessment(assessmentId) {
+            const assessment = assessments.find(a => a.id === assessmentId);
             if (!assessment) return;
 
             const student = students.find(s => s.id === assessment.studentId);
             const studentName = student ? student.name : 'طالب محذوف';
 
             if (confirm(`🗑️ هل أنت متأكد من حذف تقييم الطالب "${studentName}"؟`)) {
-                assessments = assessments.filter(a => a.id !== id);
-                saveAssessments();
-                renderAssessments();
-                alert('✅ تم حذف التقييم!');
+                const deleted = await deleteAssessmentFromFirebase(assessmentId);
+                if (deleted) {
+                    assessments = assessments.filter(a => a.id !== assessmentId);
+                    renderAssessments();
+                    alert('✅ تم حذف التقييم!');
+                }
             }
         }
 
+        // ===== تسجيل الخروج =====
         function logout() {
             if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
                 localStorage.removeItem('teachflow_teacher');
                 localStorage.removeItem('teachflow_user');
+                localStorage.removeItem('teachflow_uid');
                 window.location.href = 'index.html';
             }
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            const teacher = localStorage.getItem('teachflow_teacher');
-            if (!teacher) {
+            const uid = localStorage.getItem('teachflow_uid');
+            if (!uid) {
                 window.location.href = 'index.html';
                 return;
             }
