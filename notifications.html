@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>التنبيهات - TeachFlow</title>
+    <!-- ===== Firebase SDK ===== -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js">
+    </script>
     <style>
         * {
             margin: 0;
@@ -562,6 +569,20 @@
     </main>
 
     <script>
+        // ===== Firebase Config =====
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            projectId: "YOUR_PROJECT",
+            storageBucket: "YOUR_PROJECT.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
         // ===== Sidebar Toggle =====
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
@@ -588,26 +609,84 @@
         let notifications = [];
         let students = [];
 
-        // ===== تحميل البيانات =====
-        function loadNotifications() {
-            students = JSON.parse(localStorage.getItem('teachflow_students')) || [];
-
-            const saved = localStorage.getItem('teachflow_notifications');
-            if (saved) {
-                notifications = JSON.parse(saved);
-            } else {
-                notifications = [];
-                saveNotifications();
+        // ===== تحميل الإشعارات من Firebase =====
+        async function loadNotifications() {
+            const uid = localStorage.getItem('teachflow_uid');
+            if (!uid) {
+                window.location.href = 'index.html';
+                return;
             }
 
-            renderNotifications();
-            updateBadge();
+            try {
+                // جلب الطلاب
+                const studentsSnapshot = await db.collection('teachers').doc(uid).collection('students').get();
+                students = [];
+                studentsSnapshot.forEach(doc => {
+                    students.push({ id: doc.id, ...doc.data() });
+                });
+
+                // جلب الإشعارات
+                const notificationsSnapshot = await db.collection('teachers').doc(uid).collection('notifications')
+                    .orderBy('timestamp', 'desc').get();
+                notifications = [];
+                notificationsSnapshot.forEach(doc => {
+                    notifications.push({ id: doc.id, ...doc.data() });
+                });
+
+                renderNotifications();
+                updateBadge();
+
+            } catch (error) {
+                console.error('❌ خطأ في تحميل الإشعارات:', error);
+                notifications = [];
+                renderNotifications();
+                updateBadge();
+            }
         }
 
-        function saveNotifications() {
-            localStorage.setItem('teachflow_notifications', JSON.stringify(notifications));
+        // ===== حفظ إشعار في Firebase =====
+        async function saveNotificationToFirebase(notificationData) {
+            const uid = localStorage.getItem('teachflow_uid');
+            if (!uid) return;
+
+            try {
+                const docRef = await db.collection('teachers').doc(uid).collection('notifications').add(notificationData);
+                return docRef.id;
+            } catch (error) {
+                console.error('❌ خطأ في حفظ الإشعار:', error);
+                return null;
+            }
         }
 
+        // ===== تحديث إشعار في Firebase =====
+        async function updateNotificationInFirebase(notificationId, notificationData) {
+            const uid = localStorage.getItem('teachflow_uid');
+            if (!uid) return;
+
+            try {
+                await db.collection('teachers').doc(uid).collection('notifications').doc(notificationId).update(notificationData);
+                return true;
+            } catch (error) {
+                console.error('❌ خطأ في تحديث الإشعار:', error);
+                return false;
+            }
+        }
+
+        // ===== حذف إشعار من Firebase =====
+        async function deleteNotificationFromFirebase(notificationId) {
+            const uid = localStorage.getItem('teachflow_uid');
+            if (!uid) return;
+
+            try {
+                await db.collection('teachers').doc(uid).collection('notifications').doc(notificationId).delete();
+                return true;
+            } catch (error) {
+                console.error('❌ خطأ في حذف الإشعار:', error);
+                return false;
+            }
+        }
+
+        // ===== عرض الإشعارات =====
         function renderNotifications() {
             const list = document.getElementById('notificationsList');
             const typeFilter = document.getElementById('typeFilter').value;
@@ -624,8 +703,6 @@
             } else if (statusFilter === 'read') {
                 filtered = filtered.filter(n => n.read);
             }
-
-            filtered.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
             if (filtered.length === 0) {
                 list.innerHTML = `
@@ -645,7 +722,7 @@
                 const timeAgo = getTimeAgo(notif.timestamp);
 
                 return `
-                    <div class="notification-item ${isUnread ? 'unread' : 'read'}" onclick="markAsRead(${notif.id})">
+                    <div class="notification-item ${isUnread ? 'unread' : 'read'}" onclick="markAsRead('${notif.id}')">
                         <div class="icon">${icon}</div>
                         <div class="content">
                             <div class="title">${notif.title}</div>
@@ -653,7 +730,7 @@
                             <div class="meta">
                                 ${notif.studentName ? `<span class="student-name">👤 ${notif.studentName}</span>` : ''}
                                 ${statusBadge ? `<span>${statusBadge}</span>` : ''}
-                                <span>📅 ${notif.date}</span>
+                                <span>📅 ${notif.date || ''}</span>
                                 <span>🕐 ${timeAgo}</span>
                             </div>
                         </div>
@@ -665,6 +742,7 @@
             updateBadge();
         }
 
+        // ===== أيقونة حسب النوع =====
         function getIcon(type) {
             const icons = {
                 'attendance': '✅',
@@ -676,6 +754,7 @@
             return icons[type] || '🔔';
         }
 
+        // ===== حالة الحضور =====
         function getStatusBadge(notif) {
             if (notif.status) {
                 const statusMap = {
@@ -689,7 +768,9 @@
             return '';
         }
 
+        // ===== حساب وقت الإشعار =====
         function getTimeAgo(timestamp) {
+            if (!timestamp) return 'منذ لحظات';
             const now = new Date();
             const then = new Date(timestamp);
             const diff = Math.floor((now - then) / 1000);
@@ -701,6 +782,7 @@
             return then.toLocaleDateString('ar-EG');
         }
 
+        // ===== تحديث عدد الإشعارات غير المقروءة =====
         function updateBadge() {
             const unread = notifications.filter(n => !n.read).length;
             const badge = document.getElementById('sidebarBadge');
@@ -710,35 +792,63 @@
             }
         }
 
-        function markAsRead(id) {
-            const notif = notifications.find(n => n.id === id);
+        // ===== تحديد إشعار كمقروء =====
+        async function markAsRead(notificationId) {
+            const notif = notifications.find(n => n.id === notificationId);
             if (notif && !notif.read) {
                 notif.read = true;
-                saveNotifications();
+                await updateNotificationInFirebase(notificationId, { read: true });
                 renderNotifications();
             }
         }
 
-        function markAllAsRead() {
-            notifications.forEach(n => n.read = true);
-            saveNotifications();
-            renderNotifications();
-            alert('✅ تم تحديد جميع الإشعارات كمقروءة');
+        // ===== تحديد الكل كمقروء =====
+        async function markAllAsRead() {
+            if (notifications.length === 0) {
+                alert('⚠️ لا توجد إشعارات');
+                return;
+            }
+
+            const unread = notifications.filter(n => !n.read);
+            if (unread.length === 0) {
+                alert('✅ جميع الإشعارات مقروءة بالفعل');
+                return;
+            }
+
+            if (confirm(`✅ هل أنت متأكد من تحديد ${unread.length} إشعار غير مقروء كمقروء؟`)) {
+                for (const notif of unread) {
+                    notif.read = true;
+                    await updateNotificationInFirebase(notif.id, { read: true });
+                }
+                renderNotifications();
+                alert('✅ تم تحديد جميع الإشعارات كمقروءة');
+            }
         }
 
-        function clearAll() {
-            if (confirm('🗑️ هل أنت متأكد من حذف جميع الإشعارات؟')) {
+        // ===== حذف الكل =====
+        async function clearAll() {
+            if (notifications.length === 0) {
+                alert('⚠️ لا توجد إشعارات للحذف');
+                return;
+            }
+
+            if (confirm(`🗑️ هل أنت متأكد من حذف جميع الإشعارات (${notifications.length})؟`)) {
+                for (const notif of notifications) {
+                    await deleteNotificationFromFirebase(notif.id);
+                }
                 notifications = [];
-                saveNotifications();
                 renderNotifications();
                 alert('✅ تم حذف جميع الإشعارات');
             }
         }
 
-        function addNotification(type, title, message, studentName = '', status = '', date = '') {
+        // ===== إضافة إشعار (دالة مساعدة) =====
+        async function addNotification(type, title, message, studentName = '', status = '', date = '') {
+            const uid = localStorage.getItem('teachflow_uid');
+            if (!uid) return;
+
             const today = new Date().toISOString().split('T')[0];
-            notifications.push({
-                id: Date.now(),
+            const notificationData = {
                 type: type,
                 title: title,
                 message: message,
@@ -747,23 +857,30 @@
                 date: date || today,
                 read: false,
                 timestamp: new Date().toISOString()
-            });
-            saveNotifications();
-            renderNotifications();
-            updateBadge();
+            };
+
+            const docId = await saveNotificationToFirebase(notificationData);
+            if (docId) {
+                notificationData.id = docId;
+                notifications.unshift(notificationData);
+                renderNotifications();
+                updateBadge();
+            }
         }
 
+        // ===== تسجيل الخروج =====
         function logout() {
             if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
                 localStorage.removeItem('teachflow_teacher');
                 localStorage.removeItem('teachflow_user');
+                localStorage.removeItem('teachflow_uid');
                 window.location.href = 'index.html';
             }
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            const teacher = localStorage.getItem('teachflow_teacher');
-            if (!teacher) {
+            const uid = localStorage.getItem('teachflow_uid');
+            if (!uid) {
                 window.location.href = 'index.html';
                 return;
             }
