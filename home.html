@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>الرئيسية - TeachFlow</title>
+    <!-- ===== Firebase SDK ===== -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js">
+    </script>
     <style>
         * {
             margin: 0;
@@ -17,7 +24,6 @@
             min-height: 100vh;
         }
 
-        /* ===== Hamburger Menu ===== */
         .hamburger {
             display: none;
             position: fixed;
@@ -53,7 +59,6 @@
             display: block;
         }
 
-        /* ===== Sidebar ===== */
         .sidebar {
             position: fixed;
             right: 0;
@@ -122,7 +127,6 @@
             color: white;
         }
 
-        /* ===== Main Content ===== */
         .main-content {
             margin-right: 220px;
             padding: 25px;
@@ -325,7 +329,68 @@
             font-weight: 600;
         }
 
-        /* ===== الموبايل ===== */
+        /* ===== Trial Banner ===== */
+        .trial-banner {
+            background: #f39c12;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 500;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .trial-banner .btn-upgrade {
+            background: #2ecc71;
+            color: white;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .trial-banner .btn-upgrade:hover {
+            background: #27ae60;
+        }
+
+        .limit-banner {
+            background: #e74c3c;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            font-size: 14px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 999;
+        }
+
+        .limit-banner .btn-upgrade {
+            background: white;
+            color: #e74c3c;
+            border: none;
+            padding: 4px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-right: 10px;
+        }
+
+        .limit-banner .btn-upgrade:hover {
+            background: #f5f5f5;
+        }
+
         @media (max-width: 768px) {
             .hamburger {
                 display: block;
@@ -441,6 +506,16 @@
             .sidebar {
                 width: 260px;
             }
+
+            .trial-banner {
+                font-size: 12px;
+                padding: 8px 12px;
+            }
+
+            .limit-banner {
+                font-size: 12px;
+                padding: 8px 12px;
+            }
         }
     </style>
 </head>
@@ -553,6 +628,48 @@
     </main>
 
     <script>
+        // ===== Firebase Config =====
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            projectId: "YOUR_PROJECT",
+            storageBucket: "YOUR_PROJECT.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // ===== ترجمة المواد =====
+        const subjectTranslations = {
+            ar: {
+                math: '📐 الرياضيات',
+                arabic: '📖 اللغة العربية',
+                english: '🇬🇧 اللغة الإنجليزية',
+                science: '🔬 العلوم',
+                history: '🏛️ التاريخ',
+                geography: '🌍 الجغرافيا',
+                physics: '⚡ الفيزياء',
+                chemistry: '🧪 الكيمياء',
+                biology: '🧬 الأحياء',
+                philosophy: '💭 الفلسفة'
+            },
+            en: {
+                math: '📐 Mathematics',
+                arabic: '📖 Arabic Language',
+                english: '🇬🇧 English Language',
+                science: '🔬 Science',
+                history: '🏛️ History',
+                geography: '🌍 Geography',
+                physics: '⚡ Physics',
+                chemistry: '🧪 Chemistry',
+                biology: '🧬 Biology',
+                philosophy: '💭 Philosophy'
+            }
+        };
+
         // ===== Sidebar Toggle =====
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
@@ -575,59 +692,109 @@
             }
         }
 
-        // ===== تحميل بيانات المعلم =====
-        function loadTeacherData() {
-            const data = localStorage.getItem('teachflow_teacher');
-            if (!data) {
+        // ===== جلب بيانات المعلم من Firebase =====
+        async function loadTeacherData() {
+            const uid = localStorage.getItem('teachflow_uid');
+            if (!uid) {
                 window.location.href = 'index.html';
                 return;
             }
 
-            const teacher = JSON.parse(data);
-            document.getElementById('teacherName').textContent = teacher.name;
-            document.getElementById('userEmail').textContent = '📧 ' + teacher.email;
-            document.getElementById('userAvatar').textContent = teacher.name.charAt(0);
+            try {
+                const doc = await db.collection('teachers').doc(uid).get();
+                if (!doc.exists) {
+                    window.location.href = 'index.html';
+                    return;
+                }
 
-            const tagsContainer = document.getElementById('subjectsTags');
-            tagsContainer.innerHTML = '';
+                const teacher = doc.data();
 
-            if (teacher.subjects && teacher.subjects.length > 0) {
-                teacher.subjects.forEach(subject => {
-                    const tag = document.createElement('span');
-                    tag.className = 'tag';
-                    tag.textContent = subject;
-                    tagsContainer.appendChild(tag);
-                });
-            } else {
-                tagsContainer.innerHTML = '<span style="color:#999;font-size:13px;">⚠️ لم تقم بتحديد مواد بعد</span>';
+                // حفظ في localStorage للجلسة
+                localStorage.setItem('teachflow_teacher', JSON.stringify(teacher));
+
+                // عرض اسم المعلم
+                document.getElementById('teacherName').textContent = teacher.name || 'الأستاذ';
+                document.getElementById('userEmail').textContent = '📧 ' + (teacher.email || '');
+                document.getElementById('userAvatar').textContent = (teacher.name || 'م').charAt(0);
+
+                // عرض المواد (مترجمة)
+                const tagsContainer = document.getElementById('subjectsTags');
+                tagsContainer.innerHTML = '';
+
+                const lang = teacher.language || 'ar';
+                const translations = subjectTranslations[lang] || subjectTranslations.ar;
+
+                if (teacher.subjects && teacher.subjects.length > 0) {
+                    teacher.subjects.forEach(subject => {
+                        const tag = document.createElement('span');
+                        tag.className = 'tag';
+                        // ترجمة المادة
+                        tag.textContent = translations[subject] || subject;
+                        tagsContainer.appendChild(tag);
+                    });
+                } else {
+                    tagsContainer.innerHTML = '<span style="color:#999;font-size:13px;">⚠️ لم تقم بتحديد مواد بعد</span>';
+                }
+
+                // تحديث الأرقام (تظهر 0 افتراضياً، تتحد من Firebase)
+                await updateCounts(teacher);
+
+                // تطبيق اللغة
+                applyLanguage(teacher);
+
+                // التحقق من الفترة التجريبية
+                checkTrialStatus(teacher);
+
+                // التحقق من عدد الطلاب
+                await checkStudentLimit(teacher);
+
+            } catch (error) {
+                console.error('❌ خطأ في تحميل البيانات:', error);
+                window.location.href = 'index.html';
             }
-
-            updateCounts();
-            applyLanguage();
         }
 
-        function updateCounts() {
-            const groups = JSON.parse(localStorage.getItem('teachflow_groups')) || [];
-            document.getElementById('groupsCount').textContent = groups.length;
+        // ===== تحديث الأرقام من Firebase (بدون بيانات وهمية) =====
+        async function updateCounts(teacher) {
+            const uid = localStorage.getItem('teachflow_uid');
+            if (!uid) return;
 
-            const students = JSON.parse(localStorage.getItem('teachflow_students')) || [];
-            document.getElementById('studentCount').textContent = students.length;
+            try {
+                // عدد المجموعات
+                const groupsSnapshot = await db.collection('teachers').doc(uid).collection('groups').get();
+                document.getElementById('groupsCount').textContent = groupsSnapshot.size;
 
-            const schedule = JSON.parse(localStorage.getItem('teachflow_schedule')) || [];
-            document.getElementById('scheduleCount').textContent = schedule.length;
+                // عدد الطلاب
+                const studentsSnapshot = await db.collection('teachers').doc(uid).collection('students').get();
+                document.getElementById('studentCount').textContent = studentsSnapshot.size;
 
-            const attendance = JSON.parse(localStorage.getItem('teachflow_attendance')) || [];
-            const today = new Date().toISOString().split('T')[0];
-            const todayAttendance = attendance.filter(a => a.date === today);
-            document.getElementById('attendanceCount').textContent = todayAttendance.length || 0;
+                // عدد الحصص
+                const scheduleSnapshot = await db.collection('teachers').doc(uid).collection('schedule').get();
+                document.getElementById('scheduleCount').textContent = scheduleSnapshot.size;
 
-            const payments = JSON.parse(localStorage.getItem('teachflow_payments')) || [];
-            const totalPaid = payments.reduce((sum, p) => sum + (p.status === 'paid' ? p.amount : 0), 0);
-            document.getElementById('paymentCount').textContent = 'EGP ' + totalPaid;
+                // عدد الحضور اليوم
+                const today = new Date().toISOString().split('T')[0];
+                const attendanceSnapshot = await db.collection('teachers').doc(uid).collection('attendance')
+                    .where('date', '==', today).get();
+                document.getElementById('attendanceCount').textContent = attendanceSnapshot.size;
+
+                // إجمالي المدفوعات (غير مدفوعة تظهر 0)
+                const paymentsSnapshot = await db.collection('teachers').doc(uid).collection('payments')
+                    .where('status', '==', 'paid').get();
+                let totalPaid = 0;
+                paymentsSnapshot.forEach(doc => {
+                    totalPaid += doc.data().amount || 0;
+                });
+                document.getElementById('paymentCount').textContent = 'EGP ' + totalPaid;
+
+            } catch (error) {
+                console.error('❌ خطأ في تحديث الأرقام:', error);
+                // في حالة الخطأ، تظل الأرقام 0
+            }
         }
 
-        function applyLanguage() {
-            const teacher = JSON.parse(localStorage.getItem('teachflow_teacher'));
+        // ===== تطبيق اللغة =====
+        function applyLanguage(teacher) {
             if (teacher && teacher.language) {
                 const lang = teacher.language;
                 if (lang === 'ar' || lang === 'ur') {
@@ -640,10 +807,69 @@
             }
         }
 
+        // ===== التحقق من الفترة التجريبية =====
+        function checkTrialStatus(teacher) {
+            if (teacher.isPaid) return;
+
+            const trialEnd = new Date(teacher.trialEndDate);
+            const now = new Date();
+
+            if (now > trialEnd) {
+                localStorage.setItem('teachflow_account_expired', 'true');
+                window.location.href = 'expired.html';
+                return;
+            }
+
+            const daysLeft = Math.ceil((trialEnd - now) / (1000 * 60 * 60 * 24));
+            showTrialBanner(daysLeft);
+        }
+
+        // ===== عرض عدد الأيام المتبقية =====
+        function showTrialBanner(daysLeft) {
+            const oldBanner = document.getElementById('trialBanner');
+            if (oldBanner) oldBanner.remove();
+
+            const banner = document.createElement('div');
+            banner.id = 'trialBanner';
+            banner.className = 'trial-banner';
+            banner.innerHTML = `
+                ⏳ الفترة التجريبية: ${daysLeft} يوم متبقي
+                <button class="btn-upgrade" onclick="window.location.href='pricing.html'">🚀 الترقية الآن</button>
+            `;
+            document.body.appendChild(banner);
+        }
+
+        // ===== التحقق من عدد الطلاب =====
+        async function checkStudentLimit(teacher) {
+            if (teacher.isPaid) return;
+
+            const uid = localStorage.getItem('teachflow_uid');
+            if (!uid) return;
+
+            const studentsSnapshot = await db.collection('teachers').doc(uid).collection('students').get();
+            const maxStudents = teacher.maxStudents || 10;
+
+            if (studentsSnapshot.size >= maxStudents) {
+                const oldBanner = document.getElementById('limitBanner');
+                if (oldBanner) oldBanner.remove();
+
+                const banner = document.createElement('div');
+                banner.id = 'limitBanner';
+                banner.className = 'limit-banner';
+                banner.innerHTML = `
+                    ⚠️ لقد وصلت للحد الأقصى من الطلاب (${maxStudents} طالب)
+                    <button class="btn-upgrade" onclick="window.location.href='pricing.html'">🚀 الترقية الآن</button>
+                `;
+                document.body.prepend(banner);
+            }
+        }
+
+        // ===== تسجيل الخروج =====
         function logout() {
             if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
                 localStorage.removeItem('teachflow_teacher');
                 localStorage.removeItem('teachflow_user');
+                localStorage.removeItem('teachflow_uid');
                 window.location.href = 'index.html';
             }
         }
