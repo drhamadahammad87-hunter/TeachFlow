@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تقارير الطلاب - TeachFlow</title>
+    <!-- ===== Firebase SDK ===== -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js">
+    </script>
+    <!-- ===== jsPDF & html2canvas ===== -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js">
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js">
@@ -666,6 +674,28 @@
     </main>
 
     <script>
+        // ===== Firebase Config =====
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            projectId: "YOUR_PROJECT",
+            storageBucket: "YOUR_PROJECT.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // ===== العملات =====
+        const currencies = {
+            EGP: { symbol: 'EGP', rate: 1 },
+            USD: { symbol: 'USD', rate: 0.032 },
+            SAR: { symbol: 'SAR', rate: 0.12 },
+            AED: { symbol: 'AED', rate: 0.12 }
+        };
+
         // ===== Sidebar Toggle =====
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
@@ -693,23 +723,66 @@
         let payments = [];
         let assessments = [];
         let attendance = [];
+        let groups = [];
         let currentStudent = null;
 
-        // ===== تحميل البيانات =====
-        function loadData() {
-            students = JSON.parse(localStorage.getItem('teachflow_students')) || [];
-            payments = JSON.parse(localStorage.getItem('teachflow_payments')) || [];
-            assessments = JSON.parse(localStorage.getItem('teachflow_assessments')) || [];
-            attendance = JSON.parse(localStorage.getItem('teachflow_attendance')) || [];
+        // ===== تحميل البيانات من Firebase =====
+        async function loadData() {
+            const uid = localStorage.getItem('teachflow_uid');
+            if (!uid) {
+                window.location.href = 'index.html';
+                return;
+            }
 
-            const select = document.getElementById('studentSelect');
-            select.innerHTML = '<option value="">-- اختر طالب --</option>';
-            students.forEach(s => {
-                const option = document.createElement('option');
-                option.value = s.id;
-                option.textContent = s.name + ' (' + s.group + ')';
-                select.appendChild(option);
-            });
+            try {
+                // جلب المجموعات
+                const groupsSnapshot = await db.collection('teachers').doc(uid).collection('groups').get();
+                groups = [];
+                groupsSnapshot.forEach(doc => {
+                    groups.push({ id: doc.id, ...doc.data() });
+                });
+
+                // جلب الطلاب
+                const studentsSnapshot = await db.collection('teachers').doc(uid).collection('students').get();
+                students = [];
+                studentsSnapshot.forEach(doc => {
+                    students.push({ id: doc.id, ...doc.data() });
+                });
+
+                // جلب المدفوعات
+                const paymentsSnapshot = await db.collection('teachers').doc(uid).collection('payments').get();
+                payments = [];
+                paymentsSnapshot.forEach(doc => {
+                    payments.push({ id: doc.id, ...doc.data() });
+                });
+
+                // جلب التقييمات
+                const assessmentsSnapshot = await db.collection('teachers').doc(uid).collection('assessments').get();
+                assessments = [];
+                assessmentsSnapshot.forEach(doc => {
+                    assessments.push({ id: doc.id, ...doc.data() });
+                });
+
+                // جلب الحضور
+                const attendanceSnapshot = await db.collection('teachers').doc(uid).collection('attendance').get();
+                attendance = [];
+                attendanceSnapshot.forEach(doc => {
+                    attendance.push({ id: doc.id, ...doc.data() });
+                });
+
+                // تحميل قائمة الطلاب في الفلتر
+                const select = document.getElementById('studentSelect');
+                select.innerHTML = '<option value="">-- اختر طالب --</option>';
+                students.forEach(s => {
+                    const option = document.createElement('option');
+                    option.value = s.id;
+                    option.textContent = s.name + ' (' + s.group + ')';
+                    select.appendChild(option);
+                });
+
+            } catch (error) {
+                console.error('❌ خطأ في تحميل البيانات:', error);
+            }
         }
 
         // ===== تحميل التقرير =====
@@ -758,11 +831,14 @@
                 avgGrade = Math.round(sum / studentAssessments.length);
             }
 
+            const currency = localStorage.getItem('teachflow_currency') || 'EGP';
+            const currencySymbol = currencies[currency]?.symbol || 'EGP';
+
             container.innerHTML = `
                 <div class="report-header" id="reportHeader">
                     <div class="student-info">
                         <h2>${currentStudent.name}</h2>
-                        <p>📚 ${currentStudent.group} | 📱 ${currentStudent.phone} | 👨‍👦 ${currentStudent.parentPhone}</p>
+                        <p>📚 ${currentStudent.group} | 📱 ${currentStudent.phone || '-'} | 👨‍👦 ${currentStudent.parentPhone || '-'}</p>
                         <p style="margin-top:6px;color:#888;font-size:13px;">
                             ${currentStudent.active ? '✅ نشط' : '❌ غير نشط'}
                         </p>
@@ -852,19 +928,19 @@
                     <div class="info-grid">
                         <div class="info-item" style="background:#eafaf1;">
                             <div class="label">✅ إجمالي المدفوع</div>
-                            <div class="value" style="color:#27ae60;">${totalPaid} EGP</div>
+                            <div class="value" style="color:#27ae60;">${totalPaid} ${currencySymbol}</div>
                         </div>
                         <div class="info-item" style="background:#fef9e7;">
                             <div class="label">⏳ المتبقي</div>
-                            <div class="value" style="color:#f39c12;">${totalPending} EGP</div>
+                            <div class="value" style="color:#f39c12;">${totalPending} ${currencySymbol}</div>
                         </div>
                         <div class="info-item" style="background:#fdedec;">
                             <div class="label">⚠️ المتأخر</div>
-                            <div class="value" style="color:#e74c3c;">${totalOverdue} EGP</div>
+                            <div class="value" style="color:#e74c3c;">${totalOverdue} ${currencySymbol}</div>
                         </div>
                         <div class="info-item" style="background:#f0f4ff;">
                             <div class="label">💰 الإجمالي الكلي</div>
-                            <div class="value" style="color:#667eea;">${totalAmount} EGP</div>
+                            <div class="value" style="color:#667eea;">${totalAmount} ${currencySymbol}</div>
                         </div>
                     </div>
                     ${studentPayments.length === 0 ? '<p style="color:#999;font-size:13px;">لا توجد مدفوعات</p>' : `
@@ -888,7 +964,7 @@
                                 return `
                                     <tr>
                                         <td>${typeText}</td>
-                                        <td><strong>${p.amount} EGP</strong></td>
+                                        <td><strong>${p.amount} ${currencySymbol}</strong></td>
                                         <td><span class="payment-status-badge ${statusClass}">${statusText}</span></td>
                                         <td>${p.date}</td>
                                         <td>${p.notes || '-'}</td>
@@ -913,7 +989,7 @@
                         </div>
                         <div class="info-item" style="background:#fef9e7;">
                             <div class="label">💰 إجمالي المدفوعات</div>
-                            <div class="value" style="color:#f39c12;">${totalAmount} EGP</div>
+                            <div class="value" style="color:#f39c12;">${totalAmount} ${currencySymbol}</div>
                         </div>
                         <div class="info-item" style="background:#f0f4ff;">
                             <div class="label">📝 عدد التقييمات</div>
@@ -1008,13 +1084,14 @@
             if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
                 localStorage.removeItem('teachflow_teacher');
                 localStorage.removeItem('teachflow_user');
+                localStorage.removeItem('teachflow_uid');
                 window.location.href = 'index.html';
             }
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            const teacher = localStorage.getItem('teachflow_teacher');
-            if (!teacher) {
+            const uid = localStorage.getItem('teachflow_uid');
+            if (!uid) {
                 window.location.href = 'index.html';
                 return;
             }
