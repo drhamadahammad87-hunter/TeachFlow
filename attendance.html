@@ -4,7 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>الحضور - TeachFlow</title>
-    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js">
+    <!-- ===== Firebase SDK ===== -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js">
     </script>
     <style>
         * {
@@ -549,6 +554,20 @@
     </main>
 
     <script>
+        // ===== Firebase Config =====
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            projectId: "YOUR_PROJECT",
+            storageBucket: "YOUR_PROJECT.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
         // ===== Sidebar Toggle =====
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
@@ -575,9 +594,16 @@
         let attendanceData = [];
         let currentStudents = [];
         let currentDate = '';
+        let groups = [];
 
-        // ===== تحميل البيانات =====
-        function loadAttendance() {
+        // ===== تحميل البيانات من Firebase =====
+        async function loadAttendance() {
+            const uid = localStorage.getItem('teachflow_uid');
+            if (!uid) {
+                window.location.href = 'index.html';
+                return;
+            }
+
             const date = document.getElementById('attendanceDate').value;
             if (!date) {
                 const today = new Date().toISOString().split('T')[0];
@@ -587,17 +613,54 @@
                 currentDate = date;
             }
 
-            loadGroupsFilter();
-            loadStudents();
-            renderAttendance();
-            updateSummary();
-            updateNotificationBadge();
+            try {
+                // جلب المجموعات
+                const groupsSnapshot = await db.collection('teachers').doc(uid).collection('groups').get();
+                groups = [];
+                groupsSnapshot.forEach(doc => {
+                    groups.push({ id: doc.id, ...doc.data() });
+                });
+                loadGroupsFilter();
+
+                // جلب الطلاب
+                const studentsSnapshot = await db.collection('teachers').doc(uid).collection('students').get();
+                const allStudents = [];
+                studentsSnapshot.forEach(doc => {
+                    allStudents.push({ id: doc.id, ...doc.data() });
+                });
+
+                const groupFilter = document.getElementById('groupFilter').value;
+                if (groupFilter === 'all') {
+                    currentStudents = allStudents.filter(s => s.active);
+                } else {
+                    currentStudents = allStudents.filter(s => s.group === groupFilter && s.active);
+                }
+
+                // جلب الحضور لهذا اليوم
+                const attendanceSnapshot = await db.collection('teachers').doc(uid).collection('attendance')
+                    .where('date', '==', currentDate).get();
+                attendanceData = [];
+                attendanceSnapshot.forEach(doc => {
+                    attendanceData.push({ id: doc.id, ...doc.data() });
+                });
+
+                renderAttendance();
+                updateSummary();
+                updateNotificationBadge();
+
+            } catch (error) {
+                console.error('❌ خطأ في تحميل البيانات:', error);
+                currentStudents = [];
+                attendanceData = [];
+                renderAttendance();
+                updateSummary();
+            }
         }
 
-        // ===== تحميل المجموعات =====
+        // ===== تحميل المجموعات في الفلتر =====
         function loadGroupsFilter() {
-            const groups = JSON.parse(localStorage.getItem('teachflow_groups')) || [];
             const select = document.getElementById('groupFilter');
+            const currentValue = select.value;
             select.innerHTML = '<option value="all">كل المجموعات</option>';
             groups.forEach(g => {
                 const option = document.createElement('option');
@@ -605,25 +668,37 @@
                 option.textContent = g.name;
                 select.appendChild(option);
             });
+            select.value = currentValue;
         }
 
-        // ===== تحميل الطلاب =====
-        function loadStudents() {
-            const students = JSON.parse(localStorage.getItem('teachflow_students')) || [];
-            const groupFilter = document.getElementById('groupFilter').value;
+        // ===== حفظ الحضور في Firebase =====
+        async function saveAttendanceToFirebase(attendanceRecord) {
+            const uid = localStorage.getItem('teachflow_uid');
+            if (!uid) return;
 
-            if (groupFilter === 'all') {
-                currentStudents = students.filter(s => s.active);
-            } else {
-                currentStudents = students.filter(s => s.group === groupFilter && s.active);
-            }
+            try {
+                // البحث عن سجل موجود
+                const existingSnapshot = await db.collection('teachers').doc(uid).collection('attendance')
+                    .where('studentId', '==', attendanceRecord.studentId)
+                    .where('date', '==', attendanceRecord.date)
+                    .get();
 
-            const saved = localStorage.getItem('teachflow_attendance');
-            if (saved) {
-                const allAttendance = JSON.parse(saved);
-                attendanceData = allAttendance.filter(a => a.date === currentDate);
-            } else {
-                attendanceData = [];
+                if (!existingSnapshot.empty) {
+                    // تحديث السجل الموجود
+                    const docId = existingSnapshot.docs[0].id;
+                    await db.collection('teachers').doc(uid).collection('attendance').doc(docId).update({
+                        status: attendanceRecord.status,
+                        note: attendanceRecord.note || ''
+                    });
+                    return docId;
+                } else {
+                    // إضافة سجل جديد
+                    const docRef = await db.collection('teachers').doc(uid).collection('attendance').add(attendanceRecord);
+                    return docRef.id;
+                }
+            } catch (error) {
+                console.error('❌ خطأ في حفظ الحضور:', error);
+                return null;
             }
         }
 
@@ -657,7 +732,7 @@
                         <td>${student.group}</td>
                         <td>
                             <select class="status-badge status-${status}" 
-                                    onchange="updateStatus(${student.id}, this.value)"
+                                    onchange="updateStatus('${student.id}', this.value)"
                                     style="padding:6px 14px;border-radius:20px;border:2px solid #e8edf2;font-size:13px;font-weight:500;cursor:pointer;background:${getStatusColor(status)};color:${getStatusTextColor(status)};">
                                 <option value="present" ${status === 'present' ? 'selected' : ''}>✅ حاضر</option>
                                 <option value="absent" ${status === 'absent' ? 'selected' : ''}>❌ غائب</option>
@@ -669,7 +744,7 @@
                             <input type="text" 
                                    placeholder="ملاحظات..." 
                                    value="${note}"
-                                   onchange="updateNote(${student.id}, this.value)"
+                                   onchange="updateNote('${student.id}', this.value)"
                                    style="width:100%;padding:6px 10px;border:2px solid #e8edf2;border-radius:8px;font-size:13px;background:#f8fafc;transition:0.3s;">
                         </td>
                     </tr>
@@ -708,7 +783,7 @@
             return map[status] || status;
         }
 
-        // ===== تحديث حالة الطالب =====
+        // ===== تحديث حالة الطالب (محلياً) =====
         function updateStatus(studentId, status) {
             const existing = attendanceData.find(a => a.studentId === studentId && a.date === currentDate);
             if (existing) {
@@ -724,7 +799,7 @@
             updateSummary();
         }
 
-        // ===== تحديث ملاحظة =====
+        // ===== تحديث ملاحظة (محلياً) =====
         function updateNote(studentId, note) {
             const existing = attendanceData.find(a => a.studentId === studentId && a.date === currentDate);
             if (existing) {
@@ -792,27 +867,31 @@
             updateNotificationBadge();
         }
 
-        // ===== حفظ الحضور =====
-        function saveAttendance() {
-            const saved = localStorage.getItem('teachflow_attendance');
-            let allAttendance = saved ? JSON.parse(saved) : [];
-            allAttendance = allAttendance.filter(a => a.date !== currentDate);
-            allAttendance = allAttendance.concat(attendanceData);
-            localStorage.setItem('teachflow_attendance', JSON.stringify(allAttendance));
+        // ===== حفظ الحضور في Firebase =====
+        async function saveAttendance() {
+            const uid = localStorage.getItem('teachflow_uid');
+            if (!uid) return;
 
-            const students = JSON.parse(localStorage.getItem('teachflow_students')) || [];
+            let savedCount = 0;
             let notificationsSent = 0;
 
-            attendanceData.forEach(record => {
-                const student = students.find(s => s.id === record.studentId);
+            for (const record of attendanceData) {
+                const result = await saveAttendanceToFirebase(record);
+                if (result) savedCount++;
+
+                // إرسال إشعار
+                const student = currentStudents.find(s => s.id === record.studentId);
                 if (student) {
                     sendInAppNotification(student.name, record.status, record.date);
                     notificationsSent++;
                 }
-            });
+            }
 
+            // تحديث إحصائيات الصفحة الرئيسية
             updateHomeStats();
+
             alert(`✅ تم حفظ الحضور بنجاح!\n📨 تم إرسال ${notificationsSent} إشعار`);
+            loadAttendance(); // إعادة تحميل البيانات
         }
 
         // ===== تحديث إحصائيات الصفحة الرئيسية =====
@@ -840,13 +919,14 @@
             if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
                 localStorage.removeItem('teachflow_teacher');
                 localStorage.removeItem('teachflow_user');
+                localStorage.removeItem('teachflow_uid');
                 window.location.href = 'index.html';
             }
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            const teacher = localStorage.getItem('teachflow_teacher');
-            if (!teacher) {
+            const uid = localStorage.getItem('teachflow_uid');
+            if (!uid) {
                 window.location.href = 'index.html';
                 return;
             }
